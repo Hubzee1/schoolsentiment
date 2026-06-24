@@ -41,11 +41,11 @@ const app = express();
 
 // ========== MYSQL DATABASE CONNECTION ==========
 const pool = mysql.createPool({
-    host: 'localhost',
+    host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 3306,
-    user: 'root',
+    user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: 'schoolsentiment',
+    database: process.env.DB_NAME || 'schoolsentiment',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
