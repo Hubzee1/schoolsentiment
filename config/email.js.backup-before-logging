@@ -1,0 +1,35 @@
+const axios = require('axios');
+require('dotenv').config();
+
+async function sendEmail(to, subject, htmlContent) {
+    try {
+        const apiKey = process.env.BREVO_API_KEY;
+        
+        
+        if (!apiKey) {
+            return { success: false };
+        }
+        
+        // Now using your authenticated domain!
+        const response = await axios({
+            method: 'post',
+            url: 'https://api.brevo.com/v3/smtp/email',
+            headers: {
+                'api-key': apiKey,
+                'Content-Type': 'application/json'
+            },
+            data: {
+                sender: { email: 'noreply@schoolsentiment.co.uk', name: 'School Sentiment' },
+                to: [{ email: to }],
+                subject: subject,
+                htmlContent: htmlContent
+            }
+        });
+        
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+module.exports = { sendEmail };

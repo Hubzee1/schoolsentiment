@@ -1,0 +1,73 @@
+<%- include('partials/header') %>
+
+<main class="max-w-3xl mx-auto px-4 py-8">
+    <nav class="text-xs text-slate-500 mb-4 flex space-x-2">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <a href="/dashboard" class="hover:underline">Dashboard</a>
+        <span>&gt;</span>
+        <a href="/messages" class="hover:underline">Messages</a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium">Conversation</span>
+    </nav>
+
+    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+            <h1 class="text-xl font-bold text-slate-900"><%= ad ? ad.title : 'Conversation' %> <span class="text-sm text-slate-400 font-normal">(Ref: <%= ad ? ad.publicId : "N/A" %>)</span></h1>
+            <p class="text-sm text-slate-500"><%= ad ? ad.schoolName : '' %></p>
+        </div>
+
+        <div class="p-6 space-y-4 max-h-96 overflow-y-auto" id="messagesContainer">
+            <% messages.forEach(msg => { %>
+                <% const isMine = msg.fromUserId === currentUser.id; %>
+                <div class="flex <%= isMine ? 'justify-end' : 'justify-start' %>">
+                    <div class="max-w-[70%] <%= isMine ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-900' %> rounded-lg p-3">
+                        <p class="text-sm"><%= msg.message %></p>
+                        <p class="text-xs <%= isMine ? 'text-indigo-200' : 'text-slate-400' %> mt-1">
+                            <%= new Date(msg.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) %>
+                        </p>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+
+        <div class="border-t border-slate-200 p-4 bg-slate-50">
+            <form id="replyForm" class="flex gap-2">
+                <input type="text" id="messageInput" placeholder="Type your reply..." class="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">Send</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+document.getElementById('replyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const message = document.getElementById('messageInput').value.trim();
+    if (!message) return;
+    
+    const sendBtn = document.querySelector('#replyForm button[type="submit"]');
+    const originalText = sendBtn.textContent;
+    sendBtn.textContent = 'Sending...';
+    sendBtn.disabled = true;
+    
+    const response = await fetch('/send-reply/<%= ad.id %>/<%= otherUserId %>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message })
+    });
+    
+    if (response.ok) {
+        document.getElementById('messageInput').value = '';
+        alert('✅ Message sent successfully!');
+        setTimeout(() => window.location.reload(), 500);
+    } else {
+        alert('❌ Error sending message');
+    }
+    
+    sendBtn.textContent = originalText;
+    sendBtn.disabled = false;
+});
+</script>
+
+<%- include('partials/footer') %>

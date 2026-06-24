@@ -1,0 +1,902 @@
+<%- include('partials/header') %>
+
+<main class="max-w-6xl mx-auto px-4 py-4">
+    
+    <div class="flex justify-between items-center mb-1">
+        <div class="text-sm text-slate-500">
+            <a href="/" class="hover:underline">Home</a> › 
+            <span class="text-slate-800 font-medium"><%= schoolName %></span>
+        </div>
+        <a href="/school/<%= encodeURIComponent(schoolName) %>/noticeboard" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 hover:text-slate-950 transition-colors duration-150 ease-in-out">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-3.5 h-3.5 text-slate-400">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+            </svg>
+            <span>School Noticeboard</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3 text-slate-400 ml-0.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+        </a>
+    </div>
+
+    <div class="text-center mb-4">
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-1">
+            <%= schoolName %>
+            <% if (isVerified) { %>
+                <span class="inline-flex items-center gap-1 bg-green-100 text-green-800 text-sm px-2 py-0.5 rounded-full ml-2 align-middle">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.746 3.746 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
+                    Verified
+                </span>
+            <% } %>
+        </h1>
+        
+        <% if (schoolDetails && schoolDetails.address && schoolDetails.town && schoolDetails.postcode) { %>
+            <div class="flex items-center justify-center space-x-1.5 group cursor-pointer mb-6">
+                <a href="https://maps.google.com/?q=<%= encodeURIComponent(schoolDetails.address + ', ' + schoolDetails.town + ', ' + schoolDetails.postcode) %>" target="_blank" class="flex items-center justify-center space-x-1.5">
+                    <svg class="w-4 h-4 text-slate-400 group-hover:text-[#34535c] transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="text-xs font-bold tracking-wider text-slate-500 uppercase transition-colors group-hover:text-[#34535c] group-hover:underline decoration-dotted decoration-1 underline-offset-4">
+                        <%= schoolDetails.address %>, <%= schoolDetails.town %>, <%= schoolDetails.postcode %>
+                    </span>
+                </a>
+            </div>
+        <% } %>
+        
+        <%
+            const totalReviews = reviews.length;
+            let academicSupport = 0, facilities = 0, pastoral = 0, extra = 0, sen = 0, meals = 0;
+            reviews.forEach(review => {
+                academicSupport += review.teachingRating || review.rating || 0;
+                facilities += review.facilitiesRating || review.rating || 0;
+                pastoral += review.pastoralRating || review.rating || 0;
+                extra += review.extraRating || review.rating || 0;
+                sen += review.senRating || review.rating || 0;
+                meals += review.mealsRating || review.rating || 0;
+            });
+            
+            function getPercentage(total, count) {
+                return Math.round((total / Math.max(count, 1) / 5) * 100);
+            }
+            
+            const teachingPct = getPercentage(academicSupport, totalReviews);
+            const facilitiesPct = getPercentage(facilities, totalReviews);
+            const pastoralPct = getPercentage(pastoral, totalReviews);
+            const extraPct = getPercentage(extra, totalReviews);
+            const senPct = getPercentage(sen, totalReviews);
+            const mealsPct = getPercentage(meals, totalReviews);
+            
+            let avgRatingValue = (teachingPct / 20).toFixed(1);
+            
+            let certificateImage = '/images/angry_certificate.png';
+            if (totalReviews === 0) {
+                certificateImage = '/images/no_certificate.png';
+            } else {
+                let ratingFloat = parseFloat(avgRatingValue);
+                if (ratingFloat >= 4.5) {
+                    certificateImage = '/images/elated_certificate.png';
+                } else if (ratingFloat >= 3.5) {
+                    certificateImage = '/images/happy_certificate.png';
+                } else if (ratingFloat >= 2.5) {
+                    certificateImage = '/images/satisfied_certificate.png';
+                } else if (ratingFloat >= 1.5) {
+                    certificateImage = '/images/sad_certificate.png';
+                } else {
+                    certificateImage = '/images/angry_certificate.png';
+                }
+            }
+        %>
+        
+        <div class="flex justify-center items-center gap-8">
+            <div class="text-center">
+                <div class="text-4xl font-bold text-slate-900"><%= totalReviews %></div>
+                <div class="text-xs uppercase font-bold text-slate-400 tracking-wider mt-2">Total Reviews</div>
+            </div>
+            <div><img src="<%= certificateImage %>" class="w-48 h-48 object-contain"></div>
+            <div class="text-center">
+                <div class="text-4xl font-bold text-slate-900"><%= avgRatingValue %></div>
+                <div class="text-xs uppercase font-bold text-slate-400 tracking-wider mt-2">Overall Rating</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-end gap-2 mb-1">
+        <% if (user) { %>
+            <% if (!isVerified && !hasPendingClaim) { %>
+                <a href="/claim-school/<%= encodeURIComponent(schoolName) %>" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full shadow-sm hover:bg-amber-100 transition-colors duration-150 ease-in-out">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.746 3.746 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
+                    Claim This School
+                </a>
+            <% } else if (hasPendingClaim && !isVerified) { %>
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full opacity-70">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Claim Pending Review
+                </span>
+            <% } %>
+        <% } else { %>
+            <a href="/signin" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full shadow-sm hover:bg-amber-100 transition-colors duration-150 ease-in-out">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.746 3.746 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
+                Sign in to Claim This School
+            </a>
+        <% } %>
+        
+        <button id="followSchoolBtn" onclick="toggleFollow()" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 transition-colors duration-150 ease-in-out">
+            Follow School
+        </button>
+        
+        <% if (schoolDetails && schoolDetails.website) { %>
+            <a href="<%= schoolDetails.website %>" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 transition-colors duration-150 ease-in-out">Visit School Site</a>
+        <% } else { %>
+            <span class="bg-slate-400 text-white px-4 py-2 rounded-full text-sm font-medium inline-block opacity-50 cursor-not-allowed">Visit School Site (Unavailable)</span>
+        <% } %>
+    </div>
+
+    <div id="communityPulse" class="bg-white border rounded-2xl p-4 shadow-sm mb-8 min-h-[220px]">
+        <h2 class="text-2xl font-bold mb-1">Community Pulse</h2>
+        <div id="pulseContainer" class="flex flex-wrap items-stretch gap-4 justify-center"></div>
+    </div>
+
+    <div style="display: flex; flex-wrap: nowrap; gap: 1.5rem; margin-bottom: 2rem; align-items: stretch;">
+        <div style="flex: 3; min-width: 500px;">
+            <h2 class="text-2xl font-bold mb-1 text-sm">Categorical Filters</h2>
+            <div class="flex flex-nowrap gap-2 justify-start">
+                <button class="category-filter-btn teaching-btn bg-[#f3e8ff] border-2 border-[#c084fc] rounded-2xl p-3 w-[100px] h-[100px] flex flex-col items-center justify-center" data-category="teaching" data-name="Teaching Quality">
+                    <div class="w-10 h-10 rounded-full border-2 border-[#c084fc] flex items-center justify-center mb-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-center">Teaching Quality</span>
+                </button>
+                <button class="category-filter-btn facilities-btn bg-[#dbeafe] border-2 border-[#60a5fa] rounded-2xl p-3 w-[100px] h-[100px] flex flex-col items-center justify-center" data-category="facilities" data-name="School Facilities">
+                    <div class="w-10 h-10 rounded-full border-2 border-[#60a5fa] flex items-center justify-center mb-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    </div>
+                    <span class="text-xs font-bold">Facilities</span>
+                </button>
+                <button class="category-filter-btn pastoral-btn bg-[#fce7f3] border-2 border-[#f472b6] rounded-2xl p-3 w-[100px] h-[100px] flex flex-col items-center justify-center" data-category="pastoral" data-name="Pastoral Care">
+                    <div class="w-10 h-10 rounded-full border-2 border-[#f472b6] flex items-center justify-center mb-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-center">Pastoral Care</span>
+                </button>
+                <button class="category-filter-btn extra-btn bg-[#e8f4fd] border-2 border-[#2A7CDE] rounded-2xl p-3 w-[100px] h-[100px] flex flex-col items-center justify-center" data-category="extra" data-name="Extra-curriculars">
+                    <div class="w-10 h-10 rounded-full border-2 border-[#2A7CDE] flex items-center justify-center mb-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-center">Extra-curriculars</span>
+                </button>
+                <button class="category-filter-btn sen-btn bg-[#f0fdf4] border-2 border-[#22c55e] rounded-2xl p-3 w-[100px] h-[100px] flex flex-col items-center justify-center" data-category="sen" data-name="SEN Support">
+                    <div class="w-10 h-10 rounded-full border-2 border-[#22c55e] flex items-center justify-center mb-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-center">SEN Support</span>
+                </button>
+                <button class="category-filter-btn meals-btn bg-[#fef3c7] border-2 border-[#d97706] rounded-2xl p-3 w-[100px] h-[100px] flex flex-col items-center justify-center" data-category="meals" data-name="School Meals">
+                    <div class="w-10 h-10 rounded-full border-2 border-[#d97706] flex items-center justify-center mb-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6.5M17 13l1.5 6.5M9 21h6M12 17v4"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-center">School Meals</span>
+                </button>
+            </div>
+        </div>
+
+        <div style="flex: 2.5; min-width: 500px; margin-top: 0;">
+            <div class="bg-white border rounded-xl p-4 shadow-sm h-full">
+                <h3 class="font-bold mb-1 text-sm">Community Stats</h3>
+                <div id="communityStatsContainer">
+                    <div class="text-center text-slate-500 py-2">Loading stats...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-1">
+                <div class="flex flex-wrap items-center gap-3">
+                    <h2 class="text-xl font-bold">Read All Reviews</h2>
+                    <a href="/review?school=<%= encodeURIComponent(schoolName) %>" class="bg-black text-white px-3 py-1.5 rounded-full text-sm font-medium hover:bg-slate-800 transition">Write a Review</a>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <select id="userTypeFilter" class="text-sm border border-slate-300 rounded-full px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-slate-400 w-52">
+                        <option value="all" selected>Filter by: All Reviewers</option>
+                        <option value="student_alumni">Students &amp; Alumni</option>
+                        <option value="parent">Parents only</option>
+                        <option value="staff">Staff only</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <select id="sortBy" class="text-sm border border-slate-300 rounded-full px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-slate-400 w-48">
+                        <option value="newest" selected>Sort: Date (Newest)</option>
+                        <option value="oldest">Sort: Date (Oldest)</option>
+                        <option value="positive">Sort: Positive Vibes</option>
+                        <option value="negative">Sort: Negative Vibes</option>
+                    </select>
+                </div>
+        </div>
+        
+        <% if (reviews.length === 0) { %>
+            <div class="bg-white border rounded-xl p-8 text-center">
+                <p>No reviews yet. Be the first!</p>
+            </div>
+        <% } else { %>
+            <div id="reviewsList" class="space-y-2"></div>
+        <% } %>
+    </div>
+</main>
+
+<script>
+const allReviews = <%- JSON.stringify(reviews) %>;
+const repliesByReviewId = <%- JSON.stringify(repliesByReviewId) %>;
+const isVerifiedSchool = <%= isVerified %>;
+const currentUserEmail = <%- JSON.stringify(user ? user.email : null) %>;
+const faces = {5:'/images/Elated.png',4:'/images/happy.png',3:'/images/Average.png',2:'/images/Sad.png',1:'/images/Angry.png'};
+
+const categoryData = {
+    teaching: { name: 'Teaching Quality', inactiveBg: '#f3e8ff', inactiveBorder: '#c084fc', circleBorder: '#c084fc' },
+    facilities: { name: 'School Facilities', inactiveBg: '#dbeafe', inactiveBorder: '#60a5fa', circleBorder: '#60a5fa' },
+    pastoral: { name: 'Pastoral Care', inactiveBg: '#fce7f3', inactiveBorder: '#f472b6', circleBorder: '#f472b6' },
+    extra: { name: 'Extra-curriculars', inactiveBg: '#e8f4fd', inactiveBorder: '#2A7CDE', circleBorder: '#2A7CDE' },
+    sen: { name: 'SEN Support', inactiveBg: '#f0fdf4', inactiveBorder: '#22c55e', circleBorder: '#22c55e' },
+    meals: { name: 'School Meals', inactiveBg: '#fef3c7', inactiveBorder: '#d97706', circleBorder: '#d97706' }
+};
+
+function getPercentageForCategory(category) {
+    let total = 0;
+    let count = 0;
+    allReviews.forEach(review => {
+        let rating = null;
+        if (category === 'teaching') rating = review.teachingRating;
+        else if (category === 'facilities') rating = review.facilitiesRating;
+        else if (category === 'pastoral') rating = review.pastoralRating;
+        else if (category === 'extra') rating = review.extraRating;
+        else if (category === 'sen') rating = review.senRating;
+        else if (category === 'meals') rating = review.mealsRating;
+        
+        if (rating && rating > 0) {
+            total += rating;
+            count++;
+        }
+    });
+    if (count === 0) return 0;
+    return Math.round((total / count / 5) * 100);
+}
+
+function getSummaryText(percentage) {
+    if (percentage >= 80) return 'Excellent - Highly praised by the community';
+    if (percentage >= 60) return 'Good - Positive feedback from most';
+    if (percentage >= 40) return 'Average - Mixed opinions';
+    if (percentage >= 20) return 'Poor - Significant concerns raised';
+    return 'Very Poor - Major improvements needed';
+}
+
+function getIconForPercentage(percentage, totalReviews) {
+    if (totalReviews === 0) return '/images/no_face.png';
+    if (percentage <= 20) return '/images/Angry.png';
+    if (percentage <= 40) return '/images/Sad.png';
+    if (percentage <= 60) return '/images/Average.png';
+    if (percentage <= 80) return '/images/happy.png';
+    return '/images/Elated.png';
+}
+
+function updateCommunityPulse(activeCategories) {
+    const container = document.getElementById('pulseContainer');
+    if (!container) return;
+    
+    if (activeCategories.length === 0) {
+        container.innerHTML = '<div class="text-center text-slate-500 w-full py-4">No categories selected</div>';
+        return;
+    }
+    
+    let html = '';
+    activeCategories.forEach((cat, index) => {
+        const percentage = getPercentageForCategory(cat);
+        const icon = getIconForPercentage(percentage, allReviews.length);
+        const summary = getSummaryText(percentage);
+        const displayName = categoryData[cat]?.name || cat;
+        
+        html += `
+            <div class="flex-1 min-w-[180px] text-center px-3 ${index !== activeCategories.length - 1 ? 'border-r border-black' : ''}">
+                <img src="${icon}" class="w-24 h-24 mx-auto mb-1 object-contain">
+                <div class="font-bold text-sm">${displayName} (${percentage}%)</div>
+                <p class="text-xs text-slate-500 mt-1">${summary}</p>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function updateCommunityStats() {
+    const container = document.getElementById('communityStatsContainer');
+    if (!container) return;
+    
+    let yesCount = 0, noCount = 0, unsureCount = 0;
+    allReviews.forEach(review => {
+        if (review.recommend === 'yes') yesCount++;
+        else if (review.recommend === 'no') noCount++;
+        else if (review.recommend === 'unsure') unsureCount++;
+    });
+    const total = allReviews.length;
+    const yesPct = Math.round((yesCount / total) * 100);
+    const noPct = Math.round((noCount / total) * 100);
+    const unsurePct = Math.round((unsureCount / total) * 100);
+    
+    const categories = ['teaching', 'facilities', 'pastoral', 'extra', 'sen', 'meals'];
+    const categoryNames = {
+        teaching: 'Teaching Quality',
+        facilities: 'Facilities',
+        pastoral: 'Pastoral Care',
+        extra: 'Extra-curriculars',
+        sen: 'SEN Support',
+        meals: 'School Meals'
+    };
+    
+    let categoryPercentages = [];
+    categories.forEach(cat => {
+        let total = 0, count = 0;
+        allReviews.forEach(review => {
+            let rating = null;
+            if (cat === 'teaching') rating = review.teachingRating;
+            else if (cat === 'facilities') rating = review.facilitiesRating;
+            else if (cat === 'pastoral') rating = review.pastoralRating;
+            else if (cat === 'extra') rating = review.extraRating;
+            else if (cat === 'sen') rating = review.senRating;
+            else if (cat === 'meals') rating = review.mealsRating;
+            
+            if (rating && rating > 0) {
+                total += rating;
+                count++;
+            }
+        });
+        const pct = count > 0 ? Math.round((total / count / 5) * 100) : 0;
+        categoryPercentages.push({ name: categoryNames[cat], pct: pct });
+    });
+    
+    categoryPercentages.sort((a, b) => b.pct - a.pct);
+    const best = categoryPercentages[0];
+    const worst = categoryPercentages[categoryPercentages.length - 1];
+    
+    container.innerHTML = `
+        <div>
+            <div class="text-sm font-bold text-slate-900 mb-3 text-center">Would recommend this school?</div>
+            <div class="flex h-8 rounded-full overflow-hidden mb-4 shadow-sm">
+                <div class="bg-green-500 flex items-center justify-center text-white text-xs font-bold" style="width: ${yesPct}%">
+                    ${yesPct > 10 ? 'Yes ' + yesPct + '%' : ''}
+                </div>
+                <div class="bg-yellow-500 flex items-center justify-center text-white text-xs font-bold" style="width: ${unsurePct}%">
+                    ${unsurePct > 10 ? 'Unsure ' + unsurePct + '%' : ''}
+                </div>
+                <div class="bg-red-500 flex items-center justify-center text-white text-xs font-bold" style="width: ${noPct}%">
+                    ${noPct > 10 ? 'No ' + noPct + '%' : ''}
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-center gap-6 pt-2 border-t border-slate-100 text-xs">
+            <div>Best rated: <span class="font-semibold">${best.name} (${best.pct}%)</span></div>
+            <div>Needs work: <span class="font-semibold">${worst.name} (${worst.pct}%)</span></div>
+        </div>
+    `;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function sortReviews(reviews, sortType) {
+    const sorted = [...reviews];
+    if (sortType === 'newest') {
+        sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else if (sortType === 'oldest') {
+        sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    } else if (sortType === 'positive') {
+        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sortType === 'negative') {
+        sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+    }
+    return sorted;
+}
+
+function filterReviewsByUserType(reviews, userType) {
+    if (userType === 'all') return reviews;
+    if (userType === 'student_alumni') {
+        return reviews.filter(review => review.userType === 'student' || review.userType === 'former_student');
+    }
+    return reviews.filter(review => review.userType === userType);
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB');
+}
+
+async function submitReply(reviewId, schoolName) {
+    const responseText = prompt('Enter your response as a verified school representative:');
+    if (!responseText || responseText.trim() === '') return;
+    
+    const response = await fetch('/submit-reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewId, schoolName, responseText })
+    });
+    
+    const data = await response.json();
+    if (data.success) {
+        alert('Reply posted successfully!');
+        location.reload();
+    } else {
+        alert(data.error || 'Error posting reply');
+    }
+}
+
+async function flagReply(replyId, reviewId, schoolName) {
+    const reason = prompt('Why are you reporting this school reply?\n\nOptions: defamatory, personal, hate, offensive, spam, other');
+    if (!reason) return;
+    
+    const details = prompt('Additional details (optional):');
+    
+    const response = await fetch('/flag-reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ replyId, reviewId, schoolName, reason, details })
+    });
+    
+    const data = await response.json();
+    if (data.success) {
+        alert('Reply reported. Thank you for helping keep our community safe.');
+    } else {
+        alert('Error reporting reply');
+    }
+}
+
+function renderReplies(reviewId) {
+    const replies = repliesByReviewId[reviewId] || [];
+    if (replies.length === 0) return '';
+    
+    let html = '<div class="mt-3 pl-4 border-l-2 border-green-300">';
+    replies.forEach(reply => {
+        html += `
+            <div class="bg-green-50 rounded-lg p-3 mb-2">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.746 3.746 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
+                            Verified School Response
+                        </span>
+                        <span class="text-xs text-slate-400">${formatDate(reply.createdAt)}</span>
+                    </div>
+                    <button onclick="flagReply('${reply.id}', '${reviewId}', '<%= schoolName %>')" class="text-xs text-red-500 hover:text-red-700" title="Report this reply">
+                        🚩 Report
+                    </button>
+                </div>
+                <p class="text-sm text-slate-700">${escapeHtml(reply.responseText)}</p>
+                ${reply.lastEditedAt ? `<p class="text-xs text-slate-400 mt-1">Edited: ${formatDate(reply.lastEditedAt)}</p>` : ''}
+            </div>
+        `;
+    });
+    html += '</div>';
+    return html;
+}
+
+function renderReviews(reviewsToShow, showAll = false) {
+    const container = document.getElementById('reviewsList');
+    if (!container) return;
+    
+    let reviewsArray = [...reviewsToShow];
+    const displayCount = reviewsArray.length;
+    const displayReviews = reviewsArray.slice(0, displayCount);
+    
+    let html = '';
+    displayReviews.forEach((review, idx) => {
+        const fullText = review.reviewText || '';
+        const isLong = fullText.length > 200;
+        const shortText = isLong ? fullText.substring(0, 200) + '...' : fullText;
+        const initial = review.userType === 'student' ? 'S' : (review.userType === 'parent' ? 'P' : (review.userType === 'former_student' ? 'A' : 'T'));
+        const faceImg = faces[review.rating] || faces[3];
+        const userTypeLabel = review.userType === 'former_student' ? 'Alumni' : (review.userType.replace('_', ' ') || 'Other');
+        const reviewDate = formatDate(review.createdAt);
+        const uniqueId = `review-${Date.now()}-${idx}-${review.id || Math.random()}`;
+        const reviewTitle = review.reviewTitle || '';
+        const hasReply = repliesByReviewId[review.id] && repliesByReviewId[review.id].length > 0;
+        const canReply = isVerifiedSchool && currentUserEmail && !hasReply;
+        
+        html += `
+            <div class="bg-white border rounded-xl p-3 shadow-sm" id="${uniqueId}">
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center gap-6">
+                        <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center font-bold">${initial}</div>
+                        <div>
+                            <div class="font-semibold">${userTypeLabel}</div>
+                            <div class="text-xs text-slate-400">${reviewDate}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="save-review-btn text-gray-400 hover:text-red-500 transition" data-review-id="${review.id}" onclick="toggleSaveReview('${review.id}', this)">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
+                            </svg>
+                        </button>
+                        <button class="flag-review-btn text-gray-400 hover:text-red-500 transition ml-1 cursor-pointer" 
+                            data-review-id="${review.id}" 
+                            data-review-title="${escapeHtml(reviewTitle)}" 
+                            data-school="${escapeHtml(review.schoolName)}"
+                            onclick="event.stopPropagation(); openFlagModal('${review.id}', '${escapeHtml(reviewTitle)}', '${escapeHtml(review.schoolName)}'); return false;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18M5 5h10l-1.5 4.5L15 14H5" />
+                            </svg>
+                        </button>
+                        <img src="${faceImg}" class="w-10 h-10 object-contain">
+                    </div>
+                </div>
+                ${reviewTitle ? `<h3 class="font-bold text-slate-800 text-base mb-1 border-l-4 border-indigo-500 pl-2">${escapeHtml(reviewTitle)}</h3>` : ''}
+                <div class="text-sm text-slate-600 mt-2">
+                    <span class="review-short-text-${uniqueId.replace(/[^a-zA-Z0-9]/g, '')}">${escapeHtml(shortText)}</span>
+                    <span class="review-full-text-${uniqueId.replace(/[^a-zA-Z0-9]/g, '')}" style="display:none;">${escapeHtml(fullText)}</span>
+                </div>
+                ${isLong ? `<button class="read-more-btn text-indigo-600 text-xs font-medium mt-2 hover:underline" data-id="${uniqueId.replace(/[^a-zA-Z0-9]/g, '')}">Read more →</button>` : ''}
+                ${renderReplies(review.id)}
+                ${canReply ? `<button onclick="submitReply('${review.id}', '<%= schoolName %>')" class="mt-2 text-xs text-green-600 hover:text-green-800 font-medium">✏️ Reply as School</button>` : ''}
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    
+    document.querySelectorAll('.read-more-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const shortSpan = document.querySelector(`.review-short-text-${id}`);
+            const fullSpan = document.querySelector(`.review-full-text-${id}`);
+            if (shortSpan && fullSpan) {
+                if (shortSpan.style.display !== 'none') {
+                    shortSpan.style.display = 'none';
+                    fullSpan.style.display = 'inline';
+                    this.textContent = 'Show less ↑';
+                } else {
+                    shortSpan.style.display = 'inline';
+                    fullSpan.style.display = 'none';
+                    this.textContent = 'Read more →';
+                }
+            }
+        });
+    });
+    
+    fetch('/api/saved-reviews')
+        .then(res => res.json())
+        .then(data => {
+            if (data.groupedBySchool) {
+                const allSavedIds = Object.values(data.groupedBySchool).flat().map(r => r.id.toString());
+                document.querySelectorAll('.save-review-btn').forEach(btn => {
+                    const reviewId = btn.getAttribute('data-review-id');
+                    if (allSavedIds.includes(reviewId)) {
+                        btn.setAttribute('data-saved', 'true');
+                        btn.classList.remove('text-gray-400');
+                        btn.classList.add('text-red-500');
+                        btn.querySelector('svg').setAttribute('fill', 'currentColor');
+                    }
+                });
+            }
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryBtns = document.querySelectorAll('.category-filter-btn');
+    let activeCategories = ['teaching', 'facilities', 'pastoral'];
+    
+    function updateButtonAppearance() {
+        categoryBtns.forEach(btn => {
+            const category = btn.getAttribute('data-category');
+            const data = categoryData[category];
+            
+            if (activeCategories.includes(category)) {
+                btn.style.backgroundColor = data.inactiveBg;
+                btn.style.borderWidth = '2px';
+                btn.style.borderColor = data.inactiveBorder;
+                const innerCircle = btn.querySelector('.rounded-full');
+                if (innerCircle) {
+                    innerCircle.style.borderColor = data.inactiveBorder;
+                    innerCircle.style.backgroundColor = data.inactiveBg;
+                }
+            } else {
+                btn.style.backgroundColor = 'white';
+                btn.style.borderWidth = '2px';
+                btn.style.borderColor = data.inactiveBorder;
+                const innerCircle = btn.querySelector('.rounded-full');
+                if (innerCircle) {
+                    innerCircle.style.borderColor = data.inactiveBorder;
+                    innerCircle.style.backgroundColor = 'transparent';
+                }
+            }
+        });
+        updateCommunityPulse(activeCategories);
+    }
+    
+    categoryBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const category = this.getAttribute('data-category');
+            
+            if (activeCategories.includes(category)) {
+                activeCategories = activeCategories.filter(c => c !== category);
+                updateButtonAppearance();
+            } else {
+                if (activeCategories.length >= 5) {
+                    alert('Maximum 5 categories allowed. Please untoggle one first.');
+                    return;
+                }
+                activeCategories.push(category);
+                updateButtonAppearance();
+            }
+        });
+    });
+    
+    updateButtonAppearance();
+    updateCommunityStats();
+    
+    let currentSort = 'newest';
+    let currentUserType = 'all';
+    let showAllReviews = false;
+    
+    function updateReviews() {
+        let filtered = filterReviewsByUserType(allReviews, currentUserType);
+        let sorted = sortReviews(filtered, currentSort);
+        renderReviews(sorted, showAllReviews);
+        updateCommunityStats();
+    }
+    
+    updateReviews();
+    
+    const sortSelect = document.getElementById('sortBy');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            currentSort = this.value;
+            updateReviews();
+        });
+    }
+    
+    const userTypeSelect = document.getElementById('userTypeFilter');
+    if (userTypeSelect) {
+        userTypeSelect.addEventListener('change', function() {
+            currentUserType = this.value;
+            updateReviews();
+        });
+    }
+});
+</script>
+
+<style>
+.category-filter-btn { transition: all 0.2s ease; cursor: pointer; }
+.category-filter-btn:hover { transform: scale(1.02); }
+.read-more-btn { cursor: pointer; }
+</style>
+
+<!-- Pagination Controls -->
+<% if (pagination && pagination.totalPages > 1) { %>
+<div class="flex justify-center items-center gap-2 mt-8 mb-4">
+    <% if (pagination.currentPage > 1) { %>
+        <a href="?page=<%= pagination.currentPage - 1 %>" class="px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm font-medium hover:bg-slate-50 transition">&laquo; Previous</a>
+    <% } else { %>
+        <span class="px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-md text-sm text-slate-400 cursor-not-allowed">&laquo; Previous</span>
+    <% } %>
+    
+    <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+        <% if (i === pagination.currentPage) { %>
+            <span class="px-3 py-1.5 bg-indigo-600 text-white rounded-md text-sm font-medium"><%= i %></span>
+        <% } else if (i <= 5 || i > pagination.totalPages - 2 || (i >= pagination.currentPage - 2 && i <= pagination.currentPage + 2)) { %>
+            <a href="?page=<%= i %>" class="px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm font-medium hover:bg-slate-50 transition"><%= i %></a>
+        <% } else if (i === 6 && pagination.currentPage > 5) { %>
+            <span class="px-2 py-1.5 text-slate-400">...</span>
+        <% } else if (i === pagination.totalPages - 3 && pagination.currentPage < pagination.totalPages - 4) { %>
+            <span class="px-2 py-1.5 text-slate-400">...</span>
+        <% } %>
+    <% } %>
+    
+    <% if (pagination.currentPage < pagination.totalPages) { %>
+        <a href="?page=<%= pagination.currentPage + 1 %>" class="px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm font-medium hover:bg-slate-50 transition">Next &raquo;</a>
+    <% } else { %>
+        <span class="px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-md text-sm text-slate-400 cursor-not-allowed">Next &raquo;</span>
+    <% } %>
+</div>
+<p class="text-center text-xs text-slate-400 mb-4">Showing <%= (pagination.currentPage - 1) * pagination.limit + 1 %> - <%= Math.min(pagination.currentPage * pagination.limit, pagination.totalReviews) %> of <%= pagination.totalReviews %> reviews</p>
+<% } %>
+
+<%- include('partials/footer') %>
+
+<script>
+async function toggleSaveReview(reviewId, button) {
+    const isSaved = button.getAttribute('data-saved') === 'true';
+    const url = isSaved ? `/unsave-review/${reviewId}` : `/save-review/${reviewId}`;
+    
+    try {
+        const response = await fetch(url, { method: 'POST' });
+        if (response.ok) {
+            if (isSaved) {
+                button.setAttribute('data-saved', 'false');
+                button.classList.remove('text-red-500');
+                button.classList.add('text-gray-400');
+                button.querySelector('svg').setAttribute('fill', 'none');
+                showNotification('Removed from saved reviews');
+            } else {
+                button.setAttribute('data-saved', 'true');
+                button.classList.remove('text-gray-400');
+                button.classList.add('text-red-500');
+                button.querySelector('svg').setAttribute('fill', 'currentColor');
+                showNotification('Saved to your dashboard ⭐');
+            }
+        } else if (response.status === 401) {
+            showNotification('Please sign in to save reviews', true);
+        }
+    } catch (error) {
+        console.error('Error saving review:', error);
+        showNotification('Error saving review', true);
+    }
+}
+
+function showNotification(message, isError = false) {
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: ${isError ? '#ef4444' : '#2A7CDE'};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        z-index: 9999;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: fadeInOut 2s ease;
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 2000);
+}
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeInOut {
+        0% { opacity: 0; transform: translateY(20px); }
+        15% { opacity: 1; transform: translateY(0); }
+        85% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(20px); }
+    }
+`;
+document.head.appendChild(style);
+</script>
+
+<script>
+async function checkFollowStatus() {
+    const response = await fetch('/api/followed-schools');
+    const data = await response.json();
+    const schoolName = '<%= schoolName %>';
+    const isFollowing = data.followedSchools && data.followedSchools.includes(schoolName);
+    const btn = document.getElementById('followSchoolBtn');
+    
+    if (btn) {
+        if (isFollowing) {
+            btn.innerHTML = 'Unfollow School';
+            btn.classList.remove('bg-white', 'border-slate-200');
+            btn.classList.add('bg-amber-50', 'border-amber-200');
+        } else {
+            btn.innerHTML = 'Follow School';
+            btn.classList.remove('bg-amber-50', 'border-amber-200');
+            btn.classList.add('bg-white', 'border-slate-200');
+        }
+    }
+}
+
+async function toggleFollow() {
+    const btn = document.getElementById('followSchoolBtn');
+    if (!btn) return;
+    
+    const isFollowing = btn.innerHTML.includes('Unfollow');
+    const url = isFollowing ? '/api/unfollow-school' : '/api/follow-school';
+    const schoolName = '<%= schoolName %>';
+    
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ schoolName: schoolName })
+    });
+    const data = await response.json();
+    
+    if (data.success) {
+        if (isFollowing) {
+            btn.innerHTML = 'Follow School';
+            btn.classList.remove('bg-amber-50', 'border-amber-200');
+            btn.classList.add('bg-white', 'border-slate-200');
+        } else {
+            btn.innerHTML = 'Unfollow School';
+            btn.classList.remove('bg-white', 'border-slate-200');
+            btn.classList.add('bg-amber-50', 'border-amber-200');
+        }
+        
+        const notification = document.createElement('div');
+        notification.textContent = isFollowing ? 'Unfollowed school' : 'Following school';
+        notification.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#4f46e5; color:white; padding:10px 20px; border-radius:8px; z-index:9999;';
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 2000);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', checkFollowStatus);
+</script>
+
+<!-- Flag Modal -->
+<div id="flagModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" onclick="if(event.target===this) window.closeFlagModal()">
+    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-bold mb-2">Report Review</h3>
+        <p class="text-sm text-slate-500 mb-4" id="flagReviewInfo"></p>
+        <form id="flagForm" onsubmit="window.submitFlagReport(event)">
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-slate-700 mb-2">Reason for reporting *</label>
+                <select id="flagReason" required class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+                    <option value="">Select a reason</option>
+                    <option value="defamatory">Defamatory / False information</option>
+                    <option value="personal">Contains personal information (names, addresses)</option>
+                    <option value="hate">Hate speech or harassment</option>
+                    <option value="offensive">Offensive language (swearing, slurs, inappropriate content)</option>
+                    <option value="spam">Spam or advertising</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-slate-700 mb-2">Additional details (optional)</label>
+                <textarea id="flagDetails" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg" placeholder="Please provide any additional information..."></textarea>
+            </div>
+            
+            <div class="mt-4 pt-3 border-t">
+                <p class="text-xs text-slate-400">
+                    ⚠️ Reports are reviewed by our moderation team. 
+                    False or abusive reporting may result in account suspension.
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Submit Report</button>
+                <button type="button" onclick="window.closeFlagModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+window.submitFlagReport = async function(event) {
+    event.preventDefault();
+    const reason = document.getElementById('flagReason').value;
+    const details = document.getElementById('flagDetails').value;
+    
+    if (!reason) {
+        alert('Please select a reason');
+        return;
+    }
+    
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Submitting...';
+    submitBtn.disabled = true;
+    
+    try {
+        const response = await fetch('/flag-review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                reviewId: window.currentFlagReviewId,
+                reviewTitle: window.currentFlagReviewTitle,
+                schoolName: window.currentFlagSchool,
+                reason: reason,
+                details: details
+            })
+        });
+        
+        if (response.ok) {
+            alert('✅ Report submitted. Thank you for helping keep our community safe.');
+            window.closeFlagModal();
+        } else {
+            alert('❌ Error submitting report. Please try again.');
+        }
+    } catch (error) {
+        alert('❌ Network error. Please try again.');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+};
+</script>

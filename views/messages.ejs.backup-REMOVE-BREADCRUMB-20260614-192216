@@ -1,0 +1,78 @@
+<%- include('partials/header') %>
+
+<div class="bg-[#fefbf0] text-slate-900 antialiased min-h-screen relative overflow-x-hidden">
+  
+  <div class="absolute inset-0 opacity-[0.008] pointer-events-none select-none z-0">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full min-h-screen" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid slice">
+      <g stroke="#000" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <g transform="translate(650, 180)"><circle cx="90" cy="90" r="80"/><path d="M60 75 Q75 60 90 75 M100 75 Q115 60 130 75" stroke-width="14"/><path d="M50 105 Q90 150 130 105 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(180, 80)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(920, 90)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 130 102 112"/></g>
+        <g transform="translate(100, 380)"><circle cx="60" cy="60" r="54"/><circle cx="43" cy="52" r="5" fill="#000"/><circle cx="77" cy="52" r="5" fill="#000"/><path d="M42 82 Q60 98 78 82"/></g>
+        <g transform="translate(480, 420)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 132 102 112"/></g>
+        <g transform="translate(880, 440)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="relative z-10">
+
+<main class="max-w-4xl mx-auto px-4 py-8">
+    <nav class="text-xs text-slate-500 mb-4 flex space-x-2">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <a href="/dashboard" class="hover:underline">Dashboard</a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium">Messages</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold text-slate-900 mb-6">My Messages</h1>
+
+    <% if (conversations.length === 0) { %>
+        <div class="bg-white border border-slate-200 rounded-2xl p-12 text-center">
+            <p class="text-slate-500 text-lg">No messages yet</p>
+            <p class="text-sm text-slate-400 mt-2">When you message someone about an ad, it will appear here</p>
+            <% if (schoolName) { %><a href="/school/<%= encodeURIComponent(schoolName) %>/noticeboard" class="inline-block mt-4 text-indigo-600 hover:underline">Back to Ads →</a><% } else { %><a href="/noticeboard" class="inline-block mt-4 text-indigo-600 hover:underline">Back to Noticeboard →</a><% } %>
+        </div>
+    <% } else { %>
+        <div class="space-y-3">
+            <% conversations.forEach(conv => { %>
+                <a href="/messages/<%= conv.adId %>/<%= conv.otherUserId %>" class="block bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition">
+                    <div class="flex gap-6">
+                    <div class="flex justify-between items-start">
+                        <% if (conv.adImage) { %>
+                                <div class="w-16 h-16 flex-shrink-0 bg-slate-100 rounded-lg overflow-hidden">
+                                    <img src="<%= conv.adImage %>" alt="<%= conv.adTitle %>" class="w-full h-full object-cover">
+                                </div>
+                            <% } else { %>
+                                <div class="w-16 h-16 flex-shrink-0 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                            <% } %>
+                            <div class="flex-1 pl-2">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h3 class="font-bold text-slate-900"><%= conv.adTitle %> <span class="text-xs text-slate-400 font-normal">(Ref: <%= conv.adPublicId || "N/A" %>)</span></h3>
+                                <% if (!conv.isRead) { %>
+                                    <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">New</span>
+                                <% } %>
+                            </div>
+                            <p class="text-sm text-slate-500"><%= conv.schoolName %></p>
+                            <p class="text-sm text-slate-600 mt-1 line-clamp-1"><%= conv.lastMessage %></p>
+                        </div>
+                        <p class="text-xs text-slate-400 ml-4 whitespace-nowrap">
+                            <%= new Date(conv.lastMessageAt).toLocaleDateString('en-GB') %>
+                        </p>
+                    </div>
+                    </div>
+                </a>
+            <% }) %>
+        </div>
+    <% } %>
+</main>
+
+  </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,61 @@
+<%- include('partials/header') %>
+
+<main class="max-w-6xl mx-auto px-4 py-8">
+    <div class="text-sm text-slate-500 mb-4">
+        <a href="/" class="hover:underline">Home</a> › 
+        <span class="text-slate-800 font-medium">Schools Near Me</span>
+    </div>
+
+    <div class="bg-white border rounded-2xl overflow-hidden shadow-sm">
+        <div id="locationStatus" class="p-3 bg-blue-50 text-blue-700 text-sm">
+            📍 Finding your location...
+        </div>
+        
+        <div id="schoolsList" class="p-4 max-h-96 overflow-y-auto">
+            <div class="text-center text-slate-500 py-4">Loading schools near you...</div>
+        </div>
+    </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statusDiv = document.getElementById('locationStatus');
+    
+    if (!navigator.geolocation) {
+        statusDiv.innerHTML = '⚠️ Geolocation not supported. Redirecting to browse schools...';
+        setTimeout(() => { window.location.href = '/review'; }, 1500);
+        return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            
+            const mapsUrl = `https://www.google.com/maps/search/schools/@${userLat},${userLng},13z`;
+            
+            // Create a temporary link and click it - this opens in new tab without being blocked
+            const link = document.createElement('a');
+            link.href = mapsUrl;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show confirmation and redirect back to homepage
+            statusDiv.innerHTML = '✅ Google Maps opened in a new tab. Returning to homepage...';
+            
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        },
+        function(error) {
+            statusDiv.innerHTML = '⚠️ Unable to get your location. Redirecting to browse schools...';
+            setTimeout(() => { window.location.href = '/review'; }, 1500);
+        }
+    );
+});
+</script>
+
+<%- include('partials/footer') %>

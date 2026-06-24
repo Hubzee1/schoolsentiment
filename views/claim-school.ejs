@@ -1,0 +1,55 @@
+<%- include('partials/header') %>
+
+<main class="max-w-2xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <h1 class="text-2xl font-bold text-slate-900 mb-2">Claim This School</h1>
+        <p class="text-slate-500 mb-6">Verify your association with <strong><%= schoolName %></strong></p>
+        
+        <% if (existingClaim) { %>
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <p class="text-yellow-800">⚠️ You have already submitted a claim for this school. Please wait for admin review.</p>
+                <a href="/school/<%= encodeURIComponent(schoolName) %>" class="inline-block mt-3 text-indigo-600 hover:underline">← Back to school</a>
+            </div>
+        <% } else { %>
+            <form action="/submit-claim" method="POST" class="space-y-6">
+                <input type="hidden" name="schoolName" value="<%= schoolName %>">
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Your Role at the School *</label>
+                    <select name="role" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Select your role</option>
+                        <option value="Headteacher">Headteacher / Principal</option>
+                        <option value="Deputy Head">Deputy Headteacher</option>
+                        <option value="Administrator">School Administrator / Office Staff</option>
+                        <option value="Governor">Governor / Trustee</option>
+                        <option value="Teacher">Teacher</option>
+                        <option value="Other Staff">Other Staff Member</option>
+                        <option value="Parent Representative">Parent Representative / PTA</option>
+                        <option value="Other">Other (please specify in notes)</option>
+                    </select>
+                </div>
+                
+                <div class="bg-slate-50 rounded-lg p-4">
+                    <h3 class="font-semibold text-slate-800 mb-2">What happens next?</h3>
+                    <ul class="text-sm text-slate-600 space-y-1 list-disc list-inside">
+                        <li>We will review your claim within 2-3 business days</li>
+                        <li>You will receive an email confirmation once submitted</li>
+                        <li>If approved, a "✓ Verified" badge will appear on this school's profile</li>
+                        <li>You'll be able to respond to reviews (coming soon)</li>
+                    </ul>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
+                        Submit Claim Request
+                    </button>
+                    <a href="/school/<%= encodeURIComponent(schoolName) %>" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition font-medium">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        <% } %>
+    </div>
+</main>
+
+<%- include('partials/footer') %>

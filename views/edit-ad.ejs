@@ -1,0 +1,440 @@
+<%- include('partials/header') %>
+
+<%
+// Get all existing images
+let existingImageFiles = [];
+
+if (ad.images && ad.images.length > 0) {
+    existingImageFiles = ad.images.map(img => ({
+        id: img.id,
+        url: img.imageUrl,
+        isPrimary: false,
+        isLegacy: false,
+        position: img.position || 0
+    }));
+} else if (ad.imageUrls && ad.imageUrls.length > 0) {
+    existingImageFiles = ad.imageUrls.map((url, idx) => ({
+        id: 'legacy-' + idx,
+        url: url,
+        isPrimary: false,
+        isLegacy: true,
+        position: idx
+    }));
+} else if (ad.imageUrl) {
+    existingImageFiles = [{
+        id: 'legacy-0',
+        url: ad.imageUrl,
+        isPrimary: false,
+        isLegacy: true,
+        position: 0
+    }];
+}
+
+// Set the first image as primary by default if none marked
+if (existingImageFiles.length > 0 && !existingImageFiles.some(img => img.isPrimary)) {
+    existingImageFiles[0].isPrimary = true;
+}
+%>
+
+<div class="bg-[#fefbf0] text-slate-900 antialiased min-h-screen relative overflow-x-hidden">
+  
+  <!-- FAINT BACKGROUND FACES -->
+  <div class="absolute inset-0 opacity-[0.008] pointer-events-none select-none z-0">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full min-h-screen" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid slice">
+      <g stroke="#000" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <g transform="translate(650, 180)"><circle cx="90" cy="90" r="80"/><path d="M60 75 Q75 60 90 75 M100 75 Q115 60 130 75" stroke-width="14"/><path d="M50 105 Q90 150 130 105 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(180, 80)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(920, 90)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 130 102 112"/></g>
+        <g transform="translate(100, 380)"><circle cx="60" cy="60" r="54"/><circle cx="43" cy="52" r="5" fill="#000"/><circle cx="77" cy="52" r="5" fill="#000"/><path d="M42 82 Q60 98 78 82"/></g>
+        <g transform="translate(480, 420)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 132 102 112"/></g>
+        <g transform="translate(880, 440)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(250, 680)"><circle cx="110" cy="110" r="98"/><path d="M70 95 Q90 75 110 95 M120 95 Q140 75 160 95" stroke-width="16"/><path d="M55 135 Q110 195 165 135 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(710, 700)"><circle cx="60" cy="60" r="54"/><circle cx="43" cy="52" r="5" fill="#000"/><circle cx="77" cy="52" r="5" fill="#000"/><path d="M42 82 Q60 98 78 82"/></g>
+        <g transform="translate(940, 740)"><circle cx="85" cy="85" r="76"/><path d="M55 75 Q70 60 85 75 M95 75 Q110 60 125 75" stroke-width="12"/><path d="M48 110 Q85 155 122 110 Z" fill="#000" opacity="0.15"/></g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="relative z-10">
+    <main class="max-w-3xl mx-auto px-4 py-8">
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <h1 class="text-2xl font-bold text-slate-900 mb-6">Edit Your Ad</h1>
+            
+            <form id="editForm" action="/update-ad/<%= ad.id %>" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-900 mb-2">Title *</label>
+                    <input type="text" name="title" value="<%= ad.title %>" required class="w-full px-4 py-2 border border-slate-300 rounded-lg">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-900 mb-2">Category *</label>
+                    <select name="category" required class="w-full px-4 py-2 border border-slate-300 rounded-lg">
+                        <option value="uniform" <%= ad.category === 'uniform' ? 'selected' : '' %>>Uniforms</option>
+                        <option value="books" <%= ad.category === 'books' ? 'selected' : '' %>>Books</option>
+                        <option value="sports" <%= ad.category === 'sports' ? 'selected' : '' %>>Sports Equipment</option>
+                        <option value="other" <%= ad.category === 'other' ? 'selected' : '' %>>Other</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-900 mb-2">Condition *</label>
+                    <select name="condition" required class="w-full px-4 py-2 border border-slate-300 rounded-lg">
+                        <option value="new" <%= ad.condition === 'new' ? 'selected' : '' %>>New with tags</option>
+                        <option value="like-new" <%= ad.condition === 'like-new' ? 'selected' : '' %>>Like new</option>
+                        <option value="good" <%= ad.condition === 'good' ? 'selected' : '' %>>Good used condition</option>
+                        <option value="fair" <%= ad.condition === 'fair' ? 'selected' : '' %>>Fair - signs of wear</option>
+                        <option value="poor" <%= ad.condition === 'poor' ? 'selected' : '' %>>Poor - but usable</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-900 mb-2">Price *</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">£</span>
+                        <input type="text" name="price" value="<%= ad.price %>" required class="w-full pl-7 pr-4 py-2 border border-slate-300 rounded-lg" placeholder="e.g., 25 or FREE">
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Enter "0" or "FREE" for free items</p>
+                </div>
+                
+                <div>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="hidden" name="isWanted" value="false">
+                        <input type="checkbox" id="isWanted" name="isWanted" value="true" <%= ad.isWanted ? 'checked' : '' %> class="w-4 h-4 text-amber-600 border-slate-300 rounded focus:ring-amber-500">
+                        <span class="text-sm text-slate-700">This is a wanted ad (looking to buy)</span>
+                    </label>
+                </div>
+                
+                <!-- IMAGE MANAGER -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-900 mb-2">Photos (max 5)</label>
+                    <div id="imagesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-4"></div>
+                    
+                    <button type="button" id="addImageBtn" class="mb-3 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-200 transition flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Add Photo
+                    </button>
+                    
+                    <input type="file" id="imageFileInput" accept="image/jpeg,image/png,image/jpg" style="display: none;">
+                    
+                    <p class="text-xs text-slate-400 mt-2">
+                        <img src="/images/Elated.png" class="w-4 h-4 inline object-contain align-middle mr-1"> Click the Elated face to set as primary (thumbnail) photo. ✕ to delete. Max 5 photos total.
+                    </p>
+                    
+                    <div class="mt-3">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="replaceImages" value="true" class="w-4 h-4 text-red-600 border-slate-300 rounded">
+                            <span class="text-sm text-red-600">⚠️ Replace all existing photos with new ones (check this to delete all current photos)</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Hidden field to store image order -->
+                    <input type="hidden" id="imageOrderInput" name="imageOrder" value="">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-900 mb-2">Description *</label>
+                    <textarea name="description" rows="8" required class="w-full px-4 py-2 border border-slate-300 rounded-lg"><%= ad.description %></textarea>
+                    <div class="text-right text-xs text-slate-400 mt-1"><span id="descCounter">500</span> words remaining</div>
+                </div>
+                
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <p class="text-sm text-amber-700 font-medium mb-2">📸 Photo Tips</p>
+                    <p class="text-xs text-amber-600">Click the Elated face to set your primary (thumbnail) photo. The primary photo will move to the first position.</p>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button type="submit" id="editSubmitBtn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">Save Changes</button>
+                    <a href="/dashboard" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+  </div>
+</div>
+
+<script>
+// All images (existing + new)
+let allImages = [];
+
+// Initialize existing images
+let existingImagesData = [];
+
+<% for (let i = 0; i < existingImageFiles.length; i++) { 
+    const img = existingImageFiles[i]; %>
+    existingImagesData.push({
+        id: '<%= img.id %>',
+        url: '<%= img.url %>',
+        isPrimary: <%= img.isPrimary %>,
+        isLegacy: <%= img.isLegacy %>,
+        isNew: false,
+        file: null,
+        previewUrl: '<%= img.url %>',
+        position: <%= img.position || i %>
+    });
+<% } %>
+
+// Function to render all images
+function renderImages() {
+    const container = document.getElementById('imagesGrid');
+    if (!container) return;
+    
+    // Sort: primary first, then by original position
+    allImages = [...existingImagesData];
+    allImages.sort((a, b) => {
+        if (a.isPrimary) return -1;
+        if (b.isPrimary) return 1;
+        return a.position - b.position;
+    });
+    
+    if (allImages.length === 0) {
+        container.innerHTML = '<div class="col-span-full text-center text-slate-400 text-sm py-8 border-2 border-dashed border-slate-200 rounded-lg">No photos. Click "Add Photo" to add images.</div>';
+        document.getElementById('imageOrderInput').value = '';
+        return;
+    }
+    
+    let html = '';
+    allImages.forEach((img, idx) => {
+        html += `
+            <div class="relative group border rounded-lg p-2 bg-slate-50" data-id="${img.id}" data-url="${img.url}" data-is-new="${img.isNew}">
+                <img src="${img.previewUrl}" class="w-full h-24 object-cover rounded-lg">
+                <div class="absolute top-1 right-1 flex gap-1">
+                    <button type="button" class="set-primary-btn bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-yellow-50 transition ${img.isPrimary ? 'bg-yellow-100 ring-2 ring-yellow-400' : ''}" data-index="${idx}">
+                        <img src="/images/Elated.png" class="w-8 h-8 object-cover ${img.isPrimary ? 'opacity-100' : 'opacity-60'}">
+                    </button>
+                    <button type="button" class="delete-image-btn bg-white rounded-full w-7 h-7 flex items-center justify-center shadow-md hover:bg-red-50 transition" data-index="${idx}" data-is-new="${img.isNew}" data-id="${img.id}">
+                        ✕
+                    </button>
+                </div>
+                ${img.isPrimary ? '<div class="absolute bottom-1 left-1 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1"><img src="/images/Elated.png" class="w-3 h-3 object-contain"> Primary</div>' : ''}
+                <div class="text-center text-xs text-slate-500 mt-1">${idx + 1}</div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+    
+    // Update hidden input with image order (URLs in correct sequence)
+    const orderUrls = allImages.map(img => img.url);
+    document.getElementById('imageOrderInput').value = JSON.stringify(orderUrls);
+    
+    // Add event listeners
+    document.querySelectorAll('.set-primary-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const idx = parseInt(btn.dataset.index);
+            setPrimaryImage(idx);
+        });
+    });
+    
+    document.querySelectorAll('.delete-image-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const idx = parseInt(btn.dataset.index);
+            const isNew = btn.dataset.isNew === 'true';
+            const imageId = btn.dataset.id;
+            await deleteImage(idx, isNew, imageId);
+        });
+    });
+}
+
+function setPrimaryImage(clickedIndex) {
+    const clickedImage = allImages[clickedIndex];
+    if (!clickedImage) return;
+    
+    // Remove primary flag from all images
+    existingImagesData.forEach(img => img.isPrimary = false);
+    
+    // Set primary on clicked image
+    clickedImage.isPrimary = true;
+    
+    // Re-render
+    renderImages();
+}
+
+async function deleteImage(index, isNew, imageId) {
+    const imageToDelete = allImages[index];
+    if (!imageToDelete) return;
+    
+    if (!isNew && imageToDelete.isLegacy) {
+        alert('Legacy images cannot be deleted individually. Use "Replace all" option.');
+        return;
+    }
+    
+    if (!isNew && !imageToDelete.isLegacy) {
+        if (!confirm('Delete this photo?')) return;
+        try {
+            const response = await fetch('/api/delete-ad-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imageId: imageId, adId: '<%= ad.id %>' })
+            });
+            const data = await response.json();
+            if (!data.success) {
+                alert('Failed to delete image');
+                return;
+            }
+        } catch(err) {
+            alert('Error deleting image');
+            return;
+        }
+        
+        existingImagesData = existingImagesData.filter(img => img.id !== imageId);
+        
+        if (existingImagesData.length > 0 && !existingImagesData.some(img => img.isPrimary)) {
+            existingImagesData[0].isPrimary = true;
+        }
+        
+        renderImages();
+    }
+}
+
+// NEW IMAGES
+let newImageFiles = [];
+
+const addImageBtn = document.getElementById('addImageBtn');
+const imageFileInput = document.getElementById('imageFileInput');
+
+addImageBtn.addEventListener('click', () => {
+    const totalImages = existingImagesData.length + newImageFiles.length;
+    if (totalImages >= 5) {
+        alert('Maximum 5 photos allowed total');
+        return;
+    }
+    imageFileInput.click();
+});
+
+imageFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const totalImages = existingImagesData.length + newImageFiles.length;
+    if (totalImages >= 5) {
+        alert('Maximum 5 photos allowed total');
+        imageFileInput.value = '';
+        return;
+    }
+    
+    if (!file.type.match('image/jpeg') && !file.type.match('image/png') && !file.type.match('image/jpg')) {
+        alert('Only JPEG and PNG images are allowed');
+        imageFileInput.value = '';
+        return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Image must be less than 5MB');
+        imageFileInput.value = '';
+        return;
+    }
+    
+    const previewUrl = URL.createObjectURL(file);
+    const isPrimary = (existingImagesData.length + newImageFiles.length) === 0;
+    
+    const newImageObj = {
+        id: 'new_' + Date.now() + '_' + Math.random(),
+        url: previewUrl,
+        isPrimary: isPrimary,
+        isLegacy: false,
+        isNew: true,
+        file: file,
+        previewUrl: previewUrl,
+        position: existingImagesData.length + newImageFiles.length
+    };
+    
+    newImageFiles.push(newImageObj);
+    
+    if (isPrimary) {
+        existingImagesData.forEach(img => img.isPrimary = false);
+    }
+    
+    // Merge for display
+    existingImagesData = [...existingImagesData, ...newImageFiles];
+    renderImages();
+    
+    imageFileInput.value = '';
+});
+
+// Form submission
+const editForm = document.getElementById('editForm');
+editForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    
+    // Add all form fields
+    const formFields = editForm.querySelectorAll('input:not([type="file"]), select, textarea');
+    formFields.forEach(field => {
+        if (field.name && field.name !== 'replaceImages' && field.name !== 'imageOrder') {
+            formData.append(field.name, field.value);
+        }
+    });
+    
+    // Add image order
+    const imageOrder = document.getElementById('imageOrderInput').value;
+    formData.append('imageOrder', imageOrder);
+    
+    // Add replaceImages
+    const replaceCheckbox = editForm.querySelector('input[name="replaceImages"]');
+    if (replaceCheckbox && replaceCheckbox.checked) {
+        formData.append('replaceImages', 'true');
+    }
+    
+    // Add new image files
+    for (let i = 0; i < newImageFiles.length; i++) {
+        if (newImageFiles[i].file) {
+            formData.append('photos', newImageFiles[i].file);
+        }
+    }
+    
+    const submitBtn = editForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerText;
+    submitBtn.innerHTML = '<svg class="animate-spin inline-block w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="#f59e0b" stroke-width="4"></circle><path class="opacity-75" fill="#000000" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...';
+    submitBtn.disabled = true;
+    
+    try {
+        const response = await fetch(`/update-ad/<%= ad.id %>`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            const data = await response.json();
+            if (data.success) {
+                window.location.href = data.redirect;
+            } else {
+                alert('Error updating ad: ' + (data.message || 'Please try again.'));
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+    } catch (err) {
+        alert('Error saving changes. Please try again.');
+        submitBtn.innerText = originalText;
+        submitBtn.disabled = false;
+    }
+});
+
+// Word counter
+const descTextarea = document.querySelector('textarea[name="description"]');
+const counterSpan = document.getElementById('descCounter');
+if (descTextarea && counterSpan) {
+    const remaining = 500 - descTextarea.value.length;
+    counterSpan.textContent = remaining;
+    descTextarea.addEventListener('input', function() {
+        const remaining = 500 - this.value.length;
+        if (remaining < 0) {
+            alert('Description cannot exceed 500 words');
+            this.value = this.value.substring(0, 500);
+            counterSpan.textContent = 0;
+        } else {
+            counterSpan.textContent = remaining;
+        }
+    });
+}
+
+// Initial render
+renderImages();
+</script>
+
+<%- include('partials/footer') %>

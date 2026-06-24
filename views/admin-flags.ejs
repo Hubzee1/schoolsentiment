@@ -1,0 +1,262 @@
+<%- include('partials/header') %>
+
+<main class="max-w-6xl mx-auto px-4 py-8">
+    <nav class="text-xs text-slate-500 mb-4 flex space-x-2">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium">Moderation Queue</span>
+    </nav>
+
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-slate-900">Flagged Content</h1>
+        <a href="/admin/banned-users" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm">🚫 View Banned Users</a>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex border-b mb-6">
+        <button id="tabReviews" class="px-4 py-2 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600">Flagged Reviews</button>
+        <button id="tabReplies" class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">Flagged School Replies</button>
+    </div>
+
+    <!-- Flagged Reviews Section -->
+    <div id="reviewsSection">
+        <div id="flaggedReviewsList" class="space-y-4">
+            <div class="text-center text-slate-500 py-8">Loading flagged reviews...</div>
+        </div>
+    </div>
+
+    <!-- Flagged Replies Section (hidden by default) -->
+    <div id="repliesSection" class="hidden">
+        <div id="flaggedRepliesList" class="space-y-4">
+            <div class="text-center text-slate-500 py-8">Loading flagged replies...</div>
+        </div>
+    </div>
+</main>
+
+<script>
+let flaggedReviews = [];
+let flaggedReplies = [];
+
+async function checkBanStatus(reviewId) {
+    const response = await fetch('/admin/get-ban-status?reviewId=' + reviewId);
+    const data = await response.json();
+    return data.banned;
+}
+
+async function checkReplyStatus(replyId) {
+    const response = await fetch('/admin/get-reply-status?replyId=' + replyId);
+    const data = await response.json();
+    return data.hidden;
+}
+
+async function loadFlaggedReviews() {
+    const response = await fetch('/api/flagged-reviews');
+    const data = await response.json();
+    flaggedReviews = data.flagged || [];
+    
+    const container = document.getElementById('flaggedReviewsList');
+    if (flaggedReviews.length === 0) {
+        container.innerHTML = '<div class="bg-white border border-slate-200 rounded-xl p-8 text-center"><p class="text-slate-500">No flagged reviews pending</p></div>';
+        return;
+    }
+    
+    const banStatus = {};
+    for (const flag of flaggedReviews) {
+        banStatus[flag.reviewId] = await checkBanStatus(flag.reviewId);
+    }
+    
+    container.innerHTML = flaggedReviews.map(flag => `
+        <div class="bg-white border border-slate-200 rounded-xl p-4">
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-bold">${flag.reason}</span>
+                    <span class="text-xs text-slate-400 ml-2">Flagged: ${new Date(flag.flaggedAt).toLocaleString()}</span>
+                </div>
+                <div class="flex gap-2">
+                    <a href="/admin/review/${flag.reviewId}" class="px-3 py-1 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700">View Details</a>
+                    <button onclick="toggleHideReview('${flag.reviewId}', this)" class="px-3 py-1 text-xs rounded hide-btn"></button>
+                    <button onclick="deleteReview('${flag.reviewId}')" class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
+                    <button onclick="toggleBan('${flag.reviewId}', this)" class="px-3 py-1 text-xs rounded ban-toggle-btn" style="background-color: #ea580c; color: white;">${banStatus[flag.reviewId] ? 'Unban User' : 'Ban User'}</button>
+                    <button onclick="resolveFlag('${flag.id}')" class="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">Resolve</button>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 mt-2"><strong>School:</strong> ${flag.schoolName}</p>
+            <p class="text-sm text-slate-600"><strong>Review:</strong> ${flag.reviewTitle || 'No title'}</p>
+            ${flag.details ? `<p class="text-sm text-slate-600 mt-2"><strong>Details:</strong> ${flag.details}</p>` : ''}
+        </div>
+    `).join('');
+    
+    for (const flag of flaggedReviews) {
+        const btn = document.querySelector(`button[onclick="toggleHideReview('${flag.reviewId}', this)"]`);
+        if (btn) {
+            const response = await fetch(`/admin/get-review-status?reviewId=${flag.reviewId}`);
+            const reviewData = await response.json();
+            if (reviewData.hidden) {
+                btn.textContent = 'Unhide';
+                btn.classList.add('bg-green-600');
+                btn.classList.remove('bg-yellow-600');
+            } else {
+                btn.textContent = 'Hide';
+                btn.classList.add('bg-yellow-600');
+                btn.classList.remove('bg-green-600');
+            }
+        }
+    }
+}
+
+async function loadFlaggedReplies() {
+    const response = await fetch('/api/flagged-replies');
+    const data = await response.json();
+    flaggedReplies = data.flagged || [];
+    
+    const container = document.getElementById('flaggedRepliesList');
+    if (flaggedReplies.length === 0) {
+        container.innerHTML = '<div class="bg-white border border-slate-200 rounded-xl p-8 text-center"><p class="text-slate-500">No flagged school replies pending</p></div>';
+        return;
+    }
+    
+    const hiddenStatus = {};
+    for (const flag of flaggedReplies) {
+        hiddenStatus[flag.replyId] = await checkReplyStatus(flag.replyId);
+    }
+    
+    container.innerHTML = flaggedReplies.map(flag => `
+        <div class="bg-white border border-slate-200 rounded-xl p-4">
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-bold">${flag.reason}</span>
+                    <span class="text-xs text-slate-400 ml-2">Flagged: ${new Date(flag.flaggedAt).toLocaleString()}</span>
+                </div>
+                <div class="flex gap-2">
+                    <a href="/admin/reply/${flag.replyId}" class="px-3 py-1 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700">View Reply</a>
+                    <button onclick="toggleHideReply('${flag.replyId}', this)" class="px-3 py-1 text-xs rounded hide-reply-btn" style="background-color: ${hiddenStatus[flag.replyId] ? '#22c55e' : '#eab308'}; color: white;">${hiddenStatus[flag.replyId] ? 'Unhide' : 'Hide'}</button>
+                    <button onclick="deleteReply('${flag.replyId}')" class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">Delete Reply</button>
+                    <button onclick="resolveFlag('${flag.id}')" class="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">Resolve</button>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 mt-2"><strong>School:</strong> ${flag.schoolName}</p>
+            <p class="text-sm text-slate-600"><strong>Reply preview:</strong> ${flag.reviewTitle ? flag.reviewTitle.substring(0, 200) : 'No content'}</p>
+            ${flag.details ? `<p class="text-sm text-slate-600 mt-2"><strong>Details:</strong> ${flag.details}</p>` : ''}
+        </div>
+    `).join('');
+}
+
+async function toggleHideReview(reviewId, btn) {
+    const isHidden = btn.textContent === 'Unhide';
+    const url = isHidden ? '/admin/unhide-review' : '/admin/hide-review';
+    
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewId: reviewId })
+    });
+    const data = await response.json();
+    
+    if (data.success) {
+        if (isHidden) {
+            btn.textContent = 'Hide';
+            btn.classList.remove('bg-green-600');
+            btn.classList.add('bg-yellow-600');
+        } else {
+            btn.textContent = 'Unhide';
+            btn.classList.remove('bg-yellow-600');
+            btn.classList.add('bg-green-600');
+        }
+    }
+}
+
+async function toggleHideReply(replyId, btn) {
+    const isHidden = btn.textContent === 'Unhide';
+    const url = isHidden ? '/admin/unhide-reply' : '/admin/hide-reply';
+    
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ replyId: replyId })
+    });
+    const data = await response.json();
+    
+    if (data.success) {
+        if (isHidden) {
+            btn.textContent = 'Hide';
+            btn.classList.remove('bg-green-600');
+            btn.classList.add('bg-yellow-600');
+        } else {
+            btn.textContent = 'Unhide';
+            btn.classList.remove('bg-yellow-600');
+            btn.classList.add('bg-green-600');
+        }
+    }
+}
+
+async function toggleBan(reviewId, btn) {
+    const response = await fetch('/admin/toggle-ban', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewId: reviewId })
+    });
+    const data = await response.json();
+    if (data.banned) {
+        btn.textContent = 'Unban User';
+        btn.classList.remove('bg-orange-600');
+        btn.classList.add('bg-green-600');
+    } else {
+        btn.textContent = 'Ban User';
+        btn.classList.remove('bg-green-600');
+        btn.classList.add('bg-orange-600');
+    }
+}
+
+function deleteReview(reviewId) {
+    if (confirm('Permanently delete this review? This will also delete any school replies to it.')) {
+        fetch('/admin/delete-review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reviewId: reviewId })
+        }).then(() => location.reload());
+    }
+}
+
+function deleteReply(replyId) {
+    if (confirm('Permanently delete this school reply?')) {
+        fetch('/admin/delete-reply', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ replyId: replyId })
+        }).then(() => location.reload());
+    }
+}
+
+function resolveFlag(flagId) {
+    fetch('/admin/resolve-flag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ flagId: flagId })
+    }).then(() => location.reload());
+}
+
+// Tab switching
+document.getElementById('tabReviews').addEventListener('click', () => {
+    document.getElementById('reviewsSection').classList.remove('hidden');
+    document.getElementById('repliesSection').classList.add('hidden');
+    document.getElementById('tabReviews').classList.add('text-indigo-600', 'border-indigo-600');
+    document.getElementById('tabReviews').classList.remove('text-slate-500', 'border-transparent');
+    document.getElementById('tabReplies').classList.remove('text-indigo-600', 'border-indigo-600');
+    document.getElementById('tabReplies').classList.add('text-slate-500', 'border-transparent');
+});
+
+document.getElementById('tabReplies').addEventListener('click', () => {
+    document.getElementById('repliesSection').classList.remove('hidden');
+    document.getElementById('reviewsSection').classList.add('hidden');
+    document.getElementById('tabReplies').classList.add('text-indigo-600', 'border-indigo-600');
+    document.getElementById('tabReplies').classList.remove('text-slate-500', 'border-transparent');
+    document.getElementById('tabReviews').classList.remove('text-indigo-600', 'border-indigo-600');
+    document.getElementById('tabReviews').classList.add('text-slate-500', 'border-transparent');
+    loadFlaggedReplies();
+});
+
+// Initial load
+loadFlaggedReviews();
+</script>
+
+<%- include('partials/footer') %>

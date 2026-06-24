@@ -1,0 +1,182 @@
+    </div> <!-- Close main-content -->
+    
+    <footer style="background: #000000; color: white; padding: 1rem 0; border-top: 1px solid #333333;  position: relative; z-index: 100;">
+        <div class="container">
+            <div style="text-align: center; font-size: 0.8rem;">
+                <p>&copy; 2026 School Sentiment | <a href="/privacy" style="color: white; text-decoration: none;">Privacy</a> | <a href="/terms" style="color: white; text-decoration: none;">Terms</a> | <a href="#" id="cookieSettingsLink" style="color: white; text-decoration: none;">Cookies</a> | <a href="/contact" style="color: white; text-decoration: none;">Contact Us</a></p>
+            </div>
+        </div>
+    </footer>
+
+<!-- Cookie Consent Banner -->
+<div id="cookieConsent" style="position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; color: white; padding: 1rem; z-index: 9999; transform: translateY(100%); transition: transform 0.3s ease-in-out; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);">
+    <div class="container" style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+        <div style="flex: 1; font-size: 0.875rem;">
+            <p>We use essential cookies to keep you logged in. By using our site, you accept our <a href="/privacy" style="color: #93c5fd; text-decoration: underline;">Privacy Policy</a> and <a href="/terms" style="color: #93c5fd; text-decoration: underline;">Terms of Service</a>. <a href="#" id="cookieSettingsLinkBanner" style="color: #93c5fd; text-decoration: underline;">Cookie Settings</a></p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <button id="acceptCookies" style="background: #10b981; color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 9999px; cursor: pointer; font-weight: 500; transition: background 0.2s;">Accept</button>
+            <button id="rejectCookies" style="background: #ef4444; color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 9999px; cursor: pointer; font-weight: 500; transition: background 0.2s;">Reject</button>
+        </div>
+    </div>
+</div>
+
+<!-- Cookie Settings Modal -->
+<div id="cookieModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
+    <div style="background: white; max-width: 500px; width: 90%; margin: auto; border-radius: 16px; padding: 1.5rem; color: #1e293b;">
+        <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">Cookie Preferences</h3>
+        <p style="font-size: 0.875rem; margin-bottom: 1rem; color: #475569;">We use cookies to enhance your experience. You can choose which cookies to accept.</p>
+        
+        <div style="border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 1rem;">
+            <div style="padding: 1rem; border-bottom: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 0.875rem;">Essential Cookies</strong>
+                        <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Required for login and basic functionality. Cannot be disabled.</p>
+                    </div>
+                    <span style="background: #22c55e; color: white; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.7rem;">Always On</span>
+                </div>
+            </div>
+            <div style="padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 0.875rem;">Functional Cookies</strong>
+                        <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Remember your preferences (e.g., cookie consent).</p>
+                    </div>
+                    <label style="position: relative; display: inline-block; width: 50px; height: 24px;">
+                        <input type="checkbox" id="functionalCookiesToggle" style="opacity: 0; width: 0; height: 0;">
+                        <span id="functionalSlider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.3s; border-radius: 24px;"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <p style="font-size: 0.7rem; color: #64748b; margin-bottom: 0.5rem;"><strong>Cookies we use:</strong></p>
+            <table style="width: 100%; font-size: 0.7rem; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <th style="text-align: left; padding: 0.25rem;">Cookie Name</th>
+                    <th style="text-align: left; padding: 0.25rem;">Purpose</th>
+                    <th style="text-align: left; padding: 0.25rem;">Duration</th>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 0.25rem;">sessionToken</td>
+                    <td style="padding: 0.25rem;">Keep you logged in</td>
+                    <td style="padding: 0.25rem;">30 days</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 0.25rem;">cookieConsent</td>
+                    <td style="padding: 0.25rem;">Remember cookie preference</td>
+                    <td style="padding: 0.25rem;">1 year</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+            <button id="saveCookiePreferences" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 9999px; cursor: pointer; font-weight: 500;">Save Preferences</button>
+            <button id="closeCookieModal" style="background: #94a3b8; color: white; border: none; padding: 0.5rem 1rem; border-radius: 9999px; cursor: pointer; font-weight: 500;">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const cookieConsent = localStorage.getItem('cookieConsent');
+    const banner = document.getElementById('cookieConsent');
+    const modal = document.getElementById('cookieModal');
+    const functionalToggle = document.getElementById('functionalCookiesToggle');
+    const functionalSlider = document.getElementById('functionalSlider');
+    
+    function updateSliderStyle() {
+        if (functionalSlider) {
+            const isChecked = functionalToggle && functionalToggle.checked;
+            functionalSlider.style.backgroundColor = isChecked ? '#22c55e' : '#ccc';
+        }
+    }
+    
+    const functionalConsent = localStorage.getItem('functionalCookies') === 'true';
+    if (functionalToggle) {
+        functionalToggle.checked = functionalConsent;
+        updateSliderStyle();
+    }
+    
+    if (!cookieConsent) {
+        setTimeout(() => {
+            if (banner) {
+                banner.style.transform = 'translateY(0)';
+            }
+        }, 500);
+    }
+    
+    function acceptCookies() {
+        localStorage.setItem('cookieConsent', 'accepted');
+        if (functionalToggle) {
+            localStorage.setItem('functionalCookies', functionalToggle.checked);
+        }
+        if (banner) {
+            banner.style.transform = 'translateY(100%)';
+        }
+    }
+    
+    function rejectCookies() {
+        localStorage.setItem('cookieConsent', 'rejected');
+        localStorage.setItem('functionalCookies', 'false');
+        if (functionalToggle) {
+            functionalToggle.checked = false;
+            updateSliderStyle();
+        }
+        if (banner) {
+            banner.style.transform = 'translateY(100%)';
+        }
+    }
+    
+    function openModal() {
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+    
+    function closeModal() {
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+    
+    function savePreferences() {
+        localStorage.setItem('cookieConsent', 'accepted');
+        if (functionalToggle) {
+            localStorage.setItem('functionalCookies', functionalToggle.checked);
+        }
+        updateSliderStyle();
+        closeModal();
+        if (banner) {
+            banner.style.transform = 'translateY(100%)';
+        }
+    }
+    
+    document.getElementById('acceptCookies')?.addEventListener('click', acceptCookies);
+    document.getElementById('rejectCookies')?.addEventListener('click', rejectCookies);
+    document.getElementById('cookieSettingsLink')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        openModal();
+    });
+    document.getElementById('cookieSettingsLinkBanner')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        openModal();
+    });
+    document.getElementById('saveCookiePreferences')?.addEventListener('click', savePreferences);
+    document.getElementById('closeCookieModal')?.addEventListener('click', closeModal);
+    
+    if (functionalToggle) {
+        functionalToggle.addEventListener('change', updateSliderStyle);
+    }
+    
+    window.addEventListener('click', function(e) {
+        if (modal && e.target === modal) {
+            closeModal();
+        }
+    });
+})();
+</script>
+</body>
+</html>

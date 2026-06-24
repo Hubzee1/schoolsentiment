@@ -1,0 +1,167 @@
+<%- include('partials/header') %>
+
+<div class="bg-[#fefbf0] text-slate-900 antialiased min-h-screen relative overflow-x-hidden">
+  
+  <div class="absolute inset-0 opacity-[0.008] pointer-events-none select-none z-0">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full min-h-screen" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid slice">
+      <g stroke="#000" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <g transform="translate(650, 180)"><circle cx="90" cy="90" r="80"/><path d="M60 75 Q75 60 90 75 M100 75 Q115 60 130 75" stroke-width="14"/><path d="M50 105 Q90 150 130 105 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(180, 80)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(920, 90)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 130 102 112"/></g>
+        <g transform="translate(100, 380)"><circle cx="60" cy="60" r="54"/><circle cx="43" cy="52" r="5" fill="#000"/><circle cx="77" cy="52" r="5" fill="#000"/><path d="M42 82 Q60 98 78 82"/></g>
+        <g transform="translate(480, 420)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 132 102 112"/></g>
+        <g transform="translate(880, 440)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="relative z-10">
+
+
+<main class="max-w-4xl mx-auto px-4 py-3">
+<div class="container" style="padding: 20px; max-width: 800px; margin: 0 auto;">
+    <!-- Blog Header -->
+    <div style="text-align: center; padding: 3rem 0;">
+        <h1 style="font-size: 2.5rem; font-weight: bold; color: #333; margin-bottom: 1rem;">School Sentiment Blog</h1>
+        <p style="font-size: 1.2rem; color: #666; max-width: 600px; margin: 0 auto;">
+            Insights, stories, and perspectives on education and school communities
+        </p>
+    </div>
+
+    <!-- Featured Post -->
+    <div class="featured-post" style="background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 3rem;">
+        <!-- Hero Image -->
+        <div style="height: 300px; overflow: hidden;">
+            <img src="/photos/school.jpg" alt="School building" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        
+        <div style="padding: 2.5rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <span style="background: #34B380; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
+                    Featured
+                </span>
+                <span style="color: #666; font-size: 0.9rem;">
+                    Mental Health
+                </span>
+            </div>
+            
+            <h2 style="font-size: 1.8rem; font-weight: bold; color: #333; margin-bottom: 1rem; line-height: 1.3;">
+                How Good Mental Health is Built as Children
+            </h2>
+            
+            <p style="font-size: 1.1rem; color: #666; line-height: 1.6; margin-bottom: 1.5rem;">
+                Schools play an important role in nurturing and protecting mental health of students.
+            </p>
+            
+            <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="width: 40px; height: 40px; background: #2A7CDE; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                        SS
+                    </div>
+                    <div>
+                        <div style="font-weight: bold; color: #333;">SchoolSentiment Team</div>
+                        <div style="color: #666; font-size: 0.9rem;">
+                            October 17, 2024 • 4 min read
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Content -->
+    <div class="blog-content" style="background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 2.5rem; margin-bottom: 3rem;">
+        <p style="line-height: 1.7; margin-bottom: 1.5rem; color: #444;">
+            In today's fast-paced world, the importance of mental health has never been more apparent. While much attention is given to adult mental wellness, the foundation for lifelong mental health is built during childhood - and schools play a crucial role in this development.
+        </p>
+
+        <h3 style="color: #333; margin: 2rem 0 1rem 0; font-size: 1.3rem;">The Critical Role of Schools in Mental Health</h3>
+        <p style="line-height: 1.7; margin-bottom: 1.5rem; color: #444;">
+            Schools are more than just institutions for academic learning; they are environments where children spend the majority of their waking hours. This makes them uniquely positioned to influence mental health outcomes. From the classroom to the playground, every interaction and experience contributes to a child's emotional development.
+        </p>
+
+        <!-- Child Photo -->
+        <div style="margin: 2rem 0; text-align: center;">
+            <img src="/photos/child.jpg" alt="Happy child at school" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem; font-style: italic;">
+                A positive school environment helps build resilient and happy children
+            </p>
+        </div>
+
+        <h3 style="color: #333; margin: 2rem 0 1rem 0; font-size: 1.3rem;">Creating Supportive Environments</h3>
+        <p style="line-height: 1.7; margin-bottom: 1.5rem; color: #444;">
+            Schools that prioritize mental health create environments where students feel safe, valued, and supported. This includes:
+        </p>
+        <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem;">
+            <li style="margin-bottom: 0.5rem; line-height: 1.6;"><strong style="color: #2A7CDE;">Positive teacher-student relationships:</strong> Caring educators who recognize and respond to emotional needs</li>
+            <li style="margin-bottom: 0.5rem; line-height: 1.6;"><strong style="color: #2A7CDE;">Inclusive classrooms:</strong> Environments where every student feels they belong</li>
+            <li style="margin-bottom: 0.5rem; line-height: 1.6;"><strong style="color: #2A7CDE;">Emotional literacy programs:</strong> Teaching children to identify and express emotions healthily</li>
+            <li style="margin-bottom: 0.5rem; line-height: 1.6;"><strong style="color: #2A7CDE;">Anti-bullying policies:</strong> Zero tolerance for behaviors that harm mental wellbeing</li>
+        </ul>
+
+        <h3 style="color: #333; margin: 2rem 0 1rem 0; font-size: 1.3rem;">Early Intervention and Support</h3>
+        <p style="line-height: 1.7; margin-bottom: 1.5rem; color: #444;">
+            Schools serve as early warning systems for mental health challenges. Teachers and staff who are trained to recognize signs of distress can connect students with appropriate support services before issues escalate. This early intervention can prevent more serious problems later in life.
+        </p>
+
+        <h3 style="color: #333; margin: 2rem 0 1rem 0; font-size: 1.3rem;">Building Resilience</h3>
+        <p style="line-height: 1.7; margin-bottom: 1.5rem; color: #444;">
+            Beyond preventing problems, schools can actively build mental resilience by:
+        </p>
+        <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem;">
+            <li style="margin-bottom: 0.5rem; line-height: 1.6;">Teaching coping strategies for stress and anxiety</li>
+            <li style="margin-bottom: 0.5rem; line-height: 1.6;">Encouraging healthy social connections</li>
+            <li style="margin-bottom: 0.5rem; line-height: 1.6;">Providing opportunities for success and achievement</li>
+            <li style="margin-bottom: 0.5rem; line-height: 1.6;">Fostering a growth mindset and self-confidence</li>
+        </ul>
+
+        <h3 style="color: #333; margin: 2rem 0 1rem 0; font-size: 1.3rem;">The Ripple Effect</h3>
+        <p style="line-height: 1.7; margin-bottom: 1.5rem; color: #444;">
+            When schools successfully support mental health, the benefits extend far beyond the individual student. Well-supported students are better learners, more engaged community members, and carry these positive habits into adulthood. They become parents, employees, and citizens who understand the value of mental wellness.
+        </p>
+
+        <p style="line-height: 1.7; margin-bottom: 1.5rem; color: #444;">
+            At SchoolSentiment, we believe that understanding a school's approach to mental health is crucial for parents and students making educational choices. The emotional environment of a school is just as important as its academic reputation.
+        </p>
+
+        <p style="line-height: 1.7; margin-bottom: 1.5rem; color: #666; font-style: italic;">
+            What has been your experience with mental health support in schools? Share your thoughts and help other families make informed decisions.
+        </p>
+        
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 2rem; margin-top: 2rem;">
+            <h4 style="color: #333; margin-bottom: 1rem;">Share this article</h4>
+            <div style="display: flex; gap: 1rem;">
+                <a href="#" style="background: #2A7CDE; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 0.9rem;">
+                    Twitter
+                </a>
+                <a href="#" style="background: #1877F2; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 0.9rem;">
+                    Facebook
+                </a>
+                <a href="#" style="background: #0077B5; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 0.9rem;">
+                    LinkedIn
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="blog-cta" style="background: #2A7CDE; color: white; padding: 3rem; border-radius: 15px; text-align: center; margin-bottom: 2rem;">
+        <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">Join the Conversation</h3>
+        <p style="font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.9;">
+            Have thoughts on mental health in schools? Share your experiences and help other families make informed decisions.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="/review" style="background: #34B380; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+                Write a Review
+            </a>
+            <a href="/search" style="background: white; color: #2A7CDE; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+                Search Schools
+            </a>
+        </div>
+    </div>
+</div>
+
+  </div>
+</div>
+
+<%- include('partials/footer') %>

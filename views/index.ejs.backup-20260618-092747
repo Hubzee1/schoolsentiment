@@ -1,0 +1,235 @@
+<%- include('partials/header') %>
+
+<div class="container" style="padding: 5rem 0 2rem; position: relative; z-index: 100;">
+    <div style="text-align: center;">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            Find the school <span style="color: #FF6B8A; background: rgba(255, 92, 138, 0.1); padding: 0.125rem 0.5rem; border-radius: 0.5rem;">you feel</span> is right
+        </h1>
+        <p class="text-lg font-medium text-slate-600 mt-8 mb-8">
+            Honest reviews from students and parents
+        </p>
+        
+        <div style="max-width: 576px; margin: 0 auto 3rem; position: relative; padding: 0 16px;">
+            <form id="searchForm" action="/school" method="GET" style="position: relative;">
+                <div style="position: relative; width: 100%; display: flex; align-items: center;">
+                    <input type="text" 
+                           id="schoolSearch"
+                           name="name" 
+                           placeholder="Search for any UK school..." 
+                           style="width: 100%; padding: 1rem 5rem 1rem 1.5rem; border: 2px solid #e0e0e0; border-radius: 60px; font-size: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); box-sizing: border-box; background: white; transition: all 0.2s ease;"
+                           onfocus="this.style.borderColor='#000000'; this.style.boxShadow='0 2px 12px rgba(0,0,0,0.1)'"
+                           onblur="this.style.borderColor='#e0e0e0'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'"
+                           required
+                           autocomplete="off">
+                    <button type="submit" 
+                            style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: #000000; border: none; cursor: pointer; padding: 0.75rem; width: auto; height: auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); transition: all 0.2s ease;"
+                            onmouseover="this.style.transform='translateY(-50%) scale(1.03)'; this.style.boxShadow='0 4px 8px rgba(0, 0, 0, 0.3)';"
+                            onmouseout="this.style.transform='translateY(-50%) scale(1)'; this.style.boxShadow='0 2px 6px rgba(0, 0, 0, 0.2)';">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div id="autocompleteResults" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); z-index: 1000; max-height: 300px; overflow-y: auto; margin-top: 5px;"></div>
+                </div>
+            </form>
+            <p class="text-xs text-slate-500 max-w-lg mx-auto leading-relaxed mt-8 px-4 sm:px-0">
+                Discover honest school experiences from real parents, students, and staff. Share your journey and help families make informed choices.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="padding: 0 0 2rem; margin-top: 11rem; position: relative; z-index: 1;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; align-items: start; position: relative; z-index: 1;">
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; height: 100%; position: relative; z-index: 1;">
+            <h3 style="color: #000000; margin-bottom: 1rem;">Share Your Experience</h3>
+            <p class="text-xs text-slate-500 leading-relaxed" style="margin-bottom: 1.5rem; flex-grow: 1;">Help other families make the right choices<br>with your honest school review</p>
+            <a href="/review" style="background: #000000; color: white; padding: 0.8rem 1.5rem; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: auto;">
+                Write a Review
+            </a>
+        </div>
+        
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; height: 100%; position: relative; z-index: 1;">
+            <h3 style="color: #000000; margin-bottom: 1rem;">Browse Schools</h3>
+            <p class="text-xs text-slate-500 leading-relaxed" style="margin-bottom: 1.5rem; flex-grow: 1;">Instantly locate and evaluate schools<br>near your current location</p>
+            <button onclick="findNearbySchools()" style="background: #000000; color: white; padding: 0.8rem 1.5rem; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: auto; border: none; cursor: pointer;">
+                Search Schools Near Me
+            </button>
+        </div>
+        
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; height: 100%; position: relative; z-index: 1;">
+            <h3 style="color: #000000; margin-bottom: 1rem;">Visit The Noticeboard</h3>
+            <p class="text-xs text-slate-500 leading-relaxed" style="margin-bottom: 1.5rem; flex-grow: 1;">Buy, sell, or pass on school essentials within your community.<br>Keep handovers simple with a quick school gate drop-off.</p>
+            <a href="/noticeboard" style="background: #000000; color: white; padding: 0.8rem 1.5rem; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: auto;">
+                Visit Noticeboard
+            </a>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 3rem; height: 8px; position: relative; z-index: 1;">
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-sm space-y-6" style="margin-top: -2rem;">
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 bg-slate-50 border border-slate-200 px-3 py-1 rounded-full">Trusted School Reviews</span>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-y-6 gap-x-4 pt-2 divide-x divide-slate-100">
+                <div class="space-y-1">
+                    <div class="text-2xl font-black text-slate-900">42,000+</div>
+                    <div class="text-xs font-medium text-slate-500">UK Schools Listed</div>
+                </div>
+                <div class="space-y-1">
+                    <div class="text-2xl font-black text-slate-900">Real</div>
+                    <div class="text-xs font-medium text-slate-500">User Experiences</div>
+                </div>
+                <div class="space-y-1">
+                    <div class="text-2xl font-black text-slate-900">100%</div>
+                    <div class="text-xs font-medium text-slate-500">Completely Anonymous</div>
+                </div>
+                <div class="space-y-1">
+                    <div class="text-2xl font-black text-slate-900">Local</div>
+                    <div class="text-xs font-medium text-slate-500">School Exchange</div>
+                </div>
+                <div class="space-y-1">
+                    <div class="text-2xl font-black text-emerald-600">Free</div>
+                    <div class="text-xs font-medium text-slate-500">Unlimited Access</div>
+                </div>
+            </div>
+        </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('schoolSearch');
+    const autocompleteResults = document.getElementById('autocompleteResults');
+    const searchForm = document.getElementById('searchForm');
+    let allSchools = [];
+
+    fetch('/api/schools')
+        .then(response => response.json())
+        .then(schools => {
+            allSchools = schools;
+        });
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim().toLowerCase();
+        
+        if (query.length < 2) {
+            autocompleteResults.style.display = 'none';
+            return;
+        }
+
+        if (!allSchools || allSchools.length === 0) {
+            autocompleteResults.style.display = 'none';
+            return;
+        }
+
+        const nameStartsWith = [];
+        const townMatches = [];
+        const nameContains = [];
+
+        allSchools.forEach(school => {
+            if (!school) return;
+            const name = (school.name || "").toLowerCase();
+            const town = (school.town || "").toLowerCase();
+            
+            if (name.startsWith(query)) {
+                nameStartsWith.push(school);
+            } else if (town.includes(query)) {
+                townMatches.push(school);
+            } else if (name.includes(query)) {
+                nameContains.push(school);
+            }
+        });
+
+        const matches = [...nameStartsWith, ...townMatches, ...nameContains].slice(0, 10);
+
+        if (matches.length === 0) {
+            autocompleteResults.style.display = 'none';
+            return;
+        }
+
+        let html = '';
+        html += '<div class="autocomplete-item nearby-option" onclick="findNearbySchools()" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; text-align: left;">';
+        html += '<div style="font-weight: bold;">📍 Find Schools Near Me</div>';
+        html += '<div style="font-size: 0.85rem; color: #666;">Use your current location</div></div>';
+
+        matches.forEach(school => {
+            const schoolName = school.name || 'Unknown';
+            const townName = school.town || '';
+            const postcodeName = school.postcode || '';
+            html += '<div class="autocomplete-item" data-school-name="' + schoolName.replace(/'/g, "\\'") + '" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">';
+            html += '<div style="font-weight: bold; text-align: left;">' + schoolName + '</div>';
+            if (townName || postcodeName) {
+                html += '<div style="font-size: 0.85rem; color: #666; text-align: left;">' + townName + (postcodeName ? ' • ' + postcodeName : '') + '</div>';
+            }
+            html += '</div>';
+        });
+
+        autocompleteResults.innerHTML = html;
+        autocompleteResults.style.display = 'block';
+    });
+
+    autocompleteResults.addEventListener('click', function(e) {
+        const item = e.target.closest('.autocomplete-item');
+        if (!item) return;
+        
+        if (item.classList.contains('nearby-option')) {
+            findNearbySchools();
+        } else {
+            const schoolName = item.getAttribute('data-school-name');
+            if (schoolName) {
+                searchInput.value = schoolName;
+                autocompleteResults.style.display = 'none';
+                searchForm.submit();
+            }
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !autocompleteResults.contains(e.target)) {
+            autocompleteResults.style.display = 'none';
+        }
+    });
+});
+
+function findNearbySchools() {
+    if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser.');
+        return;
+    }
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const mapsUrl = 'https://www.google.com/maps/search/schools/@' + lat + ',' + lng + ',13z';
+            window.open(mapsUrl, '_blank');
+        },
+        function(error) {
+            alert('Unable to retrieve your location. Please search for schools by name instead.');
+        }
+    );
+}
+</script>
+
+<style>
+.autocomplete-item { cursor: pointer; }
+.autocomplete-item:hover { background: #f8f9fa !important; }
+.nearby-option:hover { background: #f0f7ff !important; }
+</style>
+
+<%- include('partials/footer') %>
+
+<script>
+function triggerNearMe() {
+    const searchInput = document.getElementById('schoolSearch');
+    if (searchInput) {
+        searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        searchInput.style.borderColor = '#FF6B8A';
+        searchInput.style.boxShadow = '0 0 0 2px rgba(255,107,138,0.3)';
+        setTimeout(() => {
+            searchInput.style.borderColor = '#e0e0e0';
+            searchInput.style.boxShadow = 'none';
+        }, 2000);
+    }
+    findNearbySchools();
+}
+</script>

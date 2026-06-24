@@ -1,0 +1,112 @@
+[
+  {
+    "id": 1,
+    "name": "Kingsbury High School",
+    "type": "Secondary",
+    "postcode": "NW9 9JR",
+    "town": "London",
+    "county": "Brent",
+    "website": "https://www.kingsburyhigh.org.uk/",
+    "phase": "Secondary",
+    "address": "Kingsbury Road"
+  },
+  {
+    "id": 2,
+    "name": "St Mary's Church of England Primary School",
+    "type": "Primary",
+    "postcode": "NW9 5SE",
+    "town": "London",
+    "county": "Brent",
+    "website": "",
+    "phase": "Primary",
+    "address": "Graham Road"
+  },
+  {
+    "id": 3,
+    "name": "The Crest Academy",
+    "type": "Secondary",
+    "postcode": "NW9 5EQ",
+    "town": "London",
+    "county": "Brent",
+    "website": "https://thecrestacademy.org.uk/",
+    "phase": "Secondary",
+    "address": "Crest Road"
+  },
+  {
+    "id": 4,
+    "name": "Oliver Goldsmith Primary School",
+    "type": "Primary",
+    "postcode": "NW9 8ND",
+    "town": "London",
+    "county": "Brent",
+    "website": "",
+    "phase": "Primary",
+    "address": "Oliver Road"
+  },
+  {
+    "id": 5,
+    "name": "St Margaret Clitherow Catholic Primary School",
+    "type": "Primary",
+    "postcode": "NW9 5PE",
+    "town": "London",
+    "county": "Brent",
+    "website": "",
+    "phase": "Primary",
+    "address": "Quainton Street"
+  },
+  {
+    "id": 6,
+    "name": "St Joseph's Catholic Junior School",
+    "type": "Primary",
+    "postcode": "NW9 6BJ",
+    "town": "London",
+    "county": "Brent",
+    "website": "",
+    "phase": "Primary",
+    "address": "Chatsworth Avenue"
+  },
+  {
+    "id": 7,
+    "name": "Fryent Primary School",
+    "type": "Primary",
+    "postcode": "NW9 9JL",
+    "town": "London",
+    "county": "Brent",
+    "website": "",
+    "phase": "Primary",
+    "address": "Church Lane"
+  },
+  {
+    "id": 8,
+    "name": "St Gregory's Catholic Science College",
+    "type": "Secondary",
+    "postcode": "HA3 5NB",
+    "town": "Harrow",
+    "county": "Harrow",
+    "website": "https://www.stgregorys.harrow.sch.uk/",
+    "phase": "Secondary",
+    "address": "Donnington Road"
+  },
+  {
+    "id": 9,
+    "name": "Park High School",
+    "type": "Secondary",
+    "postcode": "HA1 3RX",
+    "town": "Harrow",
+    "county": "Harrow",
+    "website": "https://www.parkhighstanmore.org.uk/",
+    "phase": "Secondary",
+    "address": "Thistlecroft Gardens"
+  },
+  {
+    "id": 10,
+    "name": "Nower Hill High School",
+    "type": "Secondary",
+    "postcode": "HA5 5RP",
+    "town": "Pinner",
+    "county": "Harrow",
+    "website": "https://www.nowerhill.org.uk/",
+    "phase": "Secondary",
+    "address": "George V Avenue"
+  }
+]

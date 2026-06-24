@@ -1,0 +1,378 @@
+<%- include('partials/header') %>
+
+<main class="max-w-6xl mx-auto px-4 py-8">
+    
+    <div class="text-sm text-slate-500 mb-4">
+        <a href="/" class="hover:underline">Home</a> › 
+        <span class="text-slate-800 font-medium"><%= schoolName %></span>
+    </div>
+
+    <div class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2"><%= schoolName %></h1>
+        
+        <% if (schoolDetails && schoolDetails.address && schoolDetails.town && schoolDetails.postcode) { %>
+            <div class="text-center text-xs uppercase font-bold text-slate-400 tracking-wider mb-6">
+                <a href="https://maps.google.com/?q=<%= encodeURIComponent(schoolDetails.address + ', ' + schoolDetails.town + ', ' + schoolDetails.postcode) %>" target="_blank" class="hover:text-slate-600 transition">
+                    <%= schoolDetails.address %>, <%= schoolDetails.town %>, <%= schoolDetails.postcode %>
+                </a>
+            </div>
+        <% } %>
+        
+        <%
+            const totalReviews = Math.max(reviews.length, 1);
+            let academicSupport = 0, facilities = 0;
+            reviews.forEach(review => {
+                academicSupport += review.teachingRating || review.rating;
+                facilities += review.safetyRating || review.rating;
+            });
+            let avgAcademic = Math.round((academicSupport / totalReviews / 5) * 100);
+            let avgRating = (avgAcademic / 20).toFixed(1);
+            let avgFacilities = Math.round((facilities / totalReviews / 5) * 100);
+        %>
+        
+        <div class="flex justify-center items-center gap-8">
+            <div class="text-center">
+                <div class="text-4xl font-bold text-slate-900"><%= totalReviews %></div>
+                <div class="text-xs uppercase font-bold text-slate-400 tracking-wider mt-2">Total Reviews</div>
+            </div>
+            <div><img src="/images/angry_certificate.png" class="w-48 h-48 object-contain"></div>
+            <div class="text-center">
+                <div class="text-4xl font-bold text-slate-900"><%= avgRating %></div>
+                <div class="text-xs uppercase font-bold text-slate-400 tracking-wider mt-2">Overall Rating</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Official Website Button (right aligned, above Community Pulse) -->
+    <div class="flex justify-end mb-6">
+        <% if (schoolDetails && schoolDetails.website) { %>
+            <a href="<%= schoolDetails.website %>" target="_blank" class="bg-black text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-800 transition inline-block">Visit School Site</a>
+        <% } else { %>
+            <span class="bg-slate-400 text-white px-4 py-2 rounded-full text-sm font-medium inline-block opacity-50 cursor-not-allowed">Visit School Site (Unavailable)</span>
+        <% } %>
+    </div>
+
+    <!-- Community Pulse -->
+    <div class="bg-white border rounded-2xl p-4 shadow-sm mb-6">
+        <h2 class="text-2xl font-bold mb-3">Community Pulse</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="text-center">
+                <img src="/images/Elated.png" class="w-28 h-28 mx-auto mb-2 object-contain">
+                <div class="font-bold">Academic Support (92%)</div>
+                <p class="text-sm text-slate-500">Praised for excellent SEN resources<br>and supportive teachers.</p>
+            </div>
+            <div class="text-center md:border-l md:border-slate-200 md:pl-4">
+                <img src="/images/happy.png" class="w-28 h-28 mx-auto mb-2 object-contain">
+                <div class="font-bold">School Facilities (65%)</div>
+                <p class="text-sm text-slate-500">Overall positive, though some<br>mention outdated sports equipment.</p>
+            </div>
+            <div class="text-center md:border-l md:border-slate-200 md:pl-4">
+                <img src="/images/Average.png" class="w-28 h-28 mx-auto mb-2 object-contain">
+                <div class="font-bold">Communication (45%)</div>
+                <p class="text-sm text-slate-500">Mixed reviews regarding timely<br>parent feedback.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TWO COLUMN LAYOUT: Categorical Filters (Left) + Community Stats (Right) -->
+    <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 2rem;">
+        <!-- LEFT COLUMN - Categorical Filters -->
+        <div style="flex: 2; min-width: 250px;">
+            <h2 class="text-2xl font-bold mb-4">Categorical Filters</h2>
+            <div class="flex gap-3 overflow-x-auto pb-2">
+                <button class="filter-btn active bg-[#d1ebd9] border border-[#7fc494] rounded-2xl p-4 w-[110px] h-[110px] flex flex-col items-center justify-center">
+                    <div class="w-12 h-12 rounded-full border-2 border-[#2b7e45] flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18M7 4v4M17 10v4M11 16v4"/></svg>
+                    </div>
+                    <span class="text-xs font-bold">General</span>
+                </button>
+                <button class="filter-btn bg-[#fdf8e6] border border-[#f0dfad] rounded-2xl p-4 w-[110px] h-[110px] flex flex-col items-center justify-center">
+                    <div class="w-12 h-12 rounded-full border-2 border-[#48875d] flex items-center justify-center mb-2">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-center">Teaching Quality</span>
+                </button>
+                <button class="filter-btn bg-[#f9f5eb] border border-[#ebdcb9] rounded-2xl p-4 w-[110px] h-[110px] flex flex-col items-center justify-center">
+                    <div class="w-12 h-12 rounded-full border-2 border-[#cca13b] flex items-center justify-center mb-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    </div>
+                    <span class="text-xs font-bold">Facilities</span>
+                </button>
+                <button class="filter-btn bg-[#fdf1e7] border border-[#f5d9c2] rounded-2xl p-4 w-[110px] h-[110px] flex flex-col items-center justify-center">
+                    <div class="w-12 h-12 rounded-full border-2 border-[#ce7035] flex items-center justify-center mb-2">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-center">SEN Support</span>
+                </button>
+                <button class="filter-btn bg-white border border-slate-200 rounded-2xl p-4 w-[110px] h-[110px] flex flex-col items-center justify-center">
+                    <div class="w-12 h-12 rounded-full border-2 border-[#5a6e7f] flex items-center justify-center mb-2">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-center">Pastoral Care</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN - Community Stats -->
+        <div style="flex: 1; min-width: 250px;">
+            <div class="bg-white border rounded-xl p-5 shadow-sm">
+                <h3 class="font-bold mb-4">Community Stats</h3>
+                <div class="mb-4">
+                    <div class="flex justify-between text-sm mb-1"><span>Overall Satisfaction</span><span class="font-semibold"><%= avgAcademic %>%</span></div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full"><div class="bg-indigo-600 h-full rounded-full" style="width: <%= avgAcademic %>%"></div></div>
+                </div>
+                <div class="mb-4">
+                    <div class="flex justify-between text-sm mb-1"><span>Facilities Rating</span><span class="font-semibold"><%= avgFacilities %>%</span></div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full"><div class="bg-emerald-500 h-full rounded-full" style="width: <%= avgFacilities %>%"></div></div>
+                </div>
+                <hr class="my-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><div class="text-2xl font-bold">7%</div><div class="text-[10px] uppercase font-bold text-slate-400">Staff Turnover</div></div>
+                    <div><div class="text-2xl font-bold">4.1</div><div class="text-[10px] uppercase font-bold text-slate-400">Avg Star Rating</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Read All Reviews Section -->
+    <div class="mt-6">
+        <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center gap-4">
+                <h2 class="text-xl font-bold">Read All Reviews</h2>
+                <a href="/review?school=<%= encodeURIComponent(schoolName) %>" class="bg-black text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-800 transition">Write a Review</a>
+            </div>
+            <button id="seeAllBtn" class="text-sm text-indigo-600 hover:underline">See all reviews →</button>
+        </div>
+        
+        <% if (reviews.length === 0) { %>
+            <div class="bg-white border rounded-xl p-8 text-center">
+                <p>No reviews yet. Be the first!</p>
+            </div>
+        <% } else { %>
+            <div id="reviewsList" class="space-y-4">
+                <% for (var i = 0; i < Math.min(2, reviews.length); i++) { 
+                    var review = reviews[i];
+                    var text = review.reviewText || '';
+                    text = text.substring(0, 200);
+                    var faces = {5:'/images/Elated.png',4:'/images/happy.png',3:'/images/Average.png',2:'/images/Sad.png',1:'/images/Angry.png'};
+                    var initial = review.userType === 'student' ? 'S' : (review.userType === 'parent' ? 'P' : 'T');
+                %>
+                    <div class="bg-white border rounded-xl p-5 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center font-bold"><%= initial %></div>
+                            <div><div class="font-semibold"><%= review.userType.replace('_', ' ') %></div><div class="text-xs text-slate-400"><%= new Date(review.createdAt).toLocaleDateString('en-GB') %></div></div>
+                        </div>
+                        <div class="mb-3"><img src="<%= faces[review.rating] %>" class="w-6 h-6 object-contain"></div>
+                        <div class="text-sm text-slate-600"><%= text %><%= text.length >= 200 ? '...' : '' %></div>
+                    </div>
+                <% } %>
+            </div>
+            <div id="allReviews" style="display:none" class="space-y-4">
+                <% for (var i = 0; i < reviews.length; i++) { 
+                    var review = reviews[i];
+                    var text = review.reviewText || '';
+                    var faces = {5:'/images/Elated.png',4:'/images/happy.png',3:'/images/Average.png',2:'/images/Sad.png',1:'/images/Angry.png'};
+                    var initial = review.userType === 'student' ? 'S' : (review.userType === 'parent' ? 'P' : 'T');
+                %>
+                    <div class="bg-white border rounded-xl p-5 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center font-bold"><%= initial %></div>
+                            <div><div class="font-semibold"><%= review.userType.replace('_', ' ') %></div><div class="text-xs text-slate-400"><%= new Date(review.createdAt).toLocaleDateString('en-GB') %></div></div>
+                        </div>
+                        <div class="mb-3"><img src="<%= faces[review.rating] %>" class="w-6 h-6 object-contain"></div>
+                        <div class="text-sm text-slate-600"><%= text %></div>
+                    </div>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+</main>
+
+<style>
+.filter-btn { transition: all 0.2s ease; cursor: pointer; }
+.filter-btn:hover { transform: scale(1.02); }
+.filter-btn.active { background: #d1ebd9 !important; border-color: #7fc494 !important; }
+.filter-btn.active div { border-color: #2b7e45 !important; color: #2b7e45 !important; }
+</style>
+
+<script>
+document.getElementById('seeAllBtn')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    var list = document.getElementById('reviewsList');
+    var all = document.getElementById('allReviews');
+    if (list && all) {
+        if (list.style.display !== 'none') {
+            list.style.display = 'none';
+            all.style.display = 'block';
+            this.textContent = 'See less ↑';
+        } else {
+            list.style.display = 'block';
+            all.style.display = 'none';
+            this.textContent = 'See all reviews →';
+        }
+    }
+});
+document.querySelectorAll('.filter-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(function(b) {
+            b.classList.remove('active');
+            b.style.background = '';
+        });
+        this.classList.add('active');
+        this.style.background = '#d1ebd9';
+    });
+});
+
+    // Sort Reviews Functionality
+    const sortSelect = document.getElementById('sortBy');
+    
+    function sortReviews(reviewsArray, sortType) {
+        let sorted = [...reviewsArray];
+        if (sortType === 'newest') {
+            sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else if (sortType === 'oldest') {
+            sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        } else if (sortType === 'positive') {
+            sorted.sort((a, b) => b.rating - a.rating);
+        } else if (sortType === 'negative') {
+            sorted.sort((a, b) => a.rating - b.rating);
+        }
+        return sorted;
+    }
+    
+    function renderSortedReviews(sortType) {
+        if (!window.allReviewsData) return;
+        
+        const sorted = sortReviews(window.allReviewsData, sortType);
+        
+        const listContainer = document.getElementById('reviewsList');
+        const allContainer = document.getElementById('allReviews');
+        
+        if (listContainer) {
+            listContainer.innerHTML = generateReviewHTML(sorted.slice(0, 2));
+        }
+        if (allContainer) {
+            allContainer.innerHTML = generateReviewHTML(sorted);
+        }
+    }
+    
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            renderSortedReviews(this.value);
+        });
+    }
+    
+    window.generateReviewHTML = function(reviewsArray) {
+        let html = '';
+        reviewsArray.forEach(review => {
+            let text = review.reviewText || '';
+            const faces = {5:'/images/Elated.png',4:'/images/happy.png',3:'/images/Average.png',2:'/images/Sad.png',1:'/images/Angry.png'};
+            const initial = review.userType === 'student' ? 'S' : (review.userType === 'parent' ? 'P' : 'T');
+            html += `<div class="review-card bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center font-bold">${initial}</div>
+                            <div><div class="font-semibold">${review.userType.replace('_', ' ')}</div><div class="text-xs text-slate-400">${new Date(review.createdAt).toLocaleDateString('en-GB')}</div></div>
+                        </div>
+                        <div class="mb-3"><img src="${faces[review.rating]}" class="w-6 h-6 object-contain"></div>
+                        <div class="text-sm text-slate-600">${text.substring(0, 200)}${text.length >= 200 ? '...' : ''}</div>
+                    </div>`;
+        });
+        return html;
+    };
+    
+    window.allReviewsData = [...reviews];
+    renderSortedReviews('newest');
+
+    // Sort Reviews Functionality
+    const sortSelect = document.getElementById('sortBy');
+    let allReviewsData = [...reviews];
+    
+    function sortReviews(reviewsArray, sortType) {
+        let sorted = [...reviewsArray];
+        if (sortType === 'newest') {
+            sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else if (sortType === 'oldest') {
+            sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        } else if (sortType === 'positive') {
+            sorted.sort((a, b) => b.rating - a.rating);
+        } else if (sortType === 'negative') {
+            sorted.sort((a, b) => a.rating - b.rating);
+        }
+        return sorted;
+    }
+    
+    function renderSortedReviews(sortType) {
+        const sorted = sortReviews(allReviewsData, sortType);
+        const listContainer = document.getElementById('reviewsList');
+        const allContainer = document.getElementById('allReviews');
+        
+        if (listContainer && allContainer) {
+            // Store the sorted data for see all functionality
+            window.sortedReviewsData = sorted;
+            
+            // Update the displayed reviews
+            if (listContainer.style.display !== 'none') {
+                listContainer.innerHTML = generateReviewHTML(sorted.slice(0, 2));
+            }
+            if (allContainer.style.display !== 'none') {
+                allContainer.innerHTML = generateReviewHTML(sorted);
+            }
+        }
+    }
+    
+    function generateReviewHTML(reviewsArray) {
+        let html = '';
+        reviewsArray.forEach(review => {
+            let text = review.reviewText || '';
+            const faces = {5:'/images/Elated.png',4:'/images/happy.png',3:'/images/Average.png',2:'/images/Sad.png',1:'/images/Angry.png'};
+            const initial = review.userType === 'student' ? 'S' : (review.userType === 'parent' ? 'P' : 'T');
+            html += `<div class="review-card bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center font-bold">${initial}</div>
+                            <div><div class="font-semibold">${review.userType.replace('_', ' ')}</div><div class="text-xs text-slate-400">${new Date(review.createdAt).toLocaleDateString('en-GB')}</div></div>
+                        </div>
+                        <div class="mb-3"><img src="${faces[review.rating]}" class="w-6 h-6 object-contain"></div>
+                        <div class="text-sm text-slate-600">${text.substring(0, 200)}${text.length >= 200 ? '...' : ''}</div>
+                    </div>`;
+        });
+        return html;
+    }
+    
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            renderSortedReviews(this.value);
+        });
+    }
+    
+    // Override the see all button to use sorted data
+    const originalSeeAllBtn = document.getElementById('seeAllBtn');
+    if (originalSeeAllBtn) {
+        const newSeeAllBtn = originalSeeAllBtn.cloneNode(true);
+        originalSeeAllBtn.parentNode.replaceChild(newSeeAllBtn, originalSeeAllBtn);
+        newSeeAllBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const listContainer = document.getElementById('reviewsList');
+            const allContainer = document.getElementById('allReviews');
+            if (listContainer && allContainer) {
+                if (listContainer.style.display !== 'none') {
+                    listContainer.style.display = 'none';
+                    allContainer.style.display = 'block';
+                    // Use sorted data if available
+                    const dataToShow = window.sortedReviewsData || allReviewsData;
+                    allContainer.innerHTML = generateReviewHTML(dataToShow);
+                    this.textContent = 'See less ↑';
+                } else {
+                    listContainer.style.display = 'block';
+                    allContainer.style.display = 'none';
+                    const dataToShow = window.sortedReviewsData || allReviewsData;
+                    listContainer.innerHTML = generateReviewHTML(dataToShow.slice(0, 2));
+                    this.textContent = 'See all reviews →';
+                }
+            }
+        });
+    }
+    
+    renderSortedReviews('newest');
+</script>
+
+<%- include('partials/footer') %>

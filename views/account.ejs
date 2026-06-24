@@ -1,0 +1,139 @@
+<%- include('partials/header') %>
+
+<div class="bg-[#fefbf0] text-slate-900 antialiased min-h-screen relative overflow-x-hidden flex flex-col justify-between">
+
+  <!-- FAINT BACKGROUND WALLPAPER -->
+  <div class="absolute inset-0 opacity-[0.008] pointer-events-none select-none z-0">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full min-h-screen" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid slice">
+      <g stroke="#000" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <g transform="translate(650, 180)"><circle cx="90" cy="90" r="80"/><path d="M60 75 Q75 60 90 75 M100 75 Q115 60 130 75" stroke-width="14"/><path d="M50 105 Q90 150 130 105 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(180, 80)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(920, 90)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 130 102 112"/></g>
+        <g transform="translate(100, 380)"><circle cx="60" cy="60" r="54"/><circle cx="43" cy="52" r="5" fill="#000"/><circle cx="77" cy="52" r="5" fill="#000"/><path d="M42 82 Q60 98 78 82"/></g>
+        <g transform="translate(480, 420)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 132 102 112"/></g>
+        <g transform="translate(880, 440)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(250, 680)"><circle cx="110" cy="110" r="98"/><path d="M70 95 Q90 75 110 95 M120 95 Q140 75 160 95" stroke-width="16"/><path d="M55 135 Q110 195 165 135 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(710, 700)"><circle cx="60" cy="60" r="54"/><circle cx="43" cy="52" r="5" fill="#000"/><circle cx="77" cy="52" r="5" fill="#000"/><path d="M42 82 Q60 98 78 82"/></g>
+        <g transform="translate(940, 740)"><circle cx="85" cy="85" r="76"/><path d="M55 75 Q70 60 85 75 M95 75 Q110 60 125 75" stroke-width="12"/><path d="M48 110 Q85 155 122 110 Z" fill="#000" opacity="0.15"/></g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-6 pt-8 w-full relative z-10">
+    <div class="flex justify-between items-end border-b border-slate-200 pb-5">
+      <div>
+        </nav>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Account Settings</h1>
+        <p class="text-xs text-slate-500 mt-1 font-medium">Manage your account and data preferences</p>
+      </div>
+    </div>
+  </div>
+
+  <main class="max-w-4xl mx-auto px-6 py-10 w-full relative z-10 flex-grow">
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+      
+      <!-- Account Information -->
+      <div class="mb-6 pb-6 border-b border-slate-200">
+        <h2 class="text-lg font-bold text-slate-900 mb-4">Account Information</h2>
+        <div class="space-y-3">
+          <div class="flex flex-col sm:flex-row sm:justify-between py-2">
+            <span class="text-sm font-medium text-slate-500">Email:</span>
+            <span class="text-sm text-slate-800 font-medium"><%= user.email %></span>
+          </div>
+          <div class="flex flex-col sm:flex-row sm:justify-between py-2 bg-slate-50 rounded-lg px-3">
+            <span class="text-sm font-medium text-slate-500">Account created:</span>
+            <span class="text-sm text-slate-800"><%= new Date(user.createdAt).toLocaleDateString('en-GB') %></span>
+          </div>
+          <% if (user.termsAgreedAt) { %>
+          <div class="flex flex-col sm:flex-row sm:justify-between py-2">
+            <span class="text-sm font-medium text-slate-500">Terms agreed:</span>
+            <span class="text-sm text-slate-800"><%= new Date(user.termsAgreedAt).toLocaleDateString('en-GB') %></span>
+          </div>
+          <% } %>
+        </div>
+      </div>
+      
+      <!-- Data & Privacy -->
+      <div>
+        <h2 class="text-lg font-bold text-slate-900 mb-4">Data & Privacy</h2>
+        <p class="text-sm text-slate-600 mb-4">Under UK GDPR, you have the right to access your data and request erasure.</p>
+        
+        <div class="flex flex-wrap gap-4">
+          <button id="exportDataBtn" class="bg-black hover:bg-slate-800 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-2">
+            📥 Download My Data
+          </button>
+          <button id="deleteAccountBtn" class="bg-red-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-red-700 transition shadow-sm flex items-center gap-2">
+            🗑️ Delete My Account
+          </button>
+        </div>
+        
+        <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <p class="text-xs text-amber-700">
+            ⚠️ Deleting your account is permanent. Your reviews will become anonymous but remain on the site. 
+            All your saved items and messages will be removed.
+          </p>
+        </div>
+      </div>
+      
+    </div>
+  </main>
+
+</div>
+
+<script>
+document.getElementById('exportDataBtn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('exportDataBtn');
+    btn.textContent = '📥 Generating...';
+    btn.disabled = true;
+    
+    const response = await fetch('/api/export-my-data');
+    const data = await response.json();
+    
+    if (data.error) {
+        alert('Error: ' + data.error);
+    } else {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'my-schoolsentiment-data.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        alert('✅ Your data has been downloaded!');
+    }
+    
+    btn.textContent = '📥 Download My Data';
+    btn.disabled = false;
+});
+
+document.getElementById('deleteAccountBtn')?.addEventListener('click', async () => {
+    const confirmed = confirm('⚠️ WARNING: This will permanently delete your account and all associated data. Your reviews will become anonymous but remain on the site. This action cannot be undone. Are you absolutely sure?');
+    
+    if (confirmed) {
+        const password = prompt('Type "DELETE MY ACCOUNT" to confirm permanent deletion:');
+        if (password === 'DELETE MY ACCOUNT') {
+            const btn = document.getElementById('deleteAccountBtn');
+            btn.textContent = '🗑️ Deleting...';
+            btn.disabled = true;
+            
+            const response = await fetch('/api/delete-my-account', { method: 'POST' });
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('✅ Your account has been deleted. You will be redirected to the homepage.');
+                window.location.href = '/';
+            } else {
+                alert('❌ Error: ' + (result.error || 'Unknown error'));
+                btn.textContent = '🗑️ Delete My Account';
+                btn.disabled = false;
+            }
+        } else {
+            alert('Confirmation text did not match. Account not deleted.');
+        }
+    }
+});
+</script>
+
+<%- include('partials/footer') %>

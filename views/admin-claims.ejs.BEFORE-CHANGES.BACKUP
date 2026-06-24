@@ -1,0 +1,152 @@
+<%- include('partials/header') %>
+
+<main class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-slate-900">School Claims Management</h1>
+        <a href="/admin" class="text-indigo-600 hover:underline">← Back to Admin Dashboard</a>
+    </div>
+    
+    <!-- Pending Claims -->
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+            ⏳ Pending Claims 
+            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full"><%= pendingClaims.length %></span>
+        </h2>
+        
+        <% if (pendingClaims.length === 0) { %>
+            <div class="bg-white rounded-lg border p-6 text-center text-slate-500">
+                No pending claims at this time.
+            </div>
+        <% } else { %>
+            <div class="space-y-4">
+                <% pendingClaims.forEach(claim => { %>
+                    <div class="bg-white rounded-lg border p-5 shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-900"><%= claim.schoolName %></h3>
+                                <p class="text-sm text-slate-500">Claimant: <%= claim.claimantEmail %></p>
+                                <p class="text-sm text-slate-500">Role: <span class="font-medium"><%= claim.role %></span></p>
+                                <p class="text-xs text-slate-400 mt-1">Submitted: <%= new Date(claim.submittedAt).toLocaleString() %></p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="approveClaim('<%= claim.id %>', '<%= claim.schoolName.replace(/'/g, "\\'") %>')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-medium">
+                                    ✓ Approve
+                                </button>
+                                <button onclick="rejectClaim('<%= claim.id %>', '<%= claim.schoolName.replace(/'/g, "\\'") %>')" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm font-medium">
+                                    ✗ Reject
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+    
+    <!-- Approved Claims -->
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+            ✅ Approved Claims
+            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full"><%= approvedClaims.length %></span>
+        </h2>
+        
+        <% if (approvedClaims.length === 0) { %>
+            <div class="bg-white rounded-lg border p-6 text-center text-slate-500">
+                No approved claims yet.
+            </div>
+        <% } else { %>
+            <div class="space-y-3">
+                <% approvedClaims.forEach(claim => { %>
+                    <div class="bg-green-50 rounded-lg border border-green-200 p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold text-slate-900"><%= claim.schoolName %></h3>
+                                <p class="text-sm text-slate-600">Claimed by: <%= claim.claimantEmail %></p>
+                                <p class="text-xs text-slate-500">Approved: <%= new Date(claim.reviewedAt).toLocaleString() %></p>
+                            </div>
+                            <button onclick="revokeVerification('<%= claim.schoolName.replace(/'/g, "\\'") %>')" class="text-red-600 hover:text-red-800 text-sm underline">
+                                Revoke Verification
+                            </button>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+    
+    <!-- Rejected Claims -->
+    <% if (rejectedClaims.length > 0) { %>
+        <div>
+            <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                ❌ Rejected Claims
+                <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full"><%= rejectedClaims.length %></span>
+            </h2>
+            <div class="space-y-3">
+                <% rejectedClaims.forEach(claim => { %>
+                    <div class="bg-red-50 rounded-lg border border-red-200 p-4 opacity-75">
+                        <h3 class="font-semibold text-slate-900"><%= claim.schoolName %></h3>
+                        <p class="text-sm text-slate-600">Claimant: <%= claim.claimantEmail %></p>
+                        <p class="text-xs text-slate-500">Rejected: <%= new Date(claim.reviewedAt).toLocaleString() %></p>
+                        <% if (claim.adminNotes) { %>
+                            <p class="text-sm text-red-700 mt-1">Reason: <%= claim.adminNotes %></p>
+                        <% } %>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    <% } %>
+</main>
+
+<script>
+async function approveClaim(claimId, schoolName) {
+    if (!confirm(`Approve claim for ${schoolName}? The school will show a Verified badge.`)) return;
+    
+    const response = await fetch('/admin/approve-claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claimId, schoolName })
+    });
+    
+    if (response.ok) {
+        alert('✅ Claim approved! School is now verified.');
+        location.reload();
+    } else {
+        alert('❌ Error approving claim.');
+    }
+}
+
+async function rejectClaim(claimId, schoolName) {
+    const reason = prompt('Optional: Enter a reason for rejection (will be emailed to the claimant):');
+    const response = await fetch('/admin/reject-claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claimId, schoolName, rejectionReason: reason || null })
+    });
+    
+    if (response.ok) {
+        alert('❌ Claim rejected.');
+        location.reload();
+    } else {
+        alert('❌ Error rejecting claim.');
+    }
+}
+
+async function revokeVerification(schoolName) {
+    if (!confirm(`Remove verified badge from ${schoolName}?`)) return;
+    
+    const response = await fetch('/admin/revoke-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ schoolName })
+    });
+    
+    if (response.ok) {
+        alert('✅ Verification revoked.');
+        location.reload();
+    } else {
+        alert('❌ Error revoking verification.');
+    }
+}
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,165 @@
+<%- include('partials/header') %>
+
+<main class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-slate-900 mb-6">Admin Dashboard</h1>
+
+    <!-- Analytics Dashboard -->
+    <div id="analytics-container">
+        <div class="text-center text-slate-500 py-8">Loading analytics...</div>
+    </div>
+</main>
+
+<script>
+async function loadAnalytics() {
+    try {
+        const response = await fetch('/api/admin/analytics');
+        const data = await response.json();
+        
+        if (data.success) {
+            renderAnalytics(data.data);
+        } else {
+            document.getElementById('analytics-container').innerHTML = '<div class="text-center text-red-500 py-8">Error loading analytics</div>';
+        }
+    } catch (error) {
+        console.error('Error loading analytics:', error);
+        document.getElementById('analytics-container').innerHTML = '<div class="text-center text-red-500 py-8">Error loading analytics</div>';
+    }
+}
+
+function renderAnalytics(stats) {
+    const container = document.getElementById('analytics-container');
+    
+    const html = `
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- School Stats -->
+            <div class="bg-white rounded-xl shadow-sm border p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-slate-500">Total Schools</span>
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /></svg>
+                </div>
+                <div class="text-3xl font-bold text-slate-900">${stats.totalSchools.toLocaleString()}</div>
+                <p class="text-xs text-slate-400 mt-1">UK schools in database</p>
+            </div>
+            
+            <!-- School Staff -->
+            <div class="bg-white rounded-xl shadow-sm border p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-slate-500">School Staff</span>
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                </div>
+                <div class="text-3xl font-bold text-slate-900">${stats.schoolStaff.toLocaleString()}</div>
+                <p class="text-xs text-slate-400 mt-1">Registered school staff accounts</p>
+            </div>
+            
+            <!-- Total Users -->
+            <div class="bg-white rounded-xl shadow-sm border p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-slate-500">Total Users</span>
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" /></svg>
+                </div>
+                <div class="text-3xl font-bold text-slate-900">${stats.totalUsers.toLocaleString()}</div>
+                <p class="text-xs text-slate-400 mt-1">Total registered users</p>
+            </div>
+            
+            <!-- Verified Schools -->
+            <div class="bg-white rounded-xl shadow-sm border p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-slate-500">Verified Schools</span>
+                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.746 3.746 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
+                </div>
+                <div class="text-3xl font-bold text-slate-900">${stats.verifiedSchools.toLocaleString()}</div>
+                <p class="text-xs text-slate-400 mt-1">Schools with verified badge</p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Reviews -->
+            <div class="bg-white rounded-xl shadow-sm border p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-slate-500">Total Reviews</span>
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0l-4.725 2.885a.562.562 0 0 1-.84-.61l1.285-5.385a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5z" /></svg>
+                </div>
+                <div class="text-3xl font-bold text-slate-900">${stats.totalReviews.toLocaleString()}</div>
+                <p class="text-xs text-slate-400 mt-1">Total reviews submitted</p>
+            </div>
+            
+            <!-- Ads -->
+            <div class="bg-white rounded-xl shadow-sm border p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-slate-500">Active Ads</span>
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6.5M17 13l1.5 6.5M9 21h6M12 17v4" /></svg>
+                </div>
+                <div class="text-3xl font-bold text-slate-900">${stats.totalAds.toLocaleString()}</div>
+                <p class="text-xs text-slate-400 mt-1">Active noticeboard listings</p>
+            </div>
+            
+            <!-- Replies -->
+            <div class="bg-white rounded-xl shadow-sm border p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-slate-500">School Replies</span>
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 2L4 2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14l4 4V4a2 2 0 0 0-2-2z" /></svg>
+                </div>
+                <div class="text-3xl font-bold text-slate-900">${stats.totalReplies.toLocaleString()}</div>
+                <p class="text-xs text-slate-400 mt-1">Replies from verified schools</p>
+            </div>
+        </div>
+        
+        <!-- Claims Section -->
+        <div class="bg-white rounded-xl shadow-sm border p-6 mb-8">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">School Claims</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                    <div class="text-2xl font-bold text-yellow-700">${stats.claims.pending}</div>
+                    <p class="text-sm text-yellow-600">Pending</p>
+                </div>
+                <div class="text-center p-4 bg-green-50 rounded-lg">
+                    <div class="text-2xl font-bold text-green-700">${stats.claims.approved}</div>
+                    <p class="text-sm text-green-600">Approved</p>
+                </div>
+                <div class="text-center p-4 bg-red-50 rounded-lg">
+                    <div class="text-2xl font-bold text-red-700">${stats.claims.rejected}</div>
+                    <p class="text-sm text-red-600">Rejected</p>
+                </div>
+            </div>
+            <div class="mt-4 text-center">
+                <a href="/admin/claims" class="text-indigo-600 hover:underline text-sm">Review school claims →</a>
+            </div>
+        </div>
+        
+        <!-- Flagged Content Section -->
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">Flagged Content</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex justify-between items-center p-4 bg-red-50 rounded-lg">
+                    <span class="text-sm font-medium text-red-700">Flagged Reviews</span>
+                    <span class="text-xl font-bold text-red-700">${stats.flagged.reviews}</span>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-orange-50 rounded-lg">
+                    <span class="text-sm font-medium text-orange-700">Flagged Replies</span>
+                    <span class="text-xl font-bold text-orange-700">${stats.flagged.replies}</span>
+                </div>
+            </div>
+            ${(stats.flagged.reviews > 0 || stats.flagged.replies > 0) ? `<div class="mt-4 text-center"><a href="/admin/flags" class="text-indigo-600 hover:underline text-sm">Review flagged content →</a></div>` : ''}
+        </div>
+        
+        <!-- Banned Users Section -->
+        <div class="bg-white rounded-xl shadow-sm border p-6 mt-8">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">Banned Users</h2>
+            <div class="text-center">
+                <a href="/admin/banned-users" class="text-indigo-600 hover:underline text-sm">View banned users →</a>
+            </div>
+        </div>
+        
+        <div class="mt-6 text-center text-xs text-slate-400">
+            Last updated: ${new Date().toLocaleString()}
+        </div>
+    `;
+    
+    container.innerHTML = html;
+}
+
+// Load analytics when page loads
+document.addEventListener('DOMContentLoaded', loadAnalytics);
+</script>
+
+<%- include('partials/footer') %>

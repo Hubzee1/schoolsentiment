@@ -1,0 +1,222 @@
+<%- include('partials/header') %>
+
+<main class="max-w-5xl mx-auto px-4 py-3">
+    <nav class="text-xs text-slate-500 mb-3 flex space-x-2">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <a href="/dashboard" class="hover:underline">Dashboard</a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium">Edit Your Review</span>
+    </nav>
+
+    <div class="bg-[#def0ff] border border-[#bce0ff] rounded-full px-5 py-3.5 flex items-center space-x-2.5 text-sm text-[#004085] font-medium shadow-sm mb-3">
+        <span>✏️</span>
+        <p><span class="font-bold">Editing Review:</span> Your changes will be visible to everyone. Edit history is tracked.</p>
+    </div>
+
+    <form action="/update-review/<%= review.id %>" method="POST" id="reviewForm" class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-6">
+        
+        <div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-2 tracking-tight">Your Review</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+                <div class="flex flex-col space-y-1.5">
+                    <label class="text-sm font-bold text-slate-900">Select School <span class="text-rose-500">*</span></label>
+                    <input type="text" id="schoolName" name="schoolName" value="<%= review.schoolName %>" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-full text-sm" readonly disabled style="background:#f3f4f6">
+                </div>
+
+                <div class="flex flex-col space-y-1.5">
+                    <label class="text-sm font-bold text-slate-900">Would you recommend this school? <span class="text-rose-500">*</span></label>
+                    <input type="hidden" id="recommend" name="recommend" required value="<%= review.recommend %>">
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" class="recommend-option py-2.5 bg-white border border-slate-300 rounded-full text-sm font-medium hover:bg-slate-50 transition <%= (review.recommend === 'yes') ? 'active' : '' %>" data-value="yes">Yes</button>
+                        <button type="button" class="recommend-option py-2.5 bg-white border border-slate-300 rounded-full text-sm font-medium hover:bg-slate-50 transition <%= (review.recommend === 'no') ? 'active' : '' %>" data-value="no">No</button>
+                        <button type="button" class="recommend-option py-2.5 bg-white border border-slate-300 rounded-full text-sm font-medium hover:bg-slate-50 transition <%= (review.recommend === 'unsure') ? 'active' : '' %>" data-value="unsure">Unsure</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col space-y-1.5">
+                        <label class="text-sm font-bold text-slate-900">I am a <span class="text-rose-500">*</span></label>
+                        <select id="userType" name="userType" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm">
+                            <option value="parent" <%= (review.userType === 'parent') ? 'selected' : '' %>>Parent</option>
+                            <option value="student" <%= (review.userType === 'student') ? 'selected' : '' %>>Student</option>
+                            <option value="former_student" <%= (review.userType === 'former_student') ? 'selected' : '' %>>Alumni</option>
+                            <option value="staff" <%= (review.userType === 'staff') ? 'selected' : '' %>>Staff</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col space-y-1.5">
+                        <label class="text-sm font-bold text-slate-900">Year Group <span class="text-rose-500">*</span></label>
+                        <select id="yearGroup" name="yearGroup" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm">
+                            <option value="primary" <%= (review.yearGroup === 'primary') ? 'selected' : '' %>>Reception / Year 1-6</option>
+                            <option value="secondary" <%= (review.yearGroup === 'secondary') ? 'selected' : '' %>>Year 7-11 (Secondary)</option>
+                            <option value="sixth_form" <%= (review.yearGroup === 'sixth_form') ? 'selected' : '' %>>Sixth Form (Year 12-13)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-1.5">
+                    <label class="text-sm font-bold text-slate-900">Year(s) of attendance <span class="text-rose-500">*</span></label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="yearFrom" name="yearFrom" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm">
+                            <% for(let y = 2019; y <= 2026; y++) { %>
+                                <option value="<%= y %>" <%= (review.yearFrom && parseInt(review.yearFrom) === y) ? 'selected' : '' %>><%= y %></option>
+                            <% } %>
+                        </select>
+                        <select id="yearTo" name="yearTo" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm">
+                            <% for(let y = 2019; y <= 2026; y++) { %>
+                                <option value="<%= y %>" <%= (review.yearTo && parseInt(review.yearTo) === y) ? 'selected' : '' %>><%= y %></option>
+                            <% } %>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rating Breakdown -->
+        <div class="bg-[#fefbf0] border border-[#fdf2d2]/60 rounded-2xl p-4">
+            <h3 class="text-2xl font-bold text-slate-900 text-center mb-1 tracking-tight">Rating Breakdown</h3>
+            
+            <div class="grid grid-cols-6 items-center gap-3 mb-1">
+                <div class="text-sm font-bold text-slate-900"></div>
+                <div class="text-center"><img src="/images/Angry.png" class="w-12 h-12 mx-auto object-contain"></div>
+                <div class="text-center"><img src="/images/Sad.png" class="w-12 h-12 mx-auto object-contain"></div>
+                <div class="text-center"><img src="/images/Average.png" class="w-12 h-12 mx-auto object-contain"></div>
+                <div class="text-center"><img src="/images/happy.png" class="w-12 h-12 mx-auto object-contain"></div>
+                <div class="text-center"><img src="/images/Elated.png" class="w-12 h-12 mx-auto object-contain"></div>
+            </div>
+
+            <div class="space-y-2">
+                <% const categories = ['teaching', 'facilities', 'pastoral', 'extra', 'sen', 'meals']; %>
+                <% const categoryLabels = { teaching: 'Teaching Quality', facilities: 'Facilities', pastoral: 'Pastoral Care', extra: 'Extra-curriculars', sen: 'SEN Support', meals: 'School Meals' }; %>
+                <% const ratingLabels = {1:'Annoyed',2:'Disappointed',3:'Satisfied',4:'Happy',5:'Elated'}; %>
+                
+                <% categories.forEach(cat => { %>
+                    <% const currentRating = review[cat + 'Rating']; %>
+                    <div class="grid grid-cols-6 items-center gap-3">
+                        <div class="text-sm font-bold text-slate-900"><%= categoryLabels[cat] %></div>
+                        <% for(let r = 1; r <= 5; r++) { %>
+                            <button type="button" class="rating-category <%= cat %>-option py-2 text-xs font-medium rounded-full <%= (currentRating === r) ? 'active' : '' %>" data-rating="<%= r %>" data-category="<%= cat %>">
+                                <%= ratingLabels[r] %>
+                            </button>
+                        <% } %>
+                    </div>
+                    <input type="hidden" id="<%= cat %>Rating" name="<%= cat %>Rating" value="<%= currentRating || '' %>">
+                <% }); %>
+            </div>
+        </div>
+
+        <!-- Review Title with BOLD styling -->
+        <div class="flex flex-col space-y-1.5">
+            <label class="text-sm font-bold text-slate-900">Review Title (Optional)</label>
+            <input type="text" id="reviewTitle" name="reviewTitle" value="<%= review.reviewTitle || '' %>" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-full text-sm font-bold focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+        </div>
+
+        <!-- Overall School Impression -->
+        <div class="flex flex-col space-y-2">
+            <label class="text-sm font-bold text-slate-900">Overall School Impression <span class="text-rose-500">*</span></label>
+            <div class="border border-slate-200 bg-slate-50 rounded-t-xl p-2 flex space-x-2">
+                <button type="button" id="boldBtn" class="px-3 py-1 rounded hover:bg-slate-200 text-sm font-bold">B</button>
+                <button type="button" id="italicBtn" class="px-3 py-1 rounded hover:bg-slate-200 text-sm italic">I</button>
+            </div>
+            <div id="reviewContent" contenteditable="true" class="w-full px-4 py-3 border border-t-0 border-slate-200 rounded-b-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 min-h-[160px] bg-white" style="line-height: 1.6;"><%= review.reviewText %></div>
+            <input type="hidden" id="reviewText" name="reviewText" required>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700">
+            ⚠️ Editing this review will update it publicly. Your edit history will be visible.
+        </div>
+
+        <div class="flex space-x-3">
+            <button type="submit" class="bg-[#34535c] text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-[#284047] transition">Save Changes</button>
+            <a href="/dashboard" class="bg-[#717b85] text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-[#5a626a] transition">Cancel</a>
+        </div>
+    </form>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const recommendOptions = document.querySelectorAll('.recommend-option');
+    const recommendInput = document.getElementById('recommend');
+    recommendOptions.forEach(opt => {
+        opt.addEventListener('click', function() {
+            recommendOptions.forEach(o => o.classList.remove('active'));
+            this.classList.add('active');
+            recommendInput.value = this.getAttribute('data-value');
+        });
+    });
+
+    const categories = ['teaching', 'facilities', 'pastoral', 'extra', 'sen', 'meals'];
+    categories.forEach(cat => {
+        const buttons = document.querySelectorAll(`.${cat}-option`);
+        const hiddenInput = document.getElementById(`${cat}Rating`);
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                buttons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                hiddenInput.value = this.getAttribute('data-rating');
+            });
+        });
+    });
+
+    const yearFrom = document.getElementById('yearFrom');
+    const yearTo = document.getElementById('yearTo');
+    function validateYears() {
+        if (yearFrom.value && yearTo.value && parseInt(yearTo.value) < parseInt(yearFrom.value)) {
+            alert('To year cannot be before From year');
+            return false;
+        }
+        return true;
+    }
+    yearTo.addEventListener('change', validateYears);
+
+    const reviewContent = document.getElementById('reviewContent');
+    const reviewTextHidden = document.getElementById('reviewText');
+    const reviewForm = document.getElementById('reviewForm');
+    const boldBtn = document.getElementById('boldBtn');
+    const italicBtn = document.getElementById('italicBtn');
+    
+    if (boldBtn) {
+        boldBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            reviewContent.focus();
+            document.execCommand('bold', false, null);
+        });
+    }
+    if (italicBtn) {
+        italicBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            reviewContent.focus();
+            document.execCommand('italic', false, null);
+        });
+    }
+
+    reviewForm.addEventListener('submit', function(e) {
+        let html = reviewContent.innerHTML;
+        html = html.replace(/<strong>(.*?)<\/strong>/g, '**$1**');
+        html = html.replace(/<em>(.*?)<\/em>/g, '*$1*');
+        html = html.replace(/<b>(.*?)<\/b>/g, '**$1**');
+        html = html.replace(/<i>(.*?)<\/i>/g, '*$1*');
+        html = html.replace(/<div>/g, '\n');
+        html = html.replace(/<\/div>/g, '');
+        html = html.replace(/<br>/g, '\n');
+        html = html.replace(/<[^>]*>/g, '');
+        html = html.replace(/&nbsp;/g, ' ');
+        reviewTextHidden.value = html.trim();
+    });
+});
+</script>
+
+<style>
+.rating-category { transition: all 0.2s ease; cursor: pointer; }
+.rating-category[data-rating="1"] { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
+.rating-category[data-rating="2"] { background: #ffedd5; border-color: #fed7aa; color: #9a3412; }
+.rating-category[data-rating="3"] { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+.rating-category[data-rating="4"] { background: #d1fae5; border-color: #a7f3d0; color: #065f46; }
+.rating-category[data-rating="5"] { background: #ccfbf1; border-color: #99f6e4; color: #0f766e; }
+.rating-category.active { transform: scale(1.02); box-shadow: 0 0 0 2px currentColor; }
+.recommend-option.active { background: #e8f4fd !important; border-color: #2A7CDE !important; }
+#reviewContent:empty:before { content: "Share your honest insights..."; color: #94a3b8; }
+</style>
+
+<%- include('partials/footer') %>

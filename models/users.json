@@ -1,0 +1,69 @@
+[
+  {
+    "id": "6918ca32-35c2-4026-9a7b-f82bf03b8b16",
+    "email": "test@example.com",
+    "createdAt": "2026-05-30T16:49:13.848Z",
+    "reviewIds": [],
+    "savedSchools": [],
+    "followedSchools": []
+  },
+  {
+    "id": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "email": "hubzy@hotmail.com",
+    "createdAt": "2026-05-30T16:51:21.621Z",
+    "reviewIds": [
+      "1780160490843",
+      "1780516376155"
+    ],
+    "savedSchools": [],
+    "followedSchools": [],
+    "savedReviewIds": [
+      "1780162724083",
+      "1780005055971",
+      "1780005055973",
+      "1779663128723",
+      "1779663128729",
+      "1780250303582"
+    ]
+  },
+  {
+    "id": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "email": "test@hotmail.com",
+    "createdAt": "2026-06-01T13:46:35.097Z",
+    "reviewIds": [],
+    "savedSchools": [],
+    "followedSchools": []
+  },
+  {
+    "id": "ae89c551-1546-4cc4-9b64-d1b462e83669",
+    "email": "1@hotmail.com",
+    "createdAt": "2026-06-01T21:58:31.695Z",
+    "reviewIds": [
+      "1780650288449",
+      "1780681467814",
+      "1780681944027"
+    ],
+    "savedSchools": [],
+    "followedSchools": [],
+    "savedReviewIds": [
+      "1780250406476",
+      "1780250303582"
+    ]
+  },
+  {
+    "id": "6e644664-1182-4dce-810f-7538e57f3814",
+    "email": "2@hotmail.com",
+    "createdAt": "2026-06-02T15:12:04.723Z",
+    "reviewIds": [],
+    "savedSchools": [],
+    "followedSchools": []
+  },
+  {
+    "id": "ba95e491-caf8-4602-badd-8abf949864c5",
+    "email": "hubzee@proton.me",
+    "createdAt": "2026-06-05T19:38:46.633Z",
+    "reviewIds": [],
+    "savedSchools": [],
+    "followedSchools": []
+  }
+]

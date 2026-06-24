@@ -1,0 +1,34 @@
+const fs = require('fs');
+const { exec } = require('child_process');
+const util = require('util');
+const execPromise = util.promisify(exec);
+
+async function stripExifFromFile(filePath) {
+    try {
+        console.log('📸 EXIF STRIP: Starting for', filePath);
+        
+        if (!fs.existsSync(filePath)) {
+            console.log('❌ File not found:', filePath);
+            return false;
+        }
+        
+        // Use exiftool to remove ALL metadata
+        const command = `exiftool -all= -overwrite_original "${filePath}"`;
+        console.log('📸 Running exiftool command');
+        
+        const { stdout, stderr } = await execPromise(command);
+        
+        if (stderr && !stderr.includes('nothing to do')) {
+            console.log('⚠️ exiftool stderr:', stderr);
+        }
+        
+        console.log('✅ EXIF stripped from:', filePath);
+        return true;
+        
+    } catch (error) {
+        console.error('❌ EXIF stripping error:', error.message);
+        return false;
+    }
+}
+
+module.exports = { stripExifFromFile };

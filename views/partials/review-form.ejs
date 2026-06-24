@@ -1,0 +1,144 @@
+<form action="<%= formAction %>" method="POST" id="reviewForm" class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-6">
+    
+    <div>
+        <h2 class="text-2xl font-bold text-slate-900 mb-2 tracking-tight">Your Review</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+            <div class="flex flex-col space-y-1.5">
+                <label class="text-sm font-bold text-slate-900">Select School <span class="text-rose-500">*</span></label>
+                <div class="relative">
+                    <input type="text" id="schoolName" name="schoolName" value="<%= review ? review.schoolName : '' %>" placeholder="Search for a UK school..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition" required autocomplete="off">
+                    <div id="autocompleteResults" class="hidden absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-full shadow-lg z-50 max-h-60 overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <div class="flex flex-col space-y-1.5">
+                <label class="text-sm font-bold text-slate-900">Would you recommend this school? <span class="text-rose-500">*</span></label>
+                <input type="hidden" id="recommend" name="recommend" required value="<%= review ? review.recommend : '' %>">
+                <div class="grid grid-cols-3 gap-2">
+                    <button type="button" class="recommend-option py-2.5 bg-white border border-slate-300 rounded-full text-sm font-medium hover:bg-slate-50 transition <%= (review && review.recommend === 'yes') ? 'active' : '' %>" data-value="yes">Yes</button>
+                    <button type="button" class="recommend-option py-2.5 bg-white border border-slate-300 rounded-full text-sm font-medium hover:bg-slate-50 transition <%= (review && review.recommend === 'no') ? 'active' : '' %>" data-value="no">No</button>
+                    <button type="button" class="recommend-option py-2.5 bg-white border border-slate-300 rounded-full text-sm font-medium hover:bg-slate-50 transition <%= (review && review.recommend === 'unsure') ? 'active' : '' %>" data-value="unsure">Unsure</button>
+                </div>
+                <div id="recommendError" class="text-rose-500 text-xs hidden">Please select whether you would recommend this school</div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col space-y-1.5">
+                    <label class="text-sm font-bold text-slate-900">I am a <span class="text-rose-500">*</span></label>
+                    <select id="userType" name="userType" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                        <option value="">Select...</option>
+                        <option value="parent" <%= (review && review.userType === 'parent') ? 'selected' : '' %>>Parent</option>
+                        <option value="student" <%= (review && review.userType === 'student') ? 'selected' : '' %>>Student</option>
+                        <option value="former_student" <%= (review && review.userType === 'former_student') ? 'selected' : '' %>>Alumni</option>
+                        <option value="staff" <%= (review && review.userType === 'staff') ? 'selected' : '' %>>Staff</option>
+                    </select>
+                </div>
+                <div class="flex flex-col space-y-1.5">
+                    <label class="text-sm font-bold text-slate-900">Child's Year Group <span class="text-rose-500">*</span></label>
+                    <select id="yearGroup" name="yearGroup" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                        <option value="" disabled <%= !review ? 'selected' : '' %>>Required</option>
+                        <option value="primary" <%= (review && review.yearGroup === 'primary') ? 'selected' : '' %>>Reception / Year 1-6</option>
+                        <option value="secondary" <%= (review && review.yearGroup === 'secondary') ? 'selected' : '' %>>Year 7-11 (Secondary)</option>
+                        <option value="sixth_form" <%= (review && review.yearGroup === 'sixth_form') ? 'selected' : '' %>>Sixth Form (Year 12-13)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-col space-y-1.5">
+                <label class="text-sm font-bold text-slate-900">Year(s) of attendance <span class="text-rose-500">*</span></label>
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="yearFrom" name="yearFrom" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                        <option value="" disabled <%= !review ? 'selected' : '' %>>From</option>
+                        <% const years = [2019,2020,2021,2022,2023,2024,2025,2026]; %>
+                        <% years.forEach(y => { %>
+                            <option value="<%= y %>" <%= (review && review.yearFrom && parseInt(review.yearFrom) === y) ? 'selected' : '' %>><%= y %></option>
+                        <% }); %>
+                    </select>
+                    <select id="yearTo" name="yearTo" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                        <option value="" disabled <%= !review ? 'selected' : '' %>>To</option>
+                        <% years.forEach(y => { %>
+                            <option value="<%= y %>" <%= (review && review.yearTo && parseInt(review.yearTo) === y) ? 'selected' : '' %>><%= y %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div id="yearError" class="text-rose-500 text-xs hidden">To year cannot be before From year</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Breakdown -->
+    <div class="bg-[#fefbf0] border border-[#fdf2d2]/60 rounded-2xl p-4">
+        <h3 class="text-2xl font-bold text-slate-900 text-center mb-1 tracking-tight">Rating Breakdown</h3>
+        
+        <div class="grid grid-cols-6 items-center gap-3 mb-1">
+            <div class="text-sm font-bold text-slate-900"></div>
+            <div class="text-center"><img src="/images/Angry.png" class="w-12 h-12 mx-auto object-contain"></div>
+            <div class="text-center"><img src="/images/Sad.png" class="w-12 h-12 mx-auto object-contain"></div>
+            <div class="text-center"><img src="/images/Average.png" class="w-12 h-12 mx-auto object-contain"></div>
+            <div class="text-center"><img src="/images/happy.png" class="w-12 h-12 mx-auto object-contain"></div>
+            <div class="text-center"><img src="/images/Elated.png" class="w-12 h-12 mx-auto object-contain"></div>
+        </div>
+
+        <div class="space-y-2">
+            <% const categories = ['teaching', 'facilities', 'pastoral', 'extra', 'sen', 'meals']; %>
+            <% const categoryLabels = {
+                teaching: 'Teaching Quality',
+                facilities: 'Facilities',
+                pastoral: 'Pastoral Care',
+                extra: 'Extra-curriculars',
+                sen: 'SEN Support',
+                meals: 'School Meals'
+            }; %>
+            
+            <% categories.forEach(cat => { %>
+                <div class="grid grid-cols-6 items-center gap-3">
+                    <div class="flex items-center space-x-1">
+                        <div class="text-sm font-bold text-slate-900"><%= categoryLabels[cat] %></div>
+                    </div>
+                    <% for(let rating = 1; rating <= 5; rating++) { %>
+                        <% const ratingLabels = {1:'Annoyed',2:'Disappointed',3:'Satisfied',4:'Happy',5:'Elated'}; %>
+                        <button type="button" class="rating-category <%= cat %>-option py-2 text-xs font-medium rounded-full <%= (review && review[cat + 'Rating'] === rating) ? 'active' : '' %>" data-rating="<%= rating %>" data-category="<%= cat %>">
+                            <%= ratingLabels[rating] %>
+                        </button>
+                    <% } %>
+                </div>
+                <input type="hidden" id="<%= cat %>Rating" name="<%= cat %>Rating" value="<%= review ? review[cat + 'Rating'] : '' %>" required>
+            <% }); %>
+        </div>
+    </div>
+
+    <!-- Review Title -->
+    <div class="flex flex-col space-y-1.5">
+        <label class="text-sm font-bold text-slate-900">Review Title (Optional)</label>
+        <input type="text" id="reviewTitle" name="reviewTitle" value="<%= review ? review.reviewTitle : '' %>" placeholder="Give your review a descriptive title..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-full text-sm font-bold focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+    </div>
+
+    <!-- Overall School Impression -->
+    <div class="flex flex-col space-y-2">
+        <div class="flex items-center space-x-2">
+            <label class="text-sm font-bold text-slate-900">Overall School Impression <span class="text-rose-500">*</span></label>
+        </div>
+        <div class="border border-slate-200 bg-slate-50 rounded-t-xl p-2 flex items-center space-x-2">
+            <button type="button" id="boldBtn" class="px-3 py-1 rounded hover:bg-slate-200 text-sm font-bold transition">B</button>
+            <button type="button" id="italicBtn" class="px-3 py-1 rounded hover:bg-slate-200 text-xs italic transition">I</button>
+        </div>
+        <div id="reviewContent" contenteditable="true" class="w-full px-4 py-3 border border-t-0 border-slate-200 rounded-b-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition leading-relaxed min-h-[160px] bg-white overflow-y-auto" style="line-height: 1.6;"><%= review ? review.reviewText : '' %></div>
+        <input type="hidden" id="reviewText" name="reviewText" required>
+        <div id="reviewError" class="text-rose-500 text-xs hidden">Please share your overall impression</div>
+    </div>
+
+    <% if (isEditing) { %>
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700">
+            ⚠️ Editing this review will update it publicly. Your edit history will be visible.
+        </div>
+    <% } %>
+
+    <div class="flex items-center space-x-3 pt-0">
+        <button type="submit" class="bg-[#34535c] text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-[#284047] transition shadow-sm">
+            <%= isEditing ? 'Save Changes' : 'Submit Your Review' %>
+        </button>
+        <a href="<%= isEditing ? '/dashboard' : '/' %>" class="bg-[#717b85] text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-[#5a626a] transition shadow-sm inline-block">Cancel</a>
+    </div>
+
+</form>

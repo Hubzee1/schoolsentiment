@@ -1,0 +1,438 @@
+<%- include('partials/header') %>
+<% 
+function capitalizeCondition(condition) {
+    if (!condition) return '';
+    return condition.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join('-');
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffHours = Math.floor((now - date) / (1000 * 60 * 60));
+    if (diffHours < 1) return 'just now';
+    if (diffHours < 24) return diffHours + ' hours ago';
+    if (diffHours < 48) return 'yesterday';
+    return Math.floor(diffHours / 24) + ' days ago';
+}
+
+let allImages = [];
+if (ad.images && ad.images.length > 0) {
+    allImages = ad.images.map(img => img.imageUrl);
+} else if (ad.imageUrls && ad.imageUrls.length > 0) {
+    allImages = ad.imageUrls;
+} else if (ad.imageUrl) {
+    allImages = [ad.imageUrl];
+}
+%>
+
+<div class="bg-[#fefbf0] text-slate-900 antialiased min-h-screen relative overflow-x-hidden">
+  
+  <!-- FAINT BACKGROUND FACES -->
+  <div class="absolute inset-0 opacity-[0.008] pointer-events-none select-none z-0">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full min-h-screen" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid slice">
+      <g stroke="#000" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <g transform="translate(650, 180)"><circle cx="90" cy="90" r="80"/><path d="M60 75 Q75 60 90 75 M100 75 Q115 60 130 75" stroke-width="14"/><path d="M50 105 Q90 150 130 105 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(180, 80)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(920, 90)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 130 102 112"/></g>
+        <g transform="translate(100, 380)"><circle cx="60" cy="60" r="54"/><circle cx="43" cy="52" r="5" fill="#000"/><circle cx="77" cy="52" r="5" fill="#000"/><path d="M42 82 Q60 98 78 82"/></g>
+        <g transform="translate(480, 420)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 132 102 112"/></g>
+        <g transform="translate(880, 440)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(250, 680)"><circle cx="110" cy="110" r="98"/><path d="M70 95 Q90 75 110 95 M120 95 Q140 75 160 95" stroke-width="16"/><path d="M55 135 Q110 195 165 135 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(710, 700)"><circle cx="60" cy="60" r="54"/><circle cx="43" cy="52" r="5" fill="#000"/><circle cx="77" cy="52" r="5" fill="#000"/><path d="M42 82 Q60 98 78 82"/></g>
+        <g transform="translate(940, 740)"><circle cx="85" cy="85" r="76"/><path d="M55 75 Q70 60 85 75 M95 75 Q110 60 125 75" stroke-width="12"/><path d="M48 110 Q85 155 122 110 Z" fill="#000" opacity="0.15"/></g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="relative z-10">
+    <main class="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+            
+            <!-- Image Carousel Section -->
+            <div class="relative w-full bg-slate-100">
+                <a href="/school/<%= encodeURIComponent(ad.schoolName) %>/noticeboard" class="absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-slate-600 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-3 h-3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                    </svg>
+                    <span class="hidden sm:inline">School Noticeboard</span>
+                </a>
+                
+                <% if (allImages.length > 0) { %>
+                    <div class="relative" id="carouselContainer">
+                        <div class="flex items-center justify-center p-4 sm:p-8 min-h-[250px] sm:min-h-[300px]">
+                            <img id="carouselMainImage" src="<%= allImages[0] %>" alt="<%= ad.title %>" class="max-w-full max-h-64 sm:max-h-96 object-contain rounded-lg cursor-pointer" onclick="window.open(this.src, 'image-viewer', 'width=1200,height=800,resizable=yes'); return false;">
+                        </div>
+                        
+                        <button id="carouselPrev" class="absolute left-1 sm:left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1.5 sm:p-2 shadow-md transition-all z-10 <%= allImages.length <= 1 ? 'hidden' : '' %>">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 sm:w-6 sm:h-6 text-slate-700">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                            </svg>
+                        </button>
+                        <button id="carouselNext" class="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1.5 sm:p-2 shadow-md transition-all z-10 <%= allImages.length <= 1 ? 'hidden' : '' %>">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 sm:w-6 sm:h-6 text-slate-700">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="flex justify-center gap-2 mt-2 pb-2" id="thumbnailContainer">
+                        <% allImages.forEach((img, idx) => { %>
+                            <div class="w-12 h-12 rounded-md overflow-hidden cursor-pointer border-2 <%= idx === 0 ? 'border-indigo-500' : 'border-transparent' %> thumbnail" data-index="<%= idx %>">
+                                <img src="<%= img %>" class="w-full h-full object-cover">
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="flex items-center justify-center p-4 sm:p-8 min-h-[200px] bg-slate-100">
+                        <div class="text-center text-slate-400">
+                            <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 012.682-1.386L11.25 12.75m4.5-7.5l5.25 5.25m0 0l-5.25 5.25m5.25-5.25H2.25" />
+                            </svg>
+                            <p class="text-sm">No image available</p>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+            
+            <!-- Content Section -->
+            <div class="p-4 sm:p-6 md:p-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start gap-3 mb-4">
+                    <div>
+                        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 mb-2"><%= ad.title %><% if (ad.status === "sold") { %> <span class="bg-green-100 text-green-800 text-sm font-extrabold px-3 py-1 rounded-full ml-3 align-middle">SOLD</span><% } %></h1>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <% if (ad.isWanted) { %>
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">WANTED</span>
+                            <% } %>
+                            <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold"><%= ad.category %></span>
+                            <span class="text-xs text-slate-500">Ref: <%= ad.publicId %></span>
+                        </div>
+                    </div>
+                    <div class="text-left sm:text-right">
+                        <div class="text-xl sm:text-2xl font-extrabold <%= ad.isFree ? 'text-emerald-600' : 'text-slate-900' %>">
+                            <%= ad.isFree ? 'FREE' : '£' + ad.price %>
+                        </div>
+                        <div class="flex gap-2 mt-1">
+                            <button id="saveAdBtn" class="save-ad-btn text-gray-400 hover:text-red-500 transition" data-ad-id="<%= ad.id %>" data-saved="false" style="font-size: 20px;">🤍</button>
+                            <button id="flagAdBtn" class="flag-ad-btn text-gray-400 hover:text-red-500 transition" data-ad-id="<%= ad.id %>" style="font-size: 20px;">
+                                <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.71l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5" />
+                                </svg>
+                            </button>
+                        </div>
+                        <% if (ad.status === "sold" && ad.soldAt) { const soldDate = new Date(ad.soldAt).toLocaleDateString("en-GB"); const soldTime = new Date(ad.soldAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }); %>
+                        <div class="text-xs text-green-600 font-semibold mt-1">Sold on <%= soldDate %> at <%= soldTime %></div>
+                        <% } %>
+                        <div class="text-xs text-slate-400 mt-1">Posted <%= formatDate(ad.createdAt) %></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-5 p-3 bg-slate-50 rounded-xl">
+                    <div>
+                        <div class="text-[10px] text-slate-400 uppercase font-bold">School</div>
+                        <div class="text-xs sm:text-sm font-semibold text-slate-800"><%= ad.schoolName %></div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-slate-400 uppercase font-bold">Condition</div>
+                        <div class="text-xs sm:text-sm font-semibold text-slate-800"><%= capitalizeCondition(ad.condition) %></div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-2">Description</h2>
+                    <div class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap"><%= ad.description %></div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-5">
+                    <p class="text-xs text-amber-700 font-medium mb-1">⚠️ Safety Notice</p>
+                    <p class="text-[11px] text-amber-600">Arrange collection in a public place. School Sentiment is not involved in any transactions.</p>
+                </div>
+
+                <div class="border-t border-slate-200 pt-5">
+                    <% if (currentUser) { %>
+                        <% if (currentUser.id === ad.userId) { %>
+                            <div class="bg-slate-50 rounded-xl p-4 text-center">
+                                <p class="text-sm text-slate-600 mb-3">This is your ad</p>
+                                <div class="flex flex-wrap gap-2 justify-center">
+                                    <a href="/edit-ad/<%= ad.id %>" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">Edit Ad</a>
+                                    <a href="/messages?ad=<%= ad.id %>" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Messages</a>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <div class="bg-slate-50 rounded-xl p-4">
+                                <h3 class="font-bold text-slate-900 mb-2 text-sm">Contact Seller</h3>
+                                <form id="messageForm" class="space-y-3">
+                                    <textarea id="messageText" rows="3" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Hi, I'm interested in your ad..."></textarea>
+                                    <button type="submit" class="w-full bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-indigo-700">Send Message</button>
+                                </form>
+                                <div id="messageSuccess" class="hidden mt-3 bg-green-100 text-green-700 p-2 rounded-lg text-xs text-center"></div>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <div class="bg-slate-50 rounded-xl p-5 text-center">
+                            <p class="text-slate-600 mb-2 text-sm">Sign in to contact the seller</p>
+                            <a href="/signin" class="inline-block bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700">Sign In</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </main>
+  </div>
+</div>
+
+<!-- Ad Flag Modal -->
+<div id="adFlagModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" onclick="if(event.target===this) closeAdFlagModal()">
+    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-bold mb-2">Report Ad</h3>
+        <p class="text-sm text-slate-500 mb-4" id="adFlagInfo"></p>
+        <form id="adFlagForm">
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-slate-700 mb-2">Reason for reporting *</label>
+                <select id="adFlagReason" required class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+                    <option value="">Select a reason</option>
+                    <option value="spam">Spam or advertising</option>
+                    <option value="inappropriate">Inappropriate content</option>
+                    <option value="scam">Scam or misleading</option>
+                    <option value="prohibited">Prohibited item (alcohol, weapons, etc.)</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-slate-700 mb-2">Additional details (optional)</label>
+                <textarea id="adFlagDetails" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg" placeholder="Please provide any additional information..."></textarea>
+            </div>
+            
+            <div class="mt-4 pt-3 border-t">
+                <p class="text-xs text-slate-400">
+                    Reports are reviewed by our moderation team. 
+                    False or abusive reporting may result in account suspension.
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Submit Report</button>
+                <button type="button" onclick="closeAdFlagModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// ========== CAROUSEL LOGIC ==========
+(function() {
+    var images = <%- JSON.stringify(allImages) %>;
+    var currentIndex = 0;
+    var mainImage = document.getElementById('carouselMainImage');
+    var prevBtn = document.getElementById('carouselPrev');
+    var nextBtn = document.getElementById('carouselNext');
+    var thumbnails = document.querySelectorAll('.thumbnail');
+
+    function updateCarousel(index) {
+        if (!mainImage || images.length === 0) return;
+        currentIndex = (index + images.length) % images.length;
+        mainImage.src = images[currentIndex];
+        thumbnails.forEach(function(thumb, i) {
+            if (i === currentIndex) {
+                thumb.classList.add('border-indigo-500');
+                thumb.classList.remove('border-transparent');
+            } else {
+                thumb.classList.remove('border-indigo-500');
+                thumb.classList.add('border-transparent');
+            }
+        });
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            updateCarousel(currentIndex - 1);
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            updateCarousel(currentIndex + 1);
+        });
+    }
+
+    thumbnails.forEach(function(thumb) {
+        thumb.addEventListener('click', function() {
+            var index = parseInt(this.dataset.index);
+            updateCarousel(index);
+        });
+    });
+
+    // Keyboard support
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft' && images.length > 1) {
+            e.preventDefault();
+            updateCarousel(currentIndex - 1);
+        } else if (e.key === 'ArrowRight' && images.length > 1) {
+            e.preventDefault();
+            updateCarousel(currentIndex + 1);
+        }
+    });
+})();
+
+// ========== SAVE AD ==========
+const btn = document.getElementById('saveAdBtn');
+if (btn) {
+    fetch('/api/saved-ads')
+        .then(res => res.json())
+        .then(savedIds => {
+            if (savedIds.includes(btn.getAttribute('data-ad-id'))) {
+                btn.setAttribute('data-saved', 'true');
+                btn.innerHTML = '❤️';
+                btn.style.color = 'red';
+            }
+        })
+        .catch(err => console.error(err));
+    
+    btn.onclick = async function(e) {
+        e.preventDefault();
+        const adId = this.getAttribute('data-ad-id');
+        const isSaved = this.getAttribute('data-saved') === 'true';
+        const url = isSaved ? '/unsave-ad/' + adId : '/save-ad/' + adId;
+        
+        try {
+            const response = await fetch(url, { method: 'POST' });
+            if (response.ok) {
+                if (isSaved) {
+                    this.setAttribute('data-saved', 'false');
+                    this.innerHTML = '🤍';
+                    this.style.color = 'gray';
+                } else {
+                    this.setAttribute('data-saved', 'true');
+                    this.innerHTML = '❤️';
+                    this.style.color = 'red';
+                }
+            } else if (response.status === 401) {
+                window.location.href = '/signin?message=Please sign in to save ads';
+            }
+        } catch(err) { console.error(err); }
+    };
+}
+
+// ========== MESSAGE FORM ==========
+const messageForm = document.getElementById('messageForm');
+if (messageForm) {
+    messageForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const messageText = document.getElementById('messageText');
+        const message = messageText.value.trim();
+        
+        if (!message) {
+            alert('Please enter a message');
+            return;
+        }
+        
+        const submitBtn = messageForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Sending...';
+        submitBtn.disabled = true;
+        
+        try {
+            const response = await fetch(`/message-about-ad/<%= ad.id %>`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                messageText.value = '';
+                const successDiv = document.getElementById('messageSuccess');
+                if (successDiv) {
+                    successDiv.textContent = '✅ Message sent successfully! The seller will reply soon.';
+                    successDiv.classList.remove('hidden');
+                    setTimeout(() => {
+                        successDiv.classList.add('hidden');
+                    }, 5000);
+                }
+            } else {
+                alert(data.error || 'Failed to send message. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+// ========== AD FLAG MODAL ==========
+let currentAdId = null;
+
+function openAdFlagModal(adId, adTitle) {
+    currentAdId = adId;
+    document.getElementById('adFlagInfo').innerHTML = 'You are reporting: <strong>' + adTitle + '</strong>';
+    document.getElementById('adFlagModal').classList.remove('hidden');
+    document.getElementById('adFlagModal').style.display = 'flex';
+}
+
+function closeAdFlagModal() {
+    document.getElementById('adFlagModal').classList.add('hidden');
+    document.getElementById('adFlagModal').style.display = 'none';
+    document.getElementById('adFlagForm').reset();
+    currentAdId = null;
+}
+
+const flagBtn = document.getElementById('flagAdBtn');
+if (flagBtn) {
+    flagBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const adId = this.getAttribute('data-ad-id');
+        const adTitleElement = document.querySelector('h1');
+        const adTitle = adTitleElement ? adTitleElement.innerText : 'this ad';
+        openAdFlagModal(adId, adTitle);
+    });
+}
+
+const adFlagForm = document.getElementById('adFlagForm');
+if (adFlagForm) {
+    adFlagForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const reason = document.getElementById('adFlagReason').value;
+        const details = document.getElementById('adFlagDetails').value;
+        
+        if (!reason) {
+            alert('Please select a reason');
+            return;
+        }
+        
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Submitting...';
+        submitBtn.disabled = true;
+        
+        try {
+            const response = await fetch('/api/flag-ad/' + currentAdId, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: reason, details: details })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                alert('✅ Ad flagged for review. Thank you for helping keep our community safe.');
+                closeAdFlagModal();
+            } else {
+                alert(data.error || 'Failed to flag ad. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+}
+</script>
+
+<%- include('partials/footer') %>

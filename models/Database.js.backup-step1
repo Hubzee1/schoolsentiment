@@ -1,0 +1,405 @@
+const Database = require('better-sqlite3');
+const path = require('path');
+const crypto = require('crypto');
+
+const db = new Database(path.join(__dirname, '..', 'database.sqlite'));
+
+// Helper to parse JSON fields
+function parseJSONField(value) {
+    if (!value) return [];
+    try {
+        return JSON.parse(value);
+    } catch {
+        return [];
+    }
+}
+
+// User functions
+function getUsers() {
+    return db.prepare("SELECT * FROM users").all();
+}
+
+function findOrCreateUserByEmail(email, termsAgreedAt = null) {
+    let user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+    if (!user) {
+        const id = crypto.randomUUID();
+        const agreedAt = termsAgreedAt || new Date().toISOString();
+        db.prepare(`
+            INSERT INTO users (id, email, createdAt, reviewIds, savedSchools, followedSchools, savedReviewIds, termsAgreedAt)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(id, email, new Date().toISOString(), '[]', '[]', '[]', '[]', agreedAt);
+        user = db.prepare("SELECT * FROM users WHERE id = ?").get(id);
+    }
+    return user;
+}
+
+function getUserById(userId) {
+    return db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
+}
+
+function addReviewToUser(userId, reviewId) {
+    const user = getUserById(userId);
+    if (user) {
+        const reviewIds = parseJSONField(user.reviewIds);
+        if (!reviewIds.includes(reviewId)) {
+            reviewIds.push(reviewId);
+            db.prepare("UPDATE users SET reviewIds = ? WHERE id = ?").run(JSON.stringify(reviewIds), userId);
+        }
+    }
+}
+
+function removeReviewFromUser(userId, reviewId) {
+    const user = getUserById(userId);
+    if (user) {
+        const reviewIds = parseJSONField(user.reviewIds).filter(id => id !== reviewId);
+        db.prepare("UPDATE users SET reviewIds = ? WHERE id = ?").run(JSON.stringify(reviewIds), userId);
+    }
+}
+
+function addSavedSchool(userId, schoolName) {
+    const user = getUserById(userId);
+    if (user) {
+        let savedSchools = parseJSONField(user.savedSchools);
+        if (!savedSchools.includes(schoolName)) {
+            savedSchools.push(schoolName);
+            db.prepare("UPDATE users SET savedSchools = ? WHERE id = ?").run(JSON.stringify(savedSchools), userId);
+        }
+    }
+}
+
+function removeSavedSchool(userId, schoolName) {
+    const user = getUserById(userId);
+    if (user) {
+        const savedSchools = parseJSONField(user.savedSchools).filter(s => s !== schoolName);
+        db.prepare("UPDATE users SET savedSchools = ? WHERE id = ?").run(JSON.stringify(savedSchools), userId);
+    }
+}
+
+function addSavedReview(userId, reviewId) {
+    const user = getUserById(userId);
+    if (user) {
+        let savedReviewIds = parseJSONField(user.savedReviewIds);
+        if (!savedReviewIds.includes(reviewId.toString())) {
+            savedReviewIds.push(reviewId.toString());
+            db.prepare("UPDATE users SET savedReviewIds = ? WHERE id = ?").run(JSON.stringify(savedReviewIds), userId);
+        }
+    }
+}
+
+function removeSavedReview(userId, reviewId) {
+    const user = getUserById(userId);
+    if (user) {
+        const savedReviewIds = parseJSONField(user.savedReviewIds).filter(id => id !== reviewId.toString());
+        db.prepare("UPDATE users SET savedReviewIds = ? WHERE id = ?").run(JSON.stringify(savedReviewIds), userId);
+    }
+}
+
+function getSavedReviews(userId) {
+    const user = getUserById(userId);
+    return user ? parseJSONField(user.savedReviewIds) : [];
+}
+
+// Review functions
+function getReviews() {
+    return db.prepare("SELECT * FROM reviews WHERE (hidden = 0 OR hidden IS NULL) ORDER BY createdAt DESC").all();
+}
+
+function getReviewById(id) {
+    return db.prepare("SELECT * FROM reviews WHERE id = ?").get(id);
+}
+
+function saveReview(review) {
+    const id = Date.now().toString();
+    db.prepare(`
+        INSERT INTO reviews (
+            id, schoolName, userType, rating, reviewText, reviewTitle, recommend,
+            yearFrom, yearTo, yearGroup, teachingRating, facilitiesRating, pastoralRating,
+            extraRating, senRating, mealsRating, isAnonymous, userId, createdAt,
+            editHistory, lastEditedAt
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+        id,
+        review.schoolName,
+        review.userType || null,
+        review.rating || null,
+        review.reviewText || null,
+        review.reviewTitle || null,
+        review.recommend || null,
+        review.yearFrom || null,
+        review.yearTo || null,
+        review.yearGroup || null,
+        review.teachingRating || null,
+        review.facilitiesRating || null,
+        review.pastoralRating || null,
+        review.extraRating || null,
+        review.senRating || null,
+        review.mealsRating || null,
+        review.isAnonymous ? 1 : 0,
+        review.userId || null,
+        new Date().toISOString(),
+        '[]',
+        null
+    );
+    return getReviewById(id);
+}
+
+function updateReview(reviewId, updatedData) {
+    const review = getReviewById(reviewId);
+    if (!review) return null;
+    
+    const editHistory = parseJSONField(review.editHistory);
+    editHistory.push({
+        text: review.reviewText,
+        rating: review.rating,
+        editedAt: new Date().toISOString()
+    });
+    
+    db.prepare(`
+        UPDATE reviews SET
+            reviewText = ?, reviewTitle = ?, rating = ?,
+            teachingRating = ?, facilitiesRating = ?, pastoralRating = ?,
+            extraRating = ?, senRating = ?, mealsRating = ?,
+            recommend = ?, yearFrom = ?, yearTo = ?, yearGroup = ?,
+            userType = ?, editHistory = ?, lastEditedAt = ?
+        WHERE id = ?
+    `).run(
+        updatedData.reviewText || review.reviewText,
+        updatedData.reviewTitle || review.reviewTitle,
+        updatedData.rating || review.rating,
+        updatedData.teachingRating || review.teachingRating,
+        updatedData.facilitiesRating || review.facilitiesRating,
+        updatedData.pastoralRating || review.pastoralRating,
+        updatedData.extraRating || review.extraRating,
+        updatedData.senRating || review.senRating,
+        updatedData.mealsRating || review.mealsRating,
+        updatedData.recommend || review.recommend,
+        updatedData.yearFrom || review.yearFrom,
+        updatedData.yearTo || review.yearTo,
+        updatedData.yearGroup || review.yearGroup,
+        updatedData.userType || review.userType,
+        JSON.stringify(editHistory),
+        new Date().toISOString(),
+        reviewId
+    );
+    return getReviewById(reviewId);
+}
+
+function deleteReview(reviewId) {
+    db.prepare("DELETE FROM reviews WHERE id = ?").run(reviewId);
+    return true;
+}
+
+// Ad functions
+function getAds() {
+    return db.prepare("SELECT * FROM ads WHERE status = 'active' OR status = 'deleted' ORDER BY createdAt DESC").all();
+}
+
+function getAdById(adId) {
+    return db.prepare("SELECT * FROM ads WHERE id = ?").get(adId);
+}
+
+function getAdsBySchool(schoolName) {
+    return db.prepare("SELECT * FROM ads WHERE schoolName = ? AND status = 'active' ORDER BY createdAt DESC").all(schoolName);
+}
+
+function createAd(adData) {
+    const id = Date.now().toString();
+    const { getUniquePublicId } = require('./AdIdGenerator');
+    const publicId = getUniquePublicId();
+    db.prepare(`
+        INSERT INTO ads (
+            id, publicId, schoolName, title, description, category, price,
+            isFree, isWanted, condition, imageUrl, userId, userEmail,
+            status, createdAt, expiresAt, lastEditedAt
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+        id,
+        publicId,
+        adData.schoolName,
+        adData.title || null,
+        adData.description || null,
+        adData.category || null,
+        adData.price || null,
+        adData.isFree ? 1 : 0,
+        adData.isWanted ? 1 : 0,
+        adData.condition || null,
+        adData.imageUrl || null,
+        adData.userId,
+        adData.userEmail || null,
+        'active',
+        new Date().toISOString(),
+        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        null
+    );
+    return getAdById(id);
+}
+
+function deleteAd(adId, userId) {
+    const ad = getAdById(adId);
+    if (ad && ad.userId === userId) {
+        db.prepare("UPDATE ads SET status = 'deleted' WHERE id = ?").run(adId);
+        return true;
+    }
+    return false;
+}
+
+function updateAd(adId, adData) {
+    db.prepare(`
+        UPDATE ads SET
+            title = ?, description = ?, category = ?, price = ?,
+            isFree = ?, isWanted = ?, condition = ?, imageUrl = ?,
+            lastEditedAt = ?
+        WHERE id = ?
+    `).run(
+        adData.title,
+        adData.description,
+        adData.category,
+        adData.price,
+        adData.isFree ? 1 : 0,
+        adData.isWanted ? 1 : 0,
+        adData.condition,
+        adData.imageUrl,
+        new Date().toISOString(),
+        adId
+    );
+    return getAdById(adId);
+}
+
+// Session functions
+function createSession(userId) {
+    const token = crypto.randomBytes(32).toString('hex');
+    db.prepare(`
+        INSERT INTO sessions (token, userId, createdAt, expiresAt)
+        VALUES (?, ?, ?, ?)
+    `).run(token, userId, new Date().toISOString(), new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString());
+    return token;
+}
+
+function getSession(token) {
+    return db.prepare("SELECT * FROM sessions WHERE token = ? AND expiresAt > ?").get(token, new Date().toISOString());
+}
+
+function deleteSession(token) {
+    db.prepare("DELETE FROM sessions WHERE token = ?").run(token);
+}
+
+// Magic link functions
+function saveMagicLink(link) {
+    db.prepare(`
+        INSERT OR REPLACE INTO magic_links (token, userId, claimReviewId, expiresAt)
+        VALUES (?, ?, ?, ?)
+    `).run(link.token, link.userId, link.claimReviewId, link.expiresAt);
+}
+
+function getMagicLink(token) {
+    return db.prepare("SELECT * FROM magic_links WHERE token = ? AND expiresAt > ?").get(token, new Date().toISOString());
+}
+
+function deleteMagicLink(token) {
+    db.prepare("DELETE FROM magic_links WHERE token = ?").run(token);
+}
+
+// Message functions
+function getMessages() {
+    return db.prepare("SELECT * FROM messages ORDER BY createdAt DESC").all();
+}
+
+function createMessage(messageData) {
+    const id = Date.now().toString();
+    db.prepare(`
+        INSERT INTO messages (id, adId, fromUserId, toUserId, message, createdAt, isRead)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(
+        id,
+        messageData.adId,
+        messageData.fromUserId,
+        messageData.toUserId,
+        messageData.message || null,
+        new Date().toISOString(),
+        messageData.isRead ? 1 : 0
+    );
+    return { id, ...messageData };
+}
+
+function getMessagesForUser(userId) {
+    return db.prepare(`
+        SELECT * FROM messages 
+        WHERE fromUserId = ? OR toUserId = ? 
+        ORDER BY createdAt DESC
+    `).all(userId, userId);
+}
+
+function getMessagesForAd(adId) {
+    return db.prepare("SELECT * FROM messages WHERE adId = ? ORDER BY createdAt ASC").all(adId);
+}
+
+function saveMessages(messages) {
+    return true;
+}
+
+
+function addSavedAd(userId, adId) {
+    const user = getUserById(userId);
+    if (user) {
+        let savedAdIds = parseJSONField(user.savedAdIds);
+        if (!savedAdIds.includes(adId.toString())) {
+            savedAdIds.push(adId.toString());
+            db.prepare("UPDATE users SET savedAdIds = ? WHERE id = ?").run(JSON.stringify(savedAdIds), userId);
+            return true;
+        }
+    }
+    return false;
+}
+
+function removeSavedAd(userId, adId) {
+    const user = getUserById(userId);
+    if (user) {
+        const savedAdIds = parseJSONField(user.savedAdIds).filter(id => id !== adId.toString());
+        db.prepare("UPDATE users SET savedAdIds = ? WHERE id = ?").run(JSON.stringify(savedAdIds), userId);
+        return true;
+    }
+    return false;
+}
+
+function getSavedAds(userId) {
+    const user = getUserById(userId);
+    return user ? parseJSONField(user.savedAdIds) : [];
+}
+
+module.exports = {
+    addSavedAd,
+    removeSavedAd,
+    getSavedAds,
+    getUsers,
+    findOrCreateUserByEmail,
+    getUserById,
+    addReviewToUser,
+    removeReviewFromUser,
+    addSavedSchool,
+    removeSavedSchool,
+    addSavedReview,
+    removeSavedReview,
+    getSavedReviews,
+    getReviews,
+    getReviewById,
+    saveReview,
+    updateReview,
+    deleteReview,
+    getAds,
+    getAdById,
+    getAdsBySchool,
+    createAd,
+    deleteAd,
+    updateAd,
+    createSession,
+    getSession,
+    deleteSession,
+    saveMagicLink,
+    getMagicLink,
+    deleteMagicLink,
+    getMessages,
+    createMessage,
+    getMessagesForUser,
+    getMessagesForAd,
+    saveMessages
+};

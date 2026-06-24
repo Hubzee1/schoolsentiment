@@ -1,0 +1,124 @@
+<%- include('partials/header') %>
+
+<main class="max-w-6xl mx-auto px-4 py-3">
+    <nav class="text-xs text-slate-500 mb-3 flex space-x-2">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium">My Dashboard</span>
+    </nav>
+
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">My Dashboard</h1>
+            <p class="text-slate-500 mt-1">Manage your reviews, and adverts</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="/review" class="bg-black text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-800 transition">Write Review</a>
+        </div>
+    </div>
+    
+    <% if (typeof message !== 'undefined' && message) { %>
+        <div class="bg-green-100 text-green-700 p-3 rounded-lg mb-6"><%= message %></div>
+    <% } %>
+    
+    <!-- Three Column Layout - Equal Height -->
+    <div class="grid md:grid-cols-3 gap-6">
+        
+        <!-- Column 1: My Reviews -->
+        <div class="flex flex-col h-full">
+            <h2 class="text-xl font-bold mb-4">My Reviews (<%= userReviews.length %>)</h2>
+            <div class="bg-white border border-slate-200 rounded-xl p-4 flex-grow">
+                <% if (userReviews.length === 0) { %>
+                    <p class="text-slate-500 text-sm text-center">No reviews yet</p>
+                    <a href="/review" class="text-indigo-600 text-xs hover:underline block text-center mt-2">Write one →</a>
+                <% } else { %>
+                    <div class="space-y-3">
+                        <% userReviews.slice(0, 3).forEach(review => { %>
+                            <div class="border-b border-slate-100 pb-2 last:border-0">
+                                <h3 class="font-bold text-slate-900 text-sm"><%= review.schoolName %></h3>
+                                <p class="text-xs text-slate-400"><%= new Date(review.createdAt).toLocaleDateString('en-GB') %></p>
+                                <p class="text-xs text-slate-600 mt-1 line-clamp-2"><%= review.reviewText ? review.reviewText.substring(0, 80) : '' %>...</p>
+                                <div class="flex gap-2 mt-2">
+                                <a href="/edit-review/<%= review.id %>" class="px-2 py-1 text-xs font-medium text-indigo-600 bg-white border border-indigo-300 rounded-md hover:bg-indigo-50 transition">Edit</a>
+                                <form action="/delete-review/<%= review.id %>" method="POST" class="inline" onsubmit="return confirm('Delete this review?');">
+                                    <button type="submit" class="px-2 py-1 text-xs font-medium text-red-600 bg-white border border-red-300 rounded-md hover:bg-red-50 transition">Delete</button>
+                                </form>
+                            </div>
+                            </div>
+                        <% }) %>
+                        <% if (userReviews.length > 3) { %>
+                            <p class="text-xs text-slate-400 text-center pt-2">+ <%= userReviews.length - 3 %> more</p>
+                        <% } %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+        
+        <!-- Column 2: Saved User Reviews -->
+        <div class="flex flex-col h-full">
+            <h2 class="text-xl font-bold mb-4">Saved User Reviews (<%= totalSavedCount %>)</h2>
+            <div class="bg-white border border-slate-200 rounded-xl p-4 flex-grow">
+                <% if (!savedReviewsGrouped || Object.keys(savedReviewsGrouped).length === 0) { %>
+                    <p class="text-slate-500 text-sm text-center">No saved reviews</p>
+                    <p class="text-xs text-slate-400 text-center mt-1">Click ❤️ on any review to save it</p>
+                <% } else { %>
+                    <div class="space-y-3">
+                        <% Object.keys(savedReviewsGrouped).slice(0, 3).forEach(schoolName => { %>
+                            <% const reviews = savedReviewsGrouped[schoolName]; %>
+                            <div class="border-b border-slate-100 pb-2 last:border-0">
+                                <h3 class="font-bold text-slate-900 text-sm"><%= schoolName %></h3>
+                                <p class="text-xs text-slate-500"><%= reviews.length %> saved review(s)</p>
+                                <a href="/saved-reviews" class="text-indigo-600 text-xs hover:underline block mt-1">View all saved reviews →</a>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+        
+        <!-- Column 3: My Ads - Horizontal layout with image on left -->
+        <div class="flex flex-col h-full">
+            <h2 class="text-xl font-bold mb-4">My Ads (<%= userAds ? userAds.length : 0 %>)</h2>
+            <div class="bg-white border border-slate-200 rounded-xl p-4 flex-grow">
+                <% if (!userAds || userAds.length === 0) { %>
+                    <p class="text-slate-500 text-sm text-center">No ads posted yet</p>
+                    <p class="text-xs text-slate-400 text-center mt-1">Go to any school page and click Noticeboard</p>
+                <% } else { %>
+                    <div class="space-y-3">
+                        <% userAds.forEach(ad => { %>
+                            <div class="flex gap-3 border-b border-slate-100 pb-3 last:border-0">
+                                <!-- Image on left -->
+                                <div class="w-16 h-16 flex-shrink-0 bg-slate-100 rounded-lg overflow-hidden">
+                                    <% if (ad.imageUrl) { %>
+                                        <img src="<%= ad.imageUrl %>" alt="<%= ad.title %>" class="w-full h-full object-cover">
+                                    <% } else { %>
+                                        <div class="w-full h-full flex items-center justify-center text-slate-400">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                    <% } %>
+                                </div>
+                                <!-- Content on right -->
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-slate-900 text-sm"><%= ad.title %></h3>
+                                    <p class="text-xs text-slate-500"><%= ad.schoolName %> • Ref: <%= ad.publicId %></p>
+                                    <p class="text-xs font-bold text-indigo-600 mt-1"><%= ad.isFree ? 'FREE' : '£' + ad.price %></p>
+                                    <div class="flex gap-2 mt-1">
+                                        <a href="/edit-ad/<%= ad.id %>" class="px-2 py-1 text-xs font-medium text-indigo-600 bg-white border border-indigo-300 rounded-md hover:bg-indigo-50 transition">Edit</a>
+                                        <a href="/messages?ad=<%= ad.id %>" class="px-2 py-1 text-xs font-medium text-blue-600 bg-white border border-blue-300 rounded-md hover:bg-blue-50 transition">Messages</a>
+                                        <form action="/delete-ad/<%= ad.id %>" method="POST" class="inline" onsubmit="return confirm('Delete this ad?');">
+                                            <button type="submit" class="px-2 py-1 text-xs font-medium text-red-600 bg-white border border-red-300 rounded-md hover:bg-red-50 transition">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>

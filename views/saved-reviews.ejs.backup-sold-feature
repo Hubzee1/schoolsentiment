@@ -1,0 +1,118 @@
+<%- include('partials/header') %>
+
+<main class="max-w-4xl mx-auto px-4 py-8">
+    <nav class="text-xs text-slate-500 mb-4 flex space-x-2">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <a href="/dashboard" class="hover:underline">Dashboard</a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium">Saved Reviews</span>
+    </nav>
+
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">My Saved Reviews</h1>
+            <p class="text-slate-500 mt-1">Reviews you've saved from across the site</p>
+        </div>
+        <a href="/dashboard" class="text-indigo-600 hover:underline text-sm">← Back to Dashboard</a>
+    </div>
+
+    <% if (Object.keys(groupedBySchool).length === 0) { %>
+        <div class="bg-white border border-slate-200 rounded-2xl p-12 text-center">
+            <p class="text-slate-500 text-lg">No saved reviews yet</p>
+            <p class="text-sm text-slate-400 mt-2">Click the ❤️ heart on any review to save it here</p>
+            <a href="/" class="inline-block mt-4 text-indigo-600 hover:underline">Browse schools →</a>
+        </div>
+    <% } else { %>
+        <% Object.keys(groupedBySchool).forEach(schoolName => { %>
+            <% const reviews = groupedBySchool[schoolName]; %>
+            <div class="bg-white border border-slate-200 rounded-xl mb-6 overflow-hidden">
+                <div class="bg-slate-50 px-4 py-3 border-b border-slate-200">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="font-bold text-slate-900"><%= schoolName %></h2>
+                            <p class="text-xs text-slate-500"><%= reviews.length %> saved review(s)</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="/school/<%= encodeURIComponent(schoolName) %>/noticeboard" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-full hover:bg-indigo-100 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                </svg>
+                                <span>School Noticeboard</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3 ml-0.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                </svg>
+                            </a>
+                            <% 
+                                // Find school website from schoolsData
+                                let schoolWebsite = null;
+                                if (typeof allSchools !== 'undefined') {
+                                    const school = allSchools.find(s => s.name === schoolName);
+                                    if (school) schoolWebsite = school.website;
+                                }
+                            %>
+                            <% if (schoolWebsite && schoolWebsite !== '') { %>
+                                <a href="<%= schoolWebsite %>" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                    </svg>
+                                    <span>School Website</span>
+                                </a>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                <div class="divide-y divide-slate-100">
+                    <% reviews.forEach(review => { %>
+                        <div class="p-4 hover:bg-slate-50 transition">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                            <%= review.userType === 'former_student' ? 'Alumni' : review.userType %>
+                                        </span>
+                                        <span class="text-xs text-slate-400"><%= new Date(review.createdAt).toLocaleDateString('en-GB') %></span>
+                                    </div>
+                                    <% if (review.reviewTitle) { %>
+                                        <h3 class="font-bold text-slate-800"><%= review.reviewTitle %></h3>
+                                    <% } %>
+                                    <p class="text-sm text-slate-600 mt-1"><%= review.reviewText %></p>
+                                    <div class="flex items-center gap-4 mt-2">
+                                        <span class="text-xs text-slate-500">Rating: <%= review.rating %>/5</span>
+                                        <span class="text-xs text-slate-500">Recommend: <%= review.recommend %></span>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <button class="unsave-btn text-red-500 hover:text-red-700" data-review-id="<%= review.id %>">
+                                        <svg class="w-5 h-5 fill-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+                <div class="bg-slate-50 px-4 py-2 border-t border-slate-200 text-right">
+                    <a href="/school/<%= encodeURIComponent(schoolName) %>" class="text-xs text-indigo-600 hover:underline">View all reviews for this school →</a>
+                </div>
+            </div>
+        <% }) %>
+    <% } %>
+</main>
+
+<script>
+document.querySelectorAll('.unsave-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const reviewId = this.getAttribute('data-review-id');
+        if (confirm('Remove this review from your saved list?')) {
+            const response = await fetch(`/unsave-review/${reviewId}`, { method: 'POST' });
+            if (response.ok) {
+                window.location.reload();
+            }
+        }
+    });
+});
+</script>
+
+<%- include('partials/footer') %>

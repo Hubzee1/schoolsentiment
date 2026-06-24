@@ -1,0 +1,243 @@
+[
+  {
+    "id": "1780321615019",
+    "adId": "1780222900463",
+    "fromUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "createdAt": "2026-06-01T13:46:55.019Z",
+    "isRead": false
+  },
+  {
+    "id": "1780323819809",
+    "adId": "1780222900463",
+    "fromUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "do you still have this item?",
+    "createdAt": "2026-06-01T14:23:39.809Z",
+    "isRead": false
+  },
+  {
+    "id": "1780325649983",
+    "adId": "1780222900463",
+    "fromUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "okay £20",
+    "createdAt": "2026-06-01T14:54:09.983Z",
+    "isRead": false
+  },
+  {
+    "id": "1780325683433",
+    "adId": "1780222900463",
+    "fromUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "toUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "message": "naa £10",
+    "createdAt": "2026-06-01T14:54:43.433Z",
+    "isRead": false
+  },
+  {
+    "id": "1780335567215",
+    "adId": "1780222900463",
+    "fromUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "createdAt": "2026-06-01T17:39:27.215Z",
+    "isRead": false
+  },
+  {
+    "id": "1780336176288",
+    "adId": "1780222900463",
+    "fromUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "mother",
+    "createdAt": "2026-06-01T17:49:36.289Z",
+    "isRead": false
+  },
+  {
+    "id": "1780336350659",
+    "adId": "1780222900463",
+    "fromUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "toUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "message": "father",
+    "createdAt": "2026-06-01T17:52:30.659Z",
+    "isRead": false
+  },
+  {
+    "id": "1780336519043",
+    "adId": "1780222900463",
+    "fromUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "child",
+    "createdAt": "2026-06-01T17:55:19.043Z",
+    "isRead": false
+  },
+  {
+    "id": "1780336530276",
+    "adId": "1780222900463",
+    "fromUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "toUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "message": "daughter",
+    "createdAt": "2026-06-01T17:55:30.276Z",
+    "isRead": false
+  },
+  {
+    "id": "1780336537498",
+    "adId": "1780222900463",
+    "fromUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "son",
+    "createdAt": "2026-06-01T17:55:37.498Z",
+    "isRead": false
+  },
+  {
+    "id": "1780336702565",
+    "adId": "1780222900463",
+    "fromUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "toUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "message": "cousin",
+    "createdAt": "2026-06-01T17:58:22.565Z",
+    "isRead": false
+  },
+  {
+    "id": "1780336731417",
+    "adId": "1780222900463",
+    "fromUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "kin",
+    "createdAt": "2026-06-01T17:58:51.417Z",
+    "isRead": false
+  },
+  {
+    "id": "1780337282239",
+    "adId": "1780244104185",
+    "fromUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "how low can it go",
+    "createdAt": "2026-06-01T18:08:02.239Z",
+    "isRead": false
+  },
+  {
+    "id": "1780346855575",
+    "adId": "1780244104185",
+    "fromUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "toUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "message": "very low",
+    "createdAt": "2026-06-01T20:47:35.575Z",
+    "isRead": false
+  },
+  {
+    "id": "1780346888596",
+    "adId": "1780244104185",
+    "fromUserId": "9dcc767c-0f6e-4044-a526-f7a4f1e09d63",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "that's good",
+    "createdAt": "2026-06-01T20:48:08.596Z",
+    "isRead": false
+  },
+  {
+    "id": "1780351268654",
+    "adId": "1780351197005",
+    "fromUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "toUserId": "ae89c551-1546-4cc4-9b64-d1b462e83669",
+    "message": "Sounds so shiny. How much will you drop to?",
+    "createdAt": "2026-06-01T22:01:08.654Z",
+    "isRead": false
+  },
+  {
+    "id": "1780351333396",
+    "adId": "1780351197005",
+    "fromUserId": "ae89c551-1546-4cc4-9b64-d1b462e83669",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "I may consider £50",
+    "createdAt": "2026-06-01T22:02:13.396Z",
+    "isRead": false
+  },
+  {
+    "id": "1780396686912",
+    "adId": "1780351197005",
+    "fromUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "toUserId": "ae89c551-1546-4cc4-9b64-d1b462e83669",
+    "message": "I would like to buy this. ",
+    "createdAt": "2026-06-02T10:38:06.912Z",
+    "isRead": false
+  },
+  {
+    "id": "1780398215387",
+    "adId": "1780351197005",
+    "fromUserId": "ae89c551-1546-4cc4-9b64-d1b462e83669",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "This is ideal for children and adults",
+    "createdAt": "2026-06-02T11:03:35.387Z",
+    "isRead": false
+  },
+  {
+    "id": "1780398230709",
+    "adId": "1780351197005",
+    "fromUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "toUserId": "ae89c551-1546-4cc4-9b64-d1b462e83669",
+    "message": "what colour is it",
+    "createdAt": "2026-06-02T11:03:50.709Z",
+    "isRead": false
+  },
+  {
+    "id": "1780398237191",
+    "adId": "1780351197005",
+    "fromUserId": "ae89c551-1546-4cc4-9b64-d1b462e83669",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "its gold",
+    "createdAt": "2026-06-02T11:03:57.191Z",
+    "isRead": false
+  },
+  {
+    "id": "1780398435454",
+    "adId": "1780223789381",
+    "fromUserId": "ae89c551-1546-4cc4-9b64-d1b462e83669",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "What size are these?",
+    "createdAt": "2026-06-02T11:07:15.454Z",
+    "isRead": false
+  },
+  {
+    "id": "1780398453084",
+    "adId": "1780223789381",
+    "fromUserId": "ae89c551-1546-4cc4-9b64-d1b462e83669",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "also what colour?",
+    "createdAt": "2026-06-02T11:07:33.084Z",
+    "isRead": false
+  },
+  {
+    "id": "1780398489067",
+    "adId": "1780223789381",
+    "fromUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "toUserId": "ae89c551-1546-4cc4-9b64-d1b462e83669",
+    "message": "size 5 and white.",
+    "createdAt": "2026-06-02T11:08:09.067Z",
+    "isRead": false
+  },
+  {
+    "id": "1780514130986",
+    "adId": "1780403025755",
+    "fromUserId": "ae89c551-1546-4cc4-9b64-d1b462e83669",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "Hi, I really like these. Will you accept £25?",
+    "createdAt": "2026-06-03T19:15:30.986Z",
+    "isRead": false
+  },
+  {
+    "id": "1780514165857",
+    "adId": "1780403025755",
+    "fromUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "toUserId": "ae89c551-1546-4cc4-9b64-d1b462e83669",
+    "message": "The lowest I will go is £40",
+    "createdAt": "2026-06-03T19:16:05.857Z",
+    "isRead": false
+  },
+  {
+    "id": "1780514253349",
+    "adId": "1780403025755",
+    "fromUserId": "ae89c551-1546-4cc4-9b64-d1b462e83669",
+    "toUserId": "65975866-aa58-4192-b5b7-418bc2a5720b",
+    "message": "My budget is £35. Will be great and much appreciated if we could shake on that. Let me know.",
+    "createdAt": "2026-06-03T19:17:33.349Z",
+    "isRead": false
+  }
+]

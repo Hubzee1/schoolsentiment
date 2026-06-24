@@ -1,0 +1,174 @@
+<%- include('partials/header') %>
+
+<main class="max-w-5xl mx-auto px-4 py-8">
+    <nav class="text-xs text-slate-500 mb-4 flex space-x-2">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <a href="/admin/flags" class="hover:underline">Moderation Queue</a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium">Review Details</span>
+    </nav>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-6">
+        <div class="flex justify-between items-start mb-6">
+            <h1 class="text-2xl font-bold text-slate-900">Flagged Review Details</h1>
+            <a href="/admin/flags" class="text-indigo-600 hover:underline text-sm">← Back to Queue</a>
+        </div>
+
+        <% if (flag) { %>
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                <p class="text-sm text-amber-700">
+                    <strong>Flagged on:</strong> <%= new Date(flag.flaggedAt).toLocaleString() %><br>
+                    <strong>Reason:</strong> <%= flag.reason %><br>
+                    <strong>Reported by:</strong> <%= flag.flaggedBy === 'anonymous' ? 'Anonymous user' : 'Registered user' %>
+                    <% if (flag.details) { %><br><strong>Additional details:</strong> <%= flag.details %><% } %>
+                </p>
+            </div>
+
+            <div class="border border-slate-200 rounded-xl p-4 mb-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900"><%= review.reviewTitle || 'Untitled Review' %></h2>
+                        <p class="text-sm text-slate-500">School: <strong><%= review.schoolName %></strong></p>
+                        <p class="text-xs text-slate-400">Posted: <%= new Date(review.createdAt).toLocaleDateString() %> by <%= review.userType || 'Anonymous' %></p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold">Rating:</span>
+                        <div class="flex">
+                            <% for(let i = 1; i <= 5; i++) { %>
+                                <span class="<%= i <= (review.rating || 0) ? 'text-yellow-400' : 'text-gray-300' %>">★</span>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-slate-700 whitespace-pre-wrap"><%= review.reviewText %></p>
+            </div>
+
+            <div class="flex gap-3 flex-wrap">
+                <button onclick="toggleHideReview('<%= review.id %>', this)" class="px-4 py-2 rounded-lg transition hide-btn"></button>
+                <button onclick="deleteReview('<%= review.id %>')" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
+                    🗑️ Delete Review
+                </button>
+                <button id="toggleBanBtn" onclick="toggleBanFromDetail('<%= review.id %>')" class="px-4 py-2 rounded-lg hover:opacity-80 transition">Loading...</button>
+                <button onclick="resolveFlag('<%= flag.reviewId %>')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                    ✓ Resolve (Keep Review)
+                </button>
+                <a href="/admin/flags" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition">
+                    Cancel
+                </a>
+            </div>
+        <% } else { %>
+            <p class="text-slate-500">Review not found</p>
+        <% } %>
+    </div>
+</main>
+
+<script>
+// Set the hide button state on load
+document.addEventListener('DOMContentLoaded', async function() {
+    const reviewId = '<%= review.id %>';
+    const response = await fetch('/admin/get-review-status?reviewId=' + reviewId);
+    const data = await response.json();
+    const hideBtn = document.querySelector('.hide-btn');
+    if (data.hidden) {
+        hideBtn.textContent = '👁️ Unhide Review';
+        hideBtn.classList.add('bg-green-600');
+        hideBtn.classList.remove('bg-yellow-600');
+    } else {
+        hideBtn.textContent = '👁️ Hide Review';
+        hideBtn.classList.add('bg-yellow-600');
+        hideBtn.classList.remove('bg-green-600');
+    }
+    
+    const banResponse = await fetch('/admin/get-ban-status?reviewId=' + reviewId);
+    const banData = await banResponse.json();
+    const banBtn = document.getElementById('toggleBanBtn');
+    if (banData.banned) {
+        banBtn.textContent = '✓ Unban User';
+        banBtn.classList.remove('bg-orange-600');
+        banBtn.classList.add('bg-green-600');
+    } else {
+        banBtn.textContent = '🚫 Ban User';
+        banBtn.classList.remove('bg-green-600');
+        banBtn.classList.add('bg-orange-600');
+    }
+});
+
+async function toggleHideReview(reviewId, btn) {
+    const isHidden = btn.textContent === '👁️ Unhide Review';
+    const url = isHidden ? '/admin/unhide-review' : '/admin/hide-review';
+    
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewId: reviewId })
+    });
+    const data = await response.json();
+    
+    if (data.success) {
+        if (isHidden) {
+            btn.textContent = '👁️ Hide Review';
+            btn.classList.remove('bg-green-600');
+            btn.classList.add('bg-yellow-600');
+        } else {
+            btn.textContent = '👁️ Unhide Review';
+            btn.classList.remove('bg-yellow-600');
+            btn.classList.add('bg-green-600');
+        }
+    }
+}
+
+async function toggleBanFromDetail(reviewId) {
+    const btn = document.getElementById('toggleBanBtn');
+    btn.textContent = 'Updating...';
+    btn.classList.add('bg-gray-400');
+    btn.classList.remove('bg-orange-600', 'bg-green-600');
+    
+    const response = await fetch('/admin/toggle-ban', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewId: reviewId })
+    });
+    const data = await response.json();
+    
+    if (data.banned) {
+        btn.textContent = '✓ Unban User';
+        btn.classList.remove('bg-orange-600', 'bg-gray-400');
+        btn.classList.add('bg-green-600');
+    } else {
+        btn.textContent = '🚫 Ban User';
+        btn.classList.remove('bg-green-600', 'bg-gray-400');
+        btn.classList.add('bg-orange-600');
+    }
+}
+
+async function deleteReview(reviewId) {
+    if (confirm('WARNING: This will permanently delete this review. This cannot be undone. Are you sure?')) {
+        const response = await fetch('/admin/delete-review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reviewId: reviewId })
+        });
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = '/admin/flags';
+        } else {
+            alert('Error deleting review');
+        }
+    }
+}
+
+async function resolveFlag(reviewId) {
+    const response = await fetch('/admin/resolve-flag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewId: reviewId })
+    });
+    const data = await response.json();
+    if (data.success) {
+        window.location.href = '/admin/flags';
+    }
+}
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,34 @@
+<%- include('partials/header') %>
+
+<div class="container" style="padding: 2rem 0; background: #f0f0f0;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2>Test Centering</h2>
+        
+        <!-- Test 1: Simple div -->
+        <div style="background: red; color: white; padding: 10px; margin: 0 auto 1rem; width: 500px;">
+            This should be centered (red box)
+        </div>
+        
+        <!-- Test 2: Search bar replica -->
+        <div style="max-width: 500px; margin: 0 auto 1rem; background: yellow;">
+            <input type="text" 
+                   placeholder="Test search bar..." 
+                   style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+        </div>
+        
+        <!-- Test 3: Exact search bar code -->
+        <div style="max-width: 500px; margin: 0 auto 3rem; position: relative; background: lightblue;">
+            <form style="display: flex; justify-content: center;">
+                <div style="position: relative; width: 100%;">
+                    <input type="text" 
+                           placeholder="Exact search bar code..." 
+                           style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;"
+                           required
+                           autocomplete="off">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

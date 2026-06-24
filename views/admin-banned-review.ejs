@@ -1,0 +1,51 @@
+<%- include('partials/header') %>
+
+<main class="max-w-4xl mx-auto px-4 py-8">
+    <nav class="text-xs text-slate-500 mb-4 flex space-x-2">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <a href="/admin/banned-users" class="hover:underline">Banned Users</a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium">Review Details</span>
+    </nav>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-6">
+        <h1 class="text-2xl font-bold text-slate-900 mb-4">Review That Caused Ban</h1>
+        
+        <% if (review) { %>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <p class="text-sm text-red-700">
+                    <strong>This review was flagged and led to the user being banned.</strong>
+                </p>
+            </div>
+            
+            <div class="border border-slate-200 rounded-xl p-4 mb-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900"><%= review.reviewTitle || 'Untitled Review' %></h2>
+                        <p class="text-sm text-slate-500">School: <strong><%= review.schoolName %></strong></p>
+                        <p class="text-xs text-slate-400">Posted: <%= new Date(review.createdAt).toLocaleString() %></p>
+                    </div>
+                </div>
+                <div class="bg-slate-50 rounded-lg p-4">
+                    <p class="text-slate-700 whitespace-pre-wrap"><%= review.reviewText %></p>
+                </div>
+            </div>
+            
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <p class="text-sm text-amber-700">
+                    <strong>⚠️ Why this content was banned:</strong><br>
+                    This review violated our community guidelines. The user has been banned and cannot post new reviews or ads.
+                </p>
+            </div>
+            
+            <div class="mt-6">
+                <a href="/admin/banned-users" class="text-indigo-600 hover:underline">← Back to Banned Users</a>
+            </div>
+        <% } else { %>
+            <p class="text-slate-500">Review not found</p>
+        <% } %>
+    </div>
+</main>
+
+<%- include('partials/footer') %>

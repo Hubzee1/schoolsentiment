@@ -1,0 +1,468 @@
+<%- include('partials/header') %>
+
+<main class="max-w-5xl mx-auto px-4 py-3">
+    
+    <nav class="text-xs text-slate-500 mb-3 flex space-x-2">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium">Write Your Review</span>
+    </nav>
+
+    <div class="bg-[#def0ff] border border-[#bce0ff] rounded-full px-5 py-3.5 flex items-center space-x-2.5 text-sm text-[#004085] font-medium shadow-sm mb-3">
+        <span>🔒</span>
+        <p><span class="font-bold">Community Trust:</span> Reviewers are always anonymous by default. Accounts are optional to manage your reviews.</p>
+    </div>
+
+    <form action="/submit-review" method="POST" id="reviewForm" class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-6">
+        
+        <div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-2 tracking-tight">Your Review</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+                <div class="flex flex-col space-y-1.5">
+                    <label class="text-sm font-bold text-slate-900">Select School <span class="text-rose-500">*</span></label>
+                    <div class="relative" style="position: relative;">
+                        <input type="text" id="schoolName" name="schoolName" placeholder="Search for a UK school..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition" required autocomplete="off">
+                        <div id="autocompleteResults" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; max-height: 300px; overflow-y: auto; margin-top: 4px;"></div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-1.5">
+                    <label class="text-sm font-bold text-slate-900">Would you recommend this school? <span class="text-rose-500">*</span></label>
+                    <input type="hidden" id="recommend" name="recommend" required value="">
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" class="recommend-option py-2.5 bg-white border border-slate-300 rounded-full text-sm font-medium hover:bg-slate-50 transition" data-value="yes">Yes</button>
+                        <button type="button" class="recommend-option py-2.5 bg-white border border-slate-300 rounded-full text-sm font-medium hover:bg-slate-50 transition" data-value="no">No</button>
+                        <button type="button" class="recommend-option py-2.5 bg-white border border-slate-300 rounded-full text-sm font-medium hover:bg-slate-50 transition" data-value="unsure">Unsure</button>
+                    </div>
+                    <div id="recommendError" class="text-rose-500 text-xs hidden">Please select whether you would recommend this school</div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col space-y-1.5">
+                        <label class="text-sm font-bold text-slate-900">I am a <span class="text-rose-500">*</span></label>
+                        <select id="userType" name="userType" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                            <option value="">Select...</option>
+                            <option value="parent">Parent</option>
+                            <option value="student">Student</option>
+                            <option value="former_student">Alumni</option>
+                            <option value="staff">Staff</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col space-y-1.5">
+                        <label class="text-sm font-bold text-slate-900">Child's Year Group <span class="text-rose-500">*</span></label>
+                        <select id="yearGroup" name="yearGroup" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                            <option value="" disabled selected>Required</option>
+                            <option value="primary">Reception / Year 1-6</option>
+                            <option value="secondary">Year 7-11 (Secondary)</option>
+                            <option value="sixth_form">Sixth Form (Year 12-13)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-1.5">
+                    <label class="text-sm font-bold text-slate-900">Year(s) of attendance <span class="text-rose-500">*</span></label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="yearFrom" name="yearFrom" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                            <option value="" disabled selected>From</option>
+                            <option value="2019">2019</option><option value="2020">2020</option><option value="2021">2021</option>
+                            <option value="2022">2022</option><option value="2023">2023</option><option value="2024">2024</option>
+                            <option value="2025">2025</option><option value="2026">2026</option>
+                        </select>
+                        <select id="yearTo" name="yearTo" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                            <option value="" disabled selected>To</option>
+                            <option value="2019">2019</option><option value="2020">2020</option><option value="2021">2021</option>
+                            <option value="2022">2022</option><option value="2023">2023</option><option value="2024">2024</option>
+                            <option value="2025">2025</option><option value="2026">2026</option>
+                        </select>
+                    </div>
+                    <div id="yearError" class="text-rose-500 text-xs hidden">To year cannot be before From year</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rating Breakdown -->
+        <div class="bg-[#fefbf0] border border-[#fdf2d2]/60 rounded-2xl p-4">
+            <h3 class="text-2xl font-bold text-slate-900 text-center mb-1 tracking-tight">Rating Breakdown</h3>
+            
+            <div class="grid grid-cols-6 items-center gap-3 mb-1">
+                <div class="text-sm font-bold text-slate-900"></div>
+                <div class="text-center"><img src="/images/Angry.png" class="w-12 h-12 mx-auto object-contain"></div>
+                <div class="text-center"><img src="/images/Sad.png" class="w-12 h-12 mx-auto object-contain"></div>
+                <div class="text-center"><img src="/images/Average.png" class="w-12 h-12 mx-auto object-contain"></div>
+                <div class="text-center"><img src="/images/happy.png" class="w-12 h-12 mx-auto object-contain"></div>
+                <div class="text-center"><img src="/images/Elated.png" class="w-12 h-12 mx-auto object-contain"></div>
+            </div>
+
+            <div class="space-y-2">
+                <div class="grid grid-cols-6 items-center gap-3">
+                    <div class="flex items-center space-x-1">
+                        <div class="text-sm font-bold text-slate-900">Teaching Quality</div>
+                        <div class="relative inline-block group">
+                            <div class="w-3.5 h-3.5 rounded-full bg-amber-500 text-white text-[9px] flex items-center justify-center cursor-help">i</div>
+                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-amber-600 text-white text-[10px] rounded-md p-2 w-48 z-50 shadow-lg">
+                                How effective are the teachers? Do they explain concepts clearly and support student learning?
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-amber-600 rotate-45"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="rating-category teaching-option py-2 text-xs font-medium rounded-full" data-rating="1">Annoyed</button>
+                    <button type="button" class="rating-category teaching-option py-2 text-xs font-medium rounded-full" data-rating="2">Disappointed</button>
+                    <button type="button" class="rating-category teaching-option py-2 text-xs font-medium rounded-full" data-rating="3">Satisfied</button>
+                    <button type="button" class="rating-category teaching-option py-2 text-xs font-medium rounded-full" data-rating="4">Happy</button>
+                    <button type="button" class="rating-category teaching-option py-2 text-xs font-medium rounded-full" data-rating="5">Elated</button>
+                </div>
+                <input type="hidden" id="teachingRating" name="teachingRating" required>
+
+                <div class="grid grid-cols-6 items-center gap-3">
+                    <div class="flex items-center space-x-1">
+                        <div class="text-sm font-bold text-slate-900">Facilities</div>
+                        <div class="relative inline-block group">
+                            <div class="w-3.5 h-3.5 rounded-full bg-amber-500 text-white text-[9px] flex items-center justify-center cursor-help">i</div>
+                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-amber-600 text-white text-[10px] rounded-md p-2 w-48 z-50 shadow-lg">
+                                Condition of classrooms, science labs, sports facilities, library, and overall school environment.
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-amber-600 rotate-45"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="rating-category facilities-option py-2 text-xs font-medium rounded-full" data-rating="1">Annoyed</button>
+                    <button type="button" class="rating-category facilities-option py-2 text-xs font-medium rounded-full" data-rating="2">Disappointed</button>
+                    <button type="button" class="rating-category facilities-option py-2 text-xs font-medium rounded-full" data-rating="3">Satisfied</button>
+                    <button type="button" class="rating-category facilities-option py-2 text-xs font-medium rounded-full" data-rating="4">Happy</button>
+                    <button type="button" class="rating-category facilities-option py-2 text-xs font-medium rounded-full" data-rating="5">Elated</button>
+                </div>
+                <input type="hidden" id="facilitiesRating" name="facilitiesRating" required>
+
+                <div class="grid grid-cols-6 items-center gap-3">
+                    <div class="flex items-center space-x-1">
+                        <div class="text-sm font-bold text-slate-900">Pastoral Care</div>
+                        <div class="relative inline-block group">
+                            <div class="w-3.5 h-3.5 rounded-full bg-amber-500 text-white text-[9px] flex items-center justify-center cursor-help">i</div>
+                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-amber-600 text-white text-[10px] rounded-md p-2 w-48 z-50 shadow-lg">
+                                How well does the school support student wellbeing, mental health, and handle personal issues?
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-amber-600 rotate-45"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="rating-category pastoral-option py-2 text-xs font-medium rounded-full" data-rating="1">Annoyed</button>
+                    <button type="button" class="rating-category pastoral-option py-2 text-xs font-medium rounded-full" data-rating="2">Disappointed</button>
+                    <button type="button" class="rating-category pastoral-option py-2 text-xs font-medium rounded-full" data-rating="3">Satisfied</button>
+                    <button type="button" class="rating-category pastoral-option py-2 text-xs font-medium rounded-full" data-rating="4">Happy</button>
+                    <button type="button" class="rating-category pastoral-option py-2 text-xs font-medium rounded-full" data-rating="5">Elated</button>
+                </div>
+                <input type="hidden" id="pastoralRating" name="pastoralRating" required>
+
+                <div class="grid grid-cols-6 items-center gap-3">
+                    <div class="flex items-center space-x-1">
+                        <div class="text-sm font-bold text-slate-900">Extra-curriculars</div>
+                        <div class="relative inline-block group">
+                            <div class="w-3.5 h-3.5 rounded-full bg-amber-500 text-white text-[9px] flex items-center justify-center cursor-help">i</div>
+                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-amber-600 text-white text-[10px] rounded-md p-2 w-48 z-50 shadow-lg">
+                                Range and quality of clubs, sports, arts, and after-school activities available.
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-amber-600 rotate-45"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="rating-category extra-option py-2 text-xs font-medium rounded-full" data-rating="1">Annoyed</button>
+                    <button type="button" class="rating-category extra-option py-2 text-xs font-medium rounded-full" data-rating="2">Disappointed</button>
+                    <button type="button" class="rating-category extra-option py-2 text-xs font-medium rounded-full" data-rating="3">Satisfied</button>
+                    <button type="button" class="rating-category extra-option py-2 text-xs font-medium rounded-full" data-rating="4">Happy</button>
+                    <button type="button" class="rating-category extra-option py-2 text-xs font-medium rounded-full" data-rating="5">Elated</button>
+                </div>
+                <input type="hidden" id="extraRating" name="extraRating" required>
+
+                <div class="grid grid-cols-6 items-center gap-3">
+                    <div class="flex items-center space-x-1">
+                        <div class="text-sm font-bold text-slate-900">SEN Support</div>
+                        <div class="relative inline-block group">
+                            <div class="w-3.5 h-3.5 rounded-full bg-amber-500 text-white text-[9px] flex items-center justify-center cursor-help">i</div>
+                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-amber-600 text-white text-[10px] rounded-md p-2 w-48 z-50 shadow-lg">
+                                Support provided for students with Special Educational Needs and disabilities.
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-amber-600 rotate-45"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="rating-category sen-option py-2 text-xs font-medium rounded-full" data-rating="1">Annoyed</button>
+                    <button type="button" class="rating-category sen-option py-2 text-xs font-medium rounded-full" data-rating="2">Disappointed</button>
+                    <button type="button" class="rating-category sen-option py-2 text-xs font-medium rounded-full" data-rating="3">Satisfied</button>
+                    <button type="button" class="rating-category sen-option py-2 text-xs font-medium rounded-full" data-rating="4">Happy</button>
+                    <button type="button" class="rating-category sen-option py-2 text-xs font-medium rounded-full" data-rating="5">Elated</button>
+                </div>
+                <input type="hidden" id="senRating" name="senRating" required>
+
+                <div class="grid grid-cols-6 items-center gap-3">
+                    <div class="flex items-center space-x-1">
+                        <div class="text-sm font-bold text-slate-900">School Meals</div>
+                        <div class="relative inline-block group">
+                            <div class="w-3.5 h-3.5 rounded-full bg-amber-500 text-white text-[9px] flex items-center justify-center cursor-help">i</div>
+                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-amber-600 text-white text-[10px] rounded-md p-2 w-48 z-50 shadow-lg">
+                                Quality, variety, and value of school meals. Also consider queue times and dining facilities.
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-amber-600 rotate-45"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="rating-category meals-option py-2 text-xs font-medium rounded-xl" data-rating="1" data-category="meals">Annoyed</button>
+                    <button type="button" class="rating-category meals-option py-2 text-xs font-medium rounded-xl" data-rating="2" data-category="meals">Disappointed</button>
+                    <button type="button" class="rating-category meals-option py-2 text-xs font-medium rounded-xl" data-rating="3" data-category="meals">Satisfied</button>
+                    <button type="button" class="rating-category meals-option py-2 text-xs font-medium rounded-xl" data-rating="4" data-category="meals">Happy</button>
+                    <button type="button" class="rating-category meals-option py-2 text-xs font-medium rounded-xl" data-rating="5" data-category="meals">Elated</button>
+                </div>
+                <input type="hidden" id="mealsRating" name="mealsRating" required>
+            </div>
+        </div>
+
+        <!-- Review Title -->
+        <div class="flex flex-col space-y-1.5">
+            <label class="text-sm font-bold text-slate-900">Review Title (Optional)</label>
+            <input type="text" id="reviewTitle" name="reviewTitle" placeholder="Give your review a descriptive title..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-full text-sm font-bold focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+        </div>
+
+        <!-- Overall School Impression -->
+        <div class="flex flex-col space-y-2">
+            <div class="flex items-center space-x-2">
+                <label class="text-sm font-bold text-slate-900">Overall School Impression <span class="text-rose-500">*</span></label>
+                <div class="relative inline-block group">
+                    <div class="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center cursor-help">i</div>
+                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:block bg-amber-600 text-white text-xs rounded-lg p-3 w-64 z-50 shadow-lg">
+                        <div class="font-bold mb-1">💡 Review Tips:</div>
+                        <p class="text-[11px] mb-2">Share what worked well and what could be improved. Consider teaching quality, school facilities, communication with parents, and how the school supports student wellbeing.</p>
+                        <p class="text-[11px]">Your honest feedback helps other families make informed decisions about their child's education.</p>
+                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="border border-slate-200 bg-slate-50 rounded-t-xl p-2 flex items-center space-x-2">
+                <button type="button" id="boldBtn" class="px-3 py-1 rounded hover:bg-slate-200 text-sm font-bold transition">B</button>
+                <button type="button" id="italicBtn" class="px-3 py-1 rounded hover:bg-slate-200 text-xs italic transition">I</button>
+            </div>
+            <div id="reviewContent" contenteditable="true" class="w-full px-4 py-3 border border-t-0 border-slate-200 rounded-b-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition leading-relaxed min-h-[160px] bg-white overflow-y-auto" style="line-height: 1.6;" placeholder="Share your honest insights about your time at this school. Please protect the privacy of others by omitting names, and help us maintain a supportive space by using respectful language."></div>
+            <input type="hidden" id="reviewText" name="reviewText" required>
+            <div id="reviewError" class="text-rose-500 text-xs hidden">Please share your overall impression</div>
+        </div>
+
+        <div class="flex items-center space-x-3 pt-0">
+            <button type="submit" class="bg-[#34535c] text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-[#284047] transition shadow-sm">Submit Your Review</button>
+            <a href="/" class="bg-[#717b85] text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-[#5a626a] transition shadow-sm inline-block">Cancel</a>
+        </div>
+
+    </form>
+</main>
+
+<style>
+.rating-category { transition: all 0.2s ease; cursor: pointer; }
+.rating-category[data-rating="1"] { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
+.rating-category[data-rating="1"]:hover { background: #fecaca; }
+.rating-category[data-rating="2"] { background: #ffedd5; border-color: #fed7aa; color: #9a3412; }
+.rating-category[data-rating="2"]:hover { background: #fed7aa; }
+.rating-category[data-rating="3"] { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+.rating-category[data-rating="3"]:hover { background: #fde68a; }
+.rating-category[data-rating="4"] { background: #d1fae5; border-color: #a7f3d0; color: #065f46; }
+.rating-category[data-rating="4"]:hover { background: #a7f3d0; }
+.rating-category[data-rating="5"] { background: #ccfbf1; border-color: #99f6e4; color: #0f766e; }
+.rating-category[data-rating="5"]:hover { background: #99f6e4; }
+.rating-category.active { transform: scale(1.02); box-shadow: 0 0 0 2px currentColor, 0 0 0 4px #e2e8f0; }
+.recommend-option.active { background: #e8f4fd !important; border-color: #2A7CDE !important; }
+
+/* Active button styling for Bold and Italic */
+#boldBtn.active, #italicBtn.active {
+    background: #2A7CDE !important;
+    color: white !important;
+    border-color: #2A7CDE !important;
+}
+#reviewContent:empty:before {
+    content: attr(placeholder);
+    color: #94a3b8;
+    white-space: pre-wrap;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // School autocomplete
+    const schoolInput = document.getElementById('schoolName');
+    const autocompleteResults = document.getElementById('autocompleteResults');
+    let allSchools = [];
+    fetch('/api/schools').then(r => r.json()).then(s => allSchools = s);
+
+    schoolInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        if (query.length < 2) { autocompleteResults.classList.add('hidden'); return; }
+        const matches = allSchools.filter(s => s.name.toLowerCase().includes(query.toLowerCase()) || s.town.toLowerCase().includes(query.toLowerCase())).slice(0,7);
+        if (!matches.length) { autocompleteResults.classList.add('hidden'); return; }
+        let html = '';
+        matches.forEach(s => {
+            html += `<div class="autocomplete-item" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" data-school-name="${s.name.replace(/'/g, "\\'")}">
+                        <div style="font-weight: 600; color: #0f172a; margin-bottom: 4px;">${s.name}</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">${s.town} • ${s.postcode}</div>
+                    </div>`;
+        });
+        autocompleteResults.innerHTML = html;
+        autocompleteResults.classList.remove('hidden');
+    });
+
+    autocompleteResults.addEventListener('click', function(e) {
+        const item = e.target.closest('.autocomplete-item');
+        if (item) { schoolInput.value = item.getAttribute('data-school-name'); autocompleteResults.classList.add('hidden'); }
+    });
+    document.addEventListener('click', function(e) {
+        if (!schoolInput.contains(e.target) && !autocompleteResults.contains(e.target)) { autocompleteResults.classList.add('hidden'); }
+    });
+
+    // Recommend options
+    const recommendOptions = document.querySelectorAll('.recommend-option');
+    const recommendInput = document.getElementById('recommend');
+    const recommendError = document.getElementById('recommendError');
+    recommendOptions.forEach(opt => {
+        opt.addEventListener('click', function() {
+            recommendOptions.forEach(o => o.classList.remove('active'));
+            this.classList.add('active');
+            recommendInput.value = this.getAttribute('data-value');
+            recommendError.classList.add('hidden');
+        });
+    });
+
+    // Rating category buttons
+    const categories = ['teaching', 'facilities', 'pastoral', 'extra', 'sen', 'meals'];
+    categories.forEach(cat => {
+        const buttons = document.querySelectorAll(`.${cat}-option`);
+        const hiddenInput = document.getElementById(`${cat}Rating`);
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                buttons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                hiddenInput.value = this.getAttribute('data-rating');
+            });
+        });
+    });
+
+    // Year validation
+    const yearFrom = document.getElementById('yearFrom');
+    const yearTo = document.getElementById('yearTo');
+    const yearError = document.getElementById('yearError');
+    function validateYears() {
+        if (yearFrom.value && yearTo.value && parseInt(yearTo.value) < parseInt(yearFrom.value)) {
+            yearError.classList.remove('hidden');
+            return false;
+        }
+        yearError.classList.add('hidden');
+        return true;
+    }
+    yearFrom.addEventListener('change', validateYears);
+    yearTo.addEventListener('change', validateYears);
+
+    // Bold and Italic buttons with active highlighting
+    const reviewContent = document.getElementById('reviewContent');
+    const reviewTextHidden = document.getElementById('reviewText');
+    const reviewError = document.getElementById('reviewError');
+    const reviewForm = document.getElementById('reviewForm');
+    const boldBtn = document.getElementById('boldBtn');
+    const italicBtn = document.getElementById('italicBtn');
+    
+    function updateActiveState() {
+        if (boldBtn) {
+            try {
+                const isBold = document.queryCommandState('bold');
+                if (isBold) {
+                    boldBtn.classList.add('active');
+                } else {
+                    boldBtn.classList.remove('active');
+                }
+            } catch(e) {}
+        }
+        if (italicBtn) {
+            try {
+                const isItalic = document.queryCommandState('italic');
+                if (isItalic) {
+                    italicBtn.classList.add('active');
+                } else {
+                    italicBtn.classList.remove('active');
+                }
+            } catch(e) {}
+        }
+    }
+    
+    if (boldBtn) {
+        boldBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            reviewContent.focus();
+            document.execCommand('bold', false, null);
+            setTimeout(updateActiveState, 10);
+        });
+    }
+    
+    if (italicBtn) {
+        italicBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            reviewContent.focus();
+            document.execCommand('italic', false, null);
+            setTimeout(updateActiveState, 10);
+        });
+    }
+    
+    if (reviewContent) {
+        reviewContent.addEventListener('mouseup', updateActiveState);
+        reviewContent.addEventListener('keyup', updateActiveState);
+        reviewContent.addEventListener('click', updateActiveState);
+    }
+    
+    updateActiveState();
+
+    // Form submission
+    reviewForm.addEventListener('submit', function(e) {
+        let hasError = false;
+        
+        if (!recommendInput.value) {
+            recommendError.classList.remove('hidden');
+            hasError = true;
+        }
+        
+        categories.forEach(cat => {
+            if (!document.getElementById(`${cat}Rating`).value) {
+                hasError = true;
+            }
+        });
+        
+        if (!yearFrom.value || !yearTo.value) {
+            yearError.textContent = 'Please select both From and To years';
+            yearError.classList.remove('hidden');
+            hasError = true;
+        } else if (!validateYears()) {
+            hasError = true;
+        }
+        
+        let html = reviewContent.innerHTML;
+        if (!html.trim() || html === '<br>' || html === '<div><br></div>') {
+            reviewError.classList.remove('hidden');
+            hasError = true;
+        } else {
+            reviewError.classList.add('hidden');
+            // Convert HTML to markdown for storage
+            html = html.replace(/<strong>(.*?)<\/strong>/g, '**$1**');
+            html = html.replace(/<em>(.*?)<\/em>/g, '*$1*');
+            html = html.replace(/<b>(.*?)<\/b>/g, '**$1**');
+            html = html.replace(/<i>(.*?)<\/i>/g, '*$1*');
+            html = html.replace(/<div>/g, '\n');
+            html = html.replace(/<\/div>/g, '');
+            html = html.replace(/<br>/g, '\n');
+            html = html.replace(/<ul>[\s\S]*?<\/ul>/g, function(match) {
+                return match.replace(/<li>(.*?)<\/li>/g, '- $1\n');
+            });
+            html = html.replace(/<ol>[\s\S]*?<\/ol>/g, function(match) {
+                let counter = 1;
+                return match.replace(/<li>(.*?)<\/li>/g, function() {
+                    return (counter++) + '. $1\n';
+                });
+            });
+            html = html.replace(/<[^>]*>/g, '');
+            html = html.replace(/&nbsp;/g, ' ');
+            reviewTextHidden.value = html.trim();
+        }
+        
+        if (hasError) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+
+<%- include('partials/footer') %>

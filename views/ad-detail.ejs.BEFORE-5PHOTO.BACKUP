@@ -1,0 +1,181 @@
+<%- include('partials/header') %>
+<% 
+function capitalizeCondition(condition) {
+    if (!condition) return '';
+    return condition.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join('-');
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffHours = Math.floor((now - date) / (1000 * 60 * 60));
+    if (diffHours < 1) return 'just now';
+    if (diffHours < 24) return diffHours + ' hours ago';
+    if (diffHours < 48) return 'yesterday';
+    return Math.floor(diffHours / 24) + ' days ago';
+}
+%>
+
+<main class="max-w-4xl mx-auto px-4 py-8">
+    <nav class="text-xs text-slate-500 mb-4 flex space-x-2">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <a href="/noticeboard" class="hover:underline">Noticeboard</a>
+        <span>&gt;</span>
+        <a href="/school/<%= encodeURIComponent(ad.schoolName) %>/noticeboard" class="hover:underline"><%= ad.schoolName %></a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium"><%= ad.title %></span>
+    </nav>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                <div class="absolute top-4 right-4">
+                    
+                </div>
+        <!-- Image Section -->
+        <% if (ad.imageUrl) { %>
+            <div class="relative w-full bg-slate-100 flex flex-col items-center justify-center p-8 border-b border-slate-200">
+                <a href="/school/<%= encodeURIComponent(ad.schoolName) %>/noticeboard" class="absolute top-4 right-4 inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 hover:text-slate-950 transition-colors duration-150 ease-in-out z-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-3.5 h-3.5 text-slate-400">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                    </svg>
+                    <span>School Noticeboard</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3 text-slate-400 ml-0.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                    </svg>
+                </a>
+                <img src="<%= ad.imageUrl %>" alt="<%= ad.title %>" class="max-w-full max-h-96 object-contain rounded-lg" style="cursor: pointer;" onclick="window.open(this.src, 'image-viewer', 'width=1200,height=800,resizable=yes'); return false;">
+                <p class="text-center text-xs text-slate-400 mt-3">🔍 Click image to open full size in new tab</p>
+            </div>
+        <% } %>
+        
+        <!-- Content Section -->
+        <div class="p-6 md:p-8">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2"><%= ad.title %></h1>
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <% if (ad.isWanted) { %>
+                            <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">WANTED</span>
+                        <% } %>
+                        <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold"><%= ad.category %></span>
+                        <span class="text-sm text-slate-500">Ref: <%= ad.publicId %></span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-extrabold <%= ad.isFree ? 'text-emerald-600' : 'text-slate-900' %>">
+                        <%= ad.isFree ? 'FREE' : '£' + ad.price %>
+                    </div>
+                    <button id="saveAdBtn" class="save-ad-btn text-gray-400 hover:text-red-500 transition mt-1" data-ad-id="<%= ad.id %>" data-saved="false" style="font-size: 20px;">🤍</button>
+                    <div class="text-xs text-slate-400 mt-1">Posted <%= formatDate(ad.createdAt) %></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6 p-4 bg-slate-50 rounded-xl">
+                <div>
+                    <div class="text-xs text-slate-400 uppercase font-bold">School</div>
+                    <div class="text-sm font-semibold text-slate-800"><%= ad.schoolName %></div>
+                </div>
+                <div>
+                    <div class="text-xs text-slate-400 uppercase font-bold">Condition</div>
+                    <div class="text-sm font-semibold text-slate-800"><%= capitalizeCondition(ad.condition) %></div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h2 class="text-lg font-bold text-slate-900 mb-3">Description</h2>
+                <div class="text-slate-700 leading-relaxed whitespace-pre-wrap"><%= ad.description %></div>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                <p class="text-sm text-amber-700 font-medium mb-2">⚠️ Safety Notice</p>
+                <p class="text-xs text-amber-600">Arrange collection in a public place. School Sentiment is not involved in any transactions.</p>
+            </div>
+
+            <!-- Contact Section -->
+            <div class="border-t border-slate-200 pt-6">
+                <% if (currentUser) { %>
+                    <% if (currentUser.id === ad.userId) { %>
+                        <div class="bg-slate-50 rounded-xl p-4 text-center">
+                            <p class="text-sm text-slate-600 mb-3">This is your ad</p>
+                            <div class="flex gap-3 justify-center">
+                                <a href="/edit-ad/<%= ad.id %>" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">Edit Ad</a>
+                                <a href="/messages?ad=<%= ad.id %>" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">View Messages</a>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <div class="bg-slate-50 rounded-xl p-4">
+                            <h3 class="font-bold text-slate-900 mb-3">Contact Seller</h3>
+                            <form id="messageForm" class="space-y-3">
+                                <textarea id="messageText" rows="3" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Hi, I'm interested in your ad..."></textarea>
+                                <button type="submit" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">Send Message</button>
+                            </form>
+                            <div id="messageSuccess" class="hidden mt-3 bg-green-100 text-green-700 p-2 rounded-lg text-sm text-center"></div>
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div class="bg-slate-50 rounded-xl p-6 text-center">
+                        <p class="text-slate-600 mb-3">Sign in to contact the seller</p>
+                        <a href="/signin" class="inline-block bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">Sign In</a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+
+<script>
+const btn = document.getElementById('saveAdBtn');
+if (btn) {
+    console.log('Heart button found');
+    
+    fetch('/api/saved-ads')
+        .then(res => res.json())
+        .then(savedIds => {
+            console.log('Saved IDs:', savedIds);
+            if (savedIds.includes(btn.getAttribute('data-ad-id'))) {
+                btn.setAttribute('data-saved', 'true');
+                btn.innerHTML = '❤️';
+                btn.style.color = 'red';
+            }
+        })
+        .catch(err => console.error('Fetch error:', err));
+    
+    btn.onclick = async function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Heart clicked!');
+        
+        const adId = this.getAttribute('data-ad-id');
+        const isSaved = this.getAttribute('data-saved') === 'true';
+        const url = isSaved ? '/unsave-ad/' + adId : '/save-ad/' + adId;
+        console.log('URL:', url);
+        
+        try {
+            const response = await fetch(url, { method: 'POST' });
+            console.log('Response status:', response.status);
+            if (response.ok) {
+                if (isSaved) {
+                    this.setAttribute('data-saved', 'false');
+                    this.innerHTML = '🤍';
+                    this.style.color = 'gray';
+                    console.log('Unsaved');
+                } else {
+                    this.setAttribute('data-saved', 'true');
+                    this.innerHTML = '❤️';
+                    this.style.color = 'red';
+                    console.log('Saved');
+                }
+            } else if (response.status === 401) {
+                console.log('Not authenticated');
+                window.location.href = '/signin?message=Please sign in to save ads';
+            }
+        } catch(err) {
+            console.error('Error:', err);
+        }
+    };
+}
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,196 @@
+<%- include('partials/header') %>
+
+<main class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">Flagged Ads</h1>
+            <p class="text-slate-500 mt-1">Review and moderate ads reported by users</p>
+        </div>
+        <a href="/admin" class="text-indigo-600 hover:underline">← Back to Dashboard</a>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                        <th class="text-left p-3">Ad</th>
+                        <th class="text-left p-3">School</th>
+                        <th class="text-left p-3">Reason</th>
+                        <th class="text-left p-3">Flagged By</th>
+                        <th class="text-left p-3">Time</th>
+                        <th class="text-left p-3">Status</th>
+                        <th class="text-left p-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="flaggedAdsList">
+                    <tr><td colspan="6" class="text-center p-6 text-slate-500">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+async function loadFlaggedAds() {
+    try {
+        const response = await fetch('/api/admin/flagged-ads');
+        const data = await response.json();
+        const tbody = document.getElementById('flaggedAdsList');
+        
+        if (!data.flagged || data.flagged.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center p-6 text-slate-500">No flagged ads pending review</td></tr>';
+            return;
+        }
+        
+        let html = '';
+        for (const flag of data.flagged) {
+            const adResponse = await fetch(`/api/ad/${flag.adId}`);
+            const ad = await adResponse.json();
+            
+            const isHidden = ad.status === 'hidden';
+            const hideButtonText = isHidden ? 'Unhide Ad' : 'Hide Ad';
+            
+            html += `
+                <tr class="border-b border-slate-100 hover:bg-slate-50" data-ad-id="${flag.adId}" data-flag-id="${flag.id}">
+                    <td class="p-3">
+                        <div>
+                            <div class="font-bold text-slate-900">${escapeHtml(ad.title || 'Unknown')}</div>
+                            <div class="text-xs text-slate-500">ID: ${flag.adId}</div>
+                        </div>
+                    </td>
+                    <td class="p-3 text-slate-600">${escapeHtml(ad.schoolName || 'Unknown')}</td>
+                    <td class="p-3">
+                        <span class="inline-block px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">${escapeHtml(flag.reason)}</span>
+                        ${flag.details ? `<div class="text-xs text-slate-500 mt-1">${escapeHtml(flag.details)}</div>` : ''}
+                    </td>
+                    <td class="p-3 text-slate-600">${escapeHtml(flag.flaggedBy || 'Anonymous')}</td>
+                    <td class="p-3 text-slate-500 text-xs">${new Date(flag.flaggedAt).toLocaleString()}</td>
+                    <td class="p-3">
+                        <span class="inline-block px-2 py-1 text-xs rounded-full ${ad.status === 'hidden' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}">
+                            ${ad.status === 'hidden' ? 'Hidden' : 'Pending'}
+                        </span>
+                    </td>
+                    <td class="p-3">
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="viewAd('${flag.adId}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-1 rounded-full transition">View</button>
+                            <button onclick="resolveFlag(${flag.id}, '${flag.adId}')" class="bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-3 py-1 rounded-full transition">Allow</button>
+                            <button onclick="toggleHideAd('${flag.adId}', ${flag.id}, this)" class="hide-ad-btn bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1 rounded-full transition">${hideButtonText}</button>
+                            <button onclick="deleteAd('${flag.adId}', ${flag.id})" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-3 py-1 rounded-full transition">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+        tbody.innerHTML = html;
+    } catch(e) { 
+        console.error(e);
+        document.getElementById('flaggedAdsList').innerHTML = '<tr><td colspan="6" class="text-center p-6 text-red-500">Error loading flagged ads</td></tr>';
+    }
+}
+
+function viewAd(adId) {
+    window.location.href = `/ad/${adId}`;
+}
+
+async function resolveFlag(flagId, adId) {
+    if (!confirm('Allow this ad? The flag will be dismissed and the ad will remain visible.')) return;
+    try {
+        const response = await fetch('/api/resolve-ad-flag', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ flagId, adId })
+        });
+        if (response.ok) {
+            loadFlaggedAds();
+            updateFlaggedAdsCount();
+        } else {
+            alert('Failed to resolve flag');
+        }
+    } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function toggleHideAd(adId, flagId, buttonElement) {
+    const adResponse = await fetch(`/api/ad/${adId}`);
+    const ad = await adResponse.json();
+    const isCurrentlyHidden = ad.status === 'hidden';
+    const action = isCurrentlyHidden ? 'unhide' : 'hide';
+    
+    if (!confirm(`${isCurrentlyHidden ? 'Unhide' : 'Hide'} this ad? ${isCurrentlyHidden ? 'It will reappear on noticeboards.' : 'It will be removed from noticeboards.'}`)) return;
+    
+    try {
+        const response = await fetch('/api/toggle-ad-visibility', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ adId, flagId, action })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            const newButtonText = action === 'hide' ? 'Unhide Ad' : 'Hide Ad';
+            buttonElement.textContent = newButtonText;
+            
+            if (action === 'hide') {
+                await fetch('/api/resolve-ad-flag', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ flagId, adId })
+                });
+            }
+            
+            loadFlaggedAds();
+            updateFlaggedAdsCount();
+        } else {
+            alert(data.error || 'Failed to update ad visibility');
+        }
+    } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function deleteAd(adId, flagId) {
+    if (!confirm('⚠️ PERMANENT ACTION: Are you sure you want to DELETE this ad?\n\nThis action cannot be undone. The ad will be permanently removed from the database.')) return;
+    
+    try {
+        const response = await fetch('/api/admin/delete-ad', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ adId, flagId })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            alert('✅ Ad permanently deleted.');
+            loadFlaggedAds();
+            updateFlaggedAdsCount();
+        } else {
+            alert(data.error || 'Failed to delete ad');
+        }
+    } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function updateFlaggedAdsCount() {
+    try {
+        const response = await fetch('/api/admin/flagged-ads-count');
+        const data = await response.json();
+        const countElement = document.getElementById('flaggedAdsCountSpan');
+        if (countElement) {
+            countElement.textContent = (data.count || 0) + " pending";
+        }
+    } catch(e) { console.error(e); }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return text.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+loadFlaggedAds();
+</script>
+
+<%- include('partials/footer') %>

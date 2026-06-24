@@ -1,0 +1,37 @@
+<%- include('partials/header') %>
+
+<main class="max-w-2xl mx-auto px-4 py-16">
+    <div class="bg-white rounded-xl shadow-sm border p-8 text-center">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+        
+        <h1 class="text-2xl font-bold text-slate-900 mb-2">Check Your Email</h1>
+        <p class="text-slate-500 mb-6">
+            We've sent a magic link to <strong><%= email %></strong>
+        </p>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
+            <h2 class="font-semibold text-blue-800 mb-2">What happens next?</h2>
+            <ul class="space-y-2 text-sm text-blue-700">
+                <li>1. Click the magic link in your email to verify your work email</li>
+                <li>2. You'll be automatically logged in to your school staff account</li>
+                <li>3. Go to your school page and click "Claim This School"</li>
+                <li>4. Once verified, you'll get a ✓ Verified badge on your school profile</li>
+            </ul>
+        </div>
+        
+        <p class="text-sm text-slate-400 mb-4">
+            Didn't receive the email? Check your spam folder or 
+            <a href="/for-schools" class="text-indigo-600 hover:underline">try again</a>
+        </p>
+        
+        <a href="/" class="inline-block bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+            Return to Home
+        </a>
+    </div>
+</main>
+
+<%- include('partials/footer') %>

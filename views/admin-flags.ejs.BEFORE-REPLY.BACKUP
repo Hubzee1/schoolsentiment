@@ -1,0 +1,144 @@
+<%- include('partials/header') %>
+
+<main class="max-w-6xl mx-auto px-4 py-8">
+    <nav class="text-xs text-slate-500 mb-4 flex space-x-2">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium">Moderation Queue</span>
+    </nav>
+
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-slate-900">Flagged Reviews</h1>
+        <a href="/admin/banned-users" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm">🚫 View Banned Users</a>
+    </div>
+
+    <div id="flaggedList" class="space-y-4">
+        <div class="text-center text-slate-500 py-8">Loading flagged reviews...</div>
+    </div>
+</main>
+
+<script>
+// First, fetch to check ban status for each review
+async function checkBanStatus(reviewId) {
+    const response = await fetch('/admin/get-ban-status?reviewId=' + reviewId);
+    const data = await response.json();
+    return data.banned;
+}
+
+fetch('/api/flagged-reviews')
+    .then(r => r.json())
+    .then(async data => {
+        const container = document.getElementById('flaggedList');
+        if (!data.flagged || data.flagged.length === 0) {
+            container.innerHTML = '<div class="bg-white border border-slate-200 rounded-xl p-8 text-center"><p class="text-slate-500">No flagged reviews pending</p></div>';
+            return;
+        }
+        
+        // Get ban status for each flagged review
+        const banStatus = {};
+        for (const flag of data.flagged) {
+            banStatus[flag.reviewId] = await checkBanStatus(flag.reviewId);
+        }
+        
+        container.innerHTML = data.flagged.map(flag => `
+            <div class="bg-white border border-slate-200 rounded-xl p-4">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-bold">${flag.reason}</span>
+                        <span class="text-xs text-slate-400 ml-2">Flagged: ${new Date(flag.flaggedAt).toLocaleString()}</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="/admin/review/${flag.reviewId}" class="px-3 py-1 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700">View Details</a>
+                        <button onclick="toggleHide('${flag.reviewId}', this)" class="px-3 py-1 text-xs rounded hide-btn"></button>
+                        <button onclick="deleteReview('${flag.reviewId}')" class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
+                        <button onclick="toggleBan('${flag.reviewId}', this)" class="px-3 py-1 text-xs rounded ban-toggle-btn" style="background-color: #ea580c; color: white;">${banStatus[flag.reviewId] ? 'Unban User' : 'Ban User'}</button>
+                        <button onclick="resolveFlag('${flag.reviewId}')" class="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700">Resolve</button>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-600 mt-2"><strong>School:</strong> ${flag.schoolName}</p>
+                <p class="text-sm text-slate-600"><strong>Review:</strong> ${flag.reviewTitle || 'No title'}</p>
+                ${flag.details ? `<p class="text-sm text-slate-600 mt-2"><strong>Details:</strong> ${flag.details}</p>` : ''}
+            </div>
+        `).join('');
+        
+        // Update hide button states
+        for (const flag of data.flagged) {
+            const btn = document.querySelector(`button[onclick="toggleHide('${flag.reviewId}', this)"]`);
+            if (btn) {
+                const response = await fetch(`/admin/get-review-status?reviewId=${flag.reviewId}`);
+                const reviewData = await response.json();
+                if (reviewData.hidden) {
+                    btn.textContent = 'Unhide';
+                    btn.classList.add('bg-green-600');
+                    btn.classList.remove('bg-yellow-600');
+                } else {
+                    btn.textContent = 'Hide';
+                    btn.classList.add('bg-yellow-600');
+                    btn.classList.remove('bg-green-600');
+                }
+            }
+        }
+    });
+
+async function toggleHide(reviewId, btn) {
+    const isHidden = btn.textContent === 'Unhide';
+    const url = isHidden ? '/admin/unhide-review' : '/admin/hide-review';
+    
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewId: reviewId })
+    });
+    const data = await response.json();
+    
+    if (data.success) {
+        if (isHidden) {
+            btn.textContent = 'Hide';
+            btn.classList.remove('bg-green-600');
+            btn.classList.add('bg-yellow-600');
+        } else {
+            btn.textContent = 'Unhide';
+            btn.classList.remove('bg-yellow-600');
+            btn.classList.add('bg-green-600');
+        }
+    }
+}
+
+async function toggleBan(reviewId, btn) {
+    const response = await fetch('/admin/toggle-ban', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewId: reviewId })
+    });
+    const data = await response.json();
+    if (data.banned) {
+        btn.textContent = 'Unban User';
+        btn.classList.remove('bg-orange-600');
+        btn.classList.add('bg-green-600');
+    } else {
+        btn.textContent = 'Ban User';
+        btn.classList.remove('bg-green-600');
+        btn.classList.add('bg-orange-600');
+    }
+}
+
+function deleteReview(reviewId) {
+    if (confirm('Permanently delete this review?')) {
+        fetch('/admin/delete-review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reviewId: reviewId })
+        }).then(() => location.reload());
+    }
+}
+
+function resolveFlag(reviewId) {
+    fetch('/admin/resolve-flag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewId: reviewId })
+    }).then(() => location.reload());
+}
+</script>
+
+<%- include('partials/footer') %>

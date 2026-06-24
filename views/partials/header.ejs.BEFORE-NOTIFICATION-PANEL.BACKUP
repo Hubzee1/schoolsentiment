@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title><%= title %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; min-height: 100vh; }
+        body { 
+            font-family: 'Inter', Arial, sans-serif; 
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .grey-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f8f9fa;
+            z-index: 0;
+        }
+        .cream-banner {
+            border-bottom: 1px solid #e9e9ef;
+            position: absolute;
+            top: 65px;
+            left: 0;
+            width: 100%;
+            height: 15cm;
+            background: #fefbf0;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .background-container {
+            position: absolute;
+            top: 65px;
+            left: 0;
+            width: 100%;
+            height: 15cm;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .background-image {
+            position: absolute;
+            background-repeat: no-repeat;
+            background-position: center center;
+            opacity: 0.35;
+            width: 300px;
+            height: 300px;
+            background-size: contain;
+        }
+        .image-elated {
+            background-image: url('/images/Elated.png');
+            left: -5%;
+            top: 20px;
+            animation: moveElated 35s ease-in-out infinite;
+        }
+        .image-angry {
+            background-image: url('/images/Angry.png');
+            left: 90%;
+            top: -80px;
+            animation: moveAngry 30s ease-in-out infinite;
+        }
+        .image-average {
+            background-image: url('/images/Average.png');
+            left: 50%;
+            top: -200px;
+            animation: moveAverage 40s ease-in-out infinite;
+        }
+        .image-happy {
+            background-image: url('/images/happy.png');
+            left: 75%;
+            top: 300px;
+            animation: moveHappy 32s ease-in-out infinite;
+        }
+        .image-sad {
+            background-image: url('/images/Sad.png');
+            left: 276px;
+            top: 230px;
+            animation: moveSad 38s ease-in-out infinite;
+        }
+        @keyframes moveElated {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.2); }
+            25% { transform: translate(75px, 60px) rotate(45deg) scale(1.2); }
+            50% { transform: translate(40px, 125px) rotate(0deg) scale(1.2); }
+            75% { transform: translate(-60px, 90px) rotate(-45deg) scale(1.2); }
+        }
+        @keyframes moveAngry {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.2) scaleX(-1); }
+            25% { transform: translate(-90px, -30px) rotate(-30deg) scale(1.2) scaleX(-1); }
+            50% { transform: translate(-50px, 90px) rotate(0deg) scale(1.2) scaleX(-1); }
+            75% { transform: translate(75px, -40px) rotate(30deg) scale(1.2) scaleX(-1); }
+        }
+        @keyframes moveAverage {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.2); }
+            33% { transform: translate(60px, 100px) rotate(60deg) scale(1.2); }
+            66% { transform: translate(-70px, 75px) rotate(-60deg) scale(1.2); }
+        }
+        @keyframes moveHappy {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.2) scaleX(-1); }
+            20% { transform: translate(-80px, 40px) rotate(-36deg) scale(1.2) scaleX(-1); }
+            40% { transform: translate(50px, 110px) rotate(0deg) scale(1.2) scaleX(-1); }
+            60% { transform: translate(-40px, 80px) rotate(36deg) scale(1.2) scaleX(-1); }
+            80% { transform: translate(70px, -20px) rotate(0deg) scale(1.2) scaleX(-1); }
+        }
+        @keyframes moveSad {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.2); }
+            25% { transform: translate(30px, 80px) rotate(45deg) scale(1.2); }
+            50% { transform: translate(-40px, 120px) rotate(0deg) scale(1.2); }
+            75% { transform: translate(20px, 150px) rotate(-45deg) scale(1.2); }
+        }
+        .main-content {
+            flex: 1;
+            position: relative;
+            z-index: 10;
+        }
+        .top-nav {
+            background: #000000;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #333333;
+            position: relative;
+            z-index: 20;
+        }
+        .top-nav .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo img {
+            height: 65px;
+            width: auto;
+        }
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            font-size: 1rem;
+        }
+        .top-nav a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.9;
+        }
+        .top-nav a:hover {
+            opacity: 1;
+        }
+        .nav-divider {
+            color: rgba(255,255,255,0.5);
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 20px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="grey-overlay"></div>
+    
+    <% if (currentPage === 'home') { %>
+    <div class="cream-banner"></div>
+    <div class="background-container">
+        <div class="background-image image-elated"></div>
+        <div class="background-image image-angry"></div>
+        <div class="background-image image-average"></div>
+        <div class="background-image image-happy"></div>
+        <div class="background-image image-sad"></div>
+    </div>
+    <% } %>
+    
+    <nav class="top-nav">
+        <div class="container">
+            <div class="logo">
+                <a href="/">
+                    <img src='/logo/SchoolSentiment_white_transparency.png' alt="SchoolSentiment Logo">
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="/review">Write Review</a>
+                <span class="nav-divider">|</span>
+                <a href="/noticeboard">Noticeboard</a>
+                <span class="nav-divider">|</span>
+                <% if (locals.currentUser) { %>
+                    <a href="/dashboard">Dashboard</a>
+                    <span class="nav-divider">|</span>
+                    <a href="/messages">Messages</a>
+                    <span class="nav-divider">|</span>
+                    <a href="/blog">Blog</a>
+                    <span class="nav-divider">|</span>
+                    <% if (locals.currentUser && locals.currentUser.email === 'hubzy@hotmail.com') { %>
+                        <a href="/admin/flags">Admin</a>
+                        <span class="nav-divider">|</span>
+                    <% } %>
+                    <a href="/signout">Sign Out</a>
+                <% } else { %>
+                    <a href="/blog">Blog</a>
+                    <span class="nav-divider">|</span>
+                    <a href="/signin">Sign In</a>
+                    <span class="nav-divider">|</span>
+                    <a href="/for-schools">For Schools</a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="main-content">

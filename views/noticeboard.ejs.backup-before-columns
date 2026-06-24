@@ -1,0 +1,210 @@
+<%- include('partials/header') %>
+
+<main class="max-w-6xl mx-auto px-4 py-4">
+    <div class="text-sm text-slate-500 mb-1">
+        <a href="/" class="hover:underline">Home</a> › 
+        <a href="/school/<%= encodeURIComponent(schoolName) %>" class="hover:underline"><%= schoolName %></a> › 
+        <span class="text-slate-800 font-medium">Noticeboard</span>
+    </div>
+
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-900"><%= schoolName %> Noticeboard</h1>
+        <% if (currentUser) { %>
+            <a href="/post-ad/<%= encodeURIComponent(schoolName) %>" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-full text-sm font-medium hover:bg-indigo-700 transition">+ Post an Item</a>
+        <% } else { %>
+            <a href="/signin" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-full text-sm font-medium hover:bg-gray-600 transition">Sign in to Post</a>
+        <% } %>
+    </div>
+
+    <!-- Category Filters -->
+    <div class="flex gap-2 mb-6 flex-wrap">
+        <button class="filter-btn active px-4 py-1.5 text-sm rounded-full bg-indigo-600 text-white" data-filter="all">All</button>
+        <button class="filter-btn px-4 py-1.5 text-sm rounded-full bg-white border border-slate-200 text-slate-600 hover:bg-slate-50" data-filter="for-sale">For Sale</button>
+        <button class="filter-btn px-4 py-1.5 text-sm rounded-full bg-white border border-slate-200 text-slate-600 hover:bg-slate-50" data-filter="free">Free</button>
+        <button class="filter-btn px-4 py-1.5 text-sm rounded-full bg-white border border-slate-200 text-slate-600 hover:bg-slate-50" data-filter="wanted">Wanted</button>
+    </div>
+
+    <!-- Ads Grid -->
+    <div id="ads-container" class="space-y-4">
+        <% if (ads && ads.length > 0) { %>
+            <% ads.forEach(ad => { %>
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition ad-card flex h-40" data-price-type="<%= ad.isFree ? 'free' : 'for-sale' %>" data-is-wanted="<%= ad.isWanted ? 'true' : 'false' %>">
+                    <!-- Image Section -->
+                    <div class="w-56 h-40 flex-shrink-0 bg-slate-100">
+                        <% if (ad.imageUrl) { %>
+                            <img src="<%= ad.imageUrl %>" alt="<%= ad.title %>" class="w-full h-full object-contain bg-slate-100">
+                        <% } else { %>
+                            <div class="w-full h-full flex items-center justify-center text-slate-400 bg-slate-50">
+                                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="flex-1 p-3 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-bold text-slate-900 hover:text-indigo-600 text-sm">
+                                        <a href="#" class="view-ad-details" data-ad-id="<%= ad.id %>"><%= ad.title %></a>
+                                    </h3>
+                                    <p class="text-sm text-slate-600 mt-1 line-clamp-1"><%= ad.description %></p>
+                                </div>
+                                <span class="text-xs text-slate-400 whitespace-nowrap ml-2">Ref: <%= ad.publicId %> • <%= new Date(ad.createdAt).toLocaleDateString('en-GB') %></span>
+                            </div>
+                            <div class="flex gap-2 mt-2 flex-wrap">
+                                <% if (ad.isWanted) { %>
+                                    <span class="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Wanted</span>
+                                <% } %>
+                                <span class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full"><%= ad.category %></span>
+                                <span class="text-xs text-slate-500">Condition: <%= ad.condition %></span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-100">
+                            <div>
+                                <% if (ad.isWanted) { %>
+                                    <span class="text-lg font-bold text-amber-600">WANTED</span>
+                                <% } else { %>
+                                    <span class="text-lg font-bold text-indigo-600"><%= ad.isFree ? 'FREE' : '£' + ad.price %></span>
+                                <% } %>
+                            </div>
+                            <div class="flex gap-2">
+                                <% if (currentUser && currentUser.id === ad.userId) { %>
+                                    <a href="/messages?ad=<%= ad.id %>" class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"><%= ad.hasConversation ? 'Message Buyer' : 'Messages' %></a>
+                                <% } else if (currentUser && currentUser.id !== ad.userId && ad.hasConversation) { %>
+                                    <a href="/messages?ad=<%= ad.id %>" class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Message Seller</a>
+                                <% } else if (currentUser && currentUser.id !== ad.userId && !ad.hasConversation) { %>
+                                    <button class="contact-seller-btn px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition" data-ad-id="<%= ad.id %>" data-ad-title="<%= ad.title.replace(/'/g, "\\'") %>">I'm Interested</button>
+                                <% } else { %>
+                                    <a href="/signin" class="px-3 py-1.5 text-sm bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">Sign in to Contact</a>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="bg-white border border-slate-200 rounded-2xl p-12 text-center text-slate-500">
+                <p class="text-lg">📌 No items posted yet</p>
+                <p class="text-sm mt-2">Be the first to post something!</p>
+                <% if (currentUser) { %>
+                    <a href="/post-ad/<%= encodeURIComponent(schoolName) %>" class="inline-block mt-4 text-indigo-600 hover:underline">Post an Item →</a>
+                <% } else { %>
+                    <a href="/signin" class="inline-block mt-4 text-indigo-600 hover:underline">Sign in to post</a>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+</main>
+
+<!-- Message Modal -->
+<div id="messageModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-bold mb-2">Contact Seller</h3>
+        <p class="text-sm text-slate-500 mb-4" id="modalItem"></p>
+        <textarea id="messageText" rows="4" class="w-full px-3 py-2 border border-slate-300 rounded-lg mb-4" placeholder="Your message..."></textarea>
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+            <p class="text-xs text-amber-700">⚠️ Safety tip: Arrange collection in a public place. School Sentiment does not handle payments.</p>
+        </div>
+        <div class="flex gap-3">
+            <button id="sendMessageBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Send Message</button>
+            <button id="closeModalBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Category filtering
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const filter = this.getAttribute('data-filter');
+        
+        document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('bg-indigo-600', 'text-white');
+            b.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-600');
+        });
+        this.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-600');
+        this.classList.add('bg-indigo-600', 'text-white');
+        
+        document.querySelectorAll('.ad-card').forEach(card => {
+            if (filter === 'all') {
+                card.style.display = 'flex';
+            } else if (filter === 'wanted') {
+                const isWanted = card.getAttribute('data-is-wanted') === 'true';
+                card.style.display = isWanted ? 'flex' : 'none';
+            } else {
+                const priceType = card.getAttribute('data-price-type');
+                card.style.display = priceType === filter ? 'flex' : 'none';
+            }
+        });
+    });
+});
+
+// Message modal
+const modal = document.getElementById('messageModal');
+let currentAdId = null;
+
+document.querySelectorAll('.contact-seller-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        currentAdId = this.getAttribute('data-ad-id');
+        const adTitle = this.getAttribute('data-ad-title');
+        document.getElementById('modalItem').textContent = `Item: ${adTitle}`;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    });
+});
+
+document.getElementById('closeModalBtn').addEventListener('click', () => {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+});
+
+document.getElementById('sendMessageBtn').addEventListener('click', async () => {
+    const message = document.getElementById('messageText').value;
+    if (!message.trim()) {
+        alert('Please enter a message');
+        return;
+    }
+    
+    const sendBtn = document.getElementById('sendMessageBtn');
+    const originalText = sendBtn.textContent;
+    sendBtn.textContent = 'Sending...';
+    sendBtn.disabled = true;
+    
+    try {
+        const response = await fetch(`/message-about-ad/${currentAdId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: message })
+        });
+        
+        if (response.ok) {
+            alert('✅ Message sent! The seller will contact you.');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.getElementById('messageText').value = '';
+            setTimeout(() => window.location.reload(), 500);
+        } else if (response.status === 401) {
+            alert('Please sign in to send messages');
+        } else {
+            alert('❌ Error sending message');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Network error. Please try again.');
+    } finally {
+        sendBtn.textContent = originalText;
+        sendBtn.disabled = false;
+    }
+});
+</script>
+
+<style>
+.filter-btn.active:hover {
+    background-color: #4f46e5 !important;
+}
+</style>
+
+<%- include('partials/footer') %>

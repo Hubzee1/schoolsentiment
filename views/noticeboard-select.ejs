@@ -1,0 +1,176 @@
+<%- include('partials/header') %>
+
+<main class="max-w-6xl mx-auto px-4 py-8">
+    <nav class="text-xs text-slate-500 mb-4 flex space-x-2">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium">School Noticeboard</span>
+    </nav>
+
+    <div class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-3">School Noticeboard</h1>
+        <p class="text-slate-500">Browse items for sale, wanted ads, and free items from schools across the UK</p>
+        <% if (!currentUser) { %>
+            <p class="text-sm text-amber-600 mt-2">⚠️ You need to <a href="/signin" class="underline">sign in</a> to post items or contact sellers</p>
+        <% } %>
+    </div>
+
+    <!-- Search for a school -->
+    <div class="max-w-xl mx-auto mb-12">
+        <form action="/search-noticeboard" method="GET" class="flex gap-2">
+            <div class="relative flex-1">
+                <input type="text" id="schoolSearch" name="school" placeholder="Search for a school..." class="w-full px-4 py-3 border border-slate-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <div id="autocompleteResults" class="hidden absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-lg z-10 max-h-80 overflow-y-auto"></div>
+            </div>
+            <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-full hover:bg-indigo-700 transition font-medium">Search</button>
+        </form>
+    </div>
+
+    <!-- Popular Categories -->
+    <div class="mb-12">
+        <h2 class="text-xl font-bold text-slate-900 mb-4 text-center">Popular Categories</h2>
+        <div class="flex flex-wrap justify-center gap-3">
+            <a href="#" class="category-filter px-6 py-2 text-sm rounded-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition" data-category="uniform">Uniforms</a>
+            <a href="#" class="category-filter px-6 py-2 text-sm rounded-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition" data-category="books">Books</a>
+            <a href="#" class="category-filter px-6 py-2 text-sm rounded-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition" data-category="sports">Sports Equipment</a>
+            <a href="#" class="category-filter px-6 py-2 text-sm rounded-full bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition" data-category="free">Free</a>
+        </div>
+    </div>
+
+    <!-- Recent Items Across All Schools -->
+    <div>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-slate-900">Recent Items Across All Schools</h2>
+            <a href="#" class="text-sm text-indigo-600 hover:underline view-all-link">View all →</a>
+        </div>
+        <div id="recent-items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="col-span-full text-center text-slate-500 py-8">Loading recent items...</div>
+        </div>
+    </div>
+</main>
+
+<script>
+// School autocomplete
+const schoolInput = document.getElementById('schoolSearch');
+const autocompleteResults = document.getElementById('autocompleteResults');
+let allSchools = [];
+let allAds = [];
+
+// Fetch schools and ads data
+Promise.all([
+    fetch('/api/schools').then(r => r.json()),
+    fetch('/api/ads').then(r => r.json()).catch(() => [])
+]).then(([schools, ads]) => {
+    allSchools = schools;
+    allAds = ads;
+    
+    // Render recent items
+    renderRecentItems(ads);
+});
+
+function renderRecentItems(ads) {
+    const container = document.getElementById('recent-items-grid');
+    if (!ads || ads.length === 0) {
+        container.innerHTML = '<div class="col-span-full text-center text-slate-500 py-8">No items posted yet. Be the first!</div>';
+        return;
+    }
+    
+    const recentAds = [...ads].filter(ad => ad.status === 'active').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
+    
+    if (recentAds.length === 0) {
+        container.innerHTML = '<div class="col-span-full text-center text-slate-500 py-8">No items available</div>';
+        return;
+    }
+    
+    container.innerHTML = recentAds.map(ad => `
+        <a href="/school/${encodeURIComponent(ad.schoolName)}/noticeboard" class="block bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition">
+            <div class="h-32 bg-slate-100 flex items-center justify-center">
+                ${ad.imageUrl ? `<img src="${ad.imageUrl}" class="w-full h-full object-cover">` : `
+                    <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                `}
+            </div>
+            <div class="p-3">
+                <h3 class="font-bold text-slate-900 text-sm truncate">${ad.title}</h3>
+                <p class="text-xs text-slate-500 truncate">${ad.schoolName}</p>
+                <p class="text-xs font-bold text-indigo-600 mt-1">${ad.isFree ? 'FREE' : '£' + ad.price}</p>
+            </div>
+        </a>
+    `).join('');
+}
+
+// Category filter links
+document.querySelectorAll('.category-filter').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const category = this.getAttribute('data-category');
+        // Filter recent items by category
+        if (allAds.length > 0) {
+            let filtered = allAds.filter(ad => ad.category === category && ad.status === 'active');
+            if (category === 'free') {
+                filtered = allAds.filter(ad => ad.isFree === true && ad.status === 'active');
+            }
+            renderRecentItems(filtered);
+            // Update active state
+            document.querySelectorAll('.category-filter').forEach(l => {
+                l.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-500');
+            });
+            this.classList.add('ring-2', 'ring-offset-2', 'ring-indigo-500');
+        }
+    });
+});
+
+// View all link
+document.querySelector('.view-all-link').addEventListener('click', function(e) {
+    e.preventDefault();
+    renderRecentItems(allAds.filter(ad => ad.status === 'active'));
+    document.querySelectorAll('.category-filter').forEach(l => {
+        l.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-500');
+    });
+});
+
+// School autocomplete
+if (schoolInput) {
+    schoolInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        if (query.length < 2) {
+            autocompleteResults.style.display = 'none';
+            return;
+        }
+        const matches = allSchools.filter(s => s.name.toLowerCase().includes(query.toLowerCase()) || s.town.toLowerCase().includes(query.toLowerCase())).slice(0,10);
+        if (!matches.length) {
+            autocompleteResults.style.display = 'none';
+            return;
+        }
+        let html = '';
+        matches.forEach(s => {
+            html += `<div class="autocomplete-item p-3 cursor-pointer border-b border-slate-100 hover:bg-slate-50" data-school-name="${s.name.replace(/'/g, "\\'")}">
+                        <div class="font-semibold text-slate-900">${s.name}</div>
+                        <div class="text-xs text-slate-500">${s.town} • ${s.postcode}</div>
+                    </div>`;
+        });
+        autocompleteResults.innerHTML = html;
+        autocompleteResults.style.display = 'block';
+    });
+
+    autocompleteResults.addEventListener('click', function(e) {
+        const item = e.target.closest('.autocomplete-item');
+        if (item) {
+            const schoolName = item.getAttribute('data-school-name');
+            document.querySelector('input[name="school"]').value = schoolName;
+            autocompleteResults.style.display = 'none';
+            // Auto-submit the form
+            window.location.href = `/school/${encodeURIComponent(schoolName)}/noticeboard`;
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!schoolInput.contains(e.target) && !autocompleteResults.contains(e.target)) {
+            autocompleteResults.style.display = 'none';
+        }
+    });
+}
+</script>
+
+<%- include('partials/footer') %>

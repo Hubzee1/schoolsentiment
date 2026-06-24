@@ -1,0 +1,124 @@
+<%- include('partials/header') %>
+
+<div class="bg-[#fefbf0] text-slate-900 antialiased min-h-screen relative overflow-x-hidden">
+  
+  <!-- FAINT BACKGROUND FACES -->
+  <div class="absolute inset-0 opacity-[0.008] pointer-events-none select-none z-0">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full min-h-screen" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid slice">
+      <g stroke="#000" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <g transform="translate(650, 180)"><circle cx="90" cy="90" r="80"/><path d="M60 75 Q75 60 90 75 M100 75 Q115 60 130 75" stroke-width="14"/><path d="M50 105 Q90 150 130 105 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(180, 80)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(920, 90)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 130 102 112"/></g>
+        <g transform="translate(100, 380)"><circle cx="60" cy="60" r="54"/><circle cx="43" cy="52" r="5" fill="#000"/><circle cx="77" cy="52" r="5" fill="#000"/><path d="M42 82 Q60 98 78 82"/></g>
+        <g transform="translate(480, 420)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 132 102 112"/></g>
+        <g transform="translate(880, 440)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(250, 680)"><circle cx="110" cy="110" r="98"/><path d="M70 95 Q90 75 110 95 M120 95 Q140 75 160 95" stroke-width="16"/><path d="M55 135 Q110 195 165 135 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(710, 700)"><circle cx="60" cy="60" r="54"/><circle cx="43" cy="52" r="5" fill="#000"/><circle cx="77" cy="52" r="5" fill="#000"/><path d="M42 82 Q60 98 78 82"/></g>
+        <g transform="translate(940, 740)"><circle cx="85" cy="85" r="76"/><path d="M55 75 Q70 60 85 75 M95 75 Q110 60 125 75" stroke-width="12"/><path d="M48 110 Q85 155 122 110 Z" fill="#000" opacity="0.15"/></g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="relative z-10">
+    <main class="max-w-4xl mx-auto px-4 py-4">
+
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Saved Reviews</h1>
+                <p class="text-xs text-slate-500 mt-1 font-medium">Reviews you've saved from across the site</p>
+            </div>
+            <a href="/dashboard" class="text-xs font-medium text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-full hover:bg-slate-50 transition">← Back to Dashboard</a>
+        </div>
+
+        <% if (Object.keys(groupedBySchool).length === 0) { %>
+            <div class="bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm">
+                <div class="text-4xl mb-3">❤️</div>
+                <p class="text-slate-600 font-semibold text-lg">No saved reviews yet</p>
+                <p class="text-sm text-slate-400 mt-1">Click the ❤️ heart on any review to save it here</p>
+                <a href="/" class="inline-block mt-4 bg-black hover:bg-slate-800 text-white font-semibold px-5 py-2 rounded-full text-sm transition">Browse schools →</a>
+            </div>
+        <% } else { %>
+            <% Object.keys(groupedBySchool).forEach(schoolName => { %>
+                <% const reviews = groupedBySchool[schoolName]; %>
+                <div class="bg-white border border-slate-200 rounded-xl mb-4 overflow-hidden shadow-sm">
+                    <div class="bg-slate-50 px-4 py-3 border-b border-slate-200">
+                        <div class="flex justify-between items-center flex-wrap gap-2">
+                            <div>
+                                <h2 class="font-bold text-slate-900 text-base"><%= schoolName %></h2>
+                                <p class="text-xs text-slate-500"><%= reviews.length %> saved review(s)</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <a href="/school/<%= encodeURIComponent(schoolName) %>/noticeboard" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-950 bg-amber-400 border border-amber-400 rounded-full shadow-sm hover:bg-amber-500 transition">
+                                    <span>School Noticeboard</span>
+                                </a>
+                                <% 
+                                    let schoolWebsite = null;
+                                    if (typeof allSchools !== 'undefined') {
+                                        const school = allSchools.find(s => s.name === schoolName);
+                                        if (school) schoolWebsite = school.website;
+                                    }
+                                %>
+                                <% if (schoolWebsite && schoolWebsite !== '') { %>
+                                    <a href="<%= schoolWebsite %>" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 transition">
+                                        <span>School Website</span>
+                                    </a>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divide-y divide-slate-100">
+                        <% reviews.forEach(review => { %>
+                            <div class="p-4 hover:bg-slate-50 transition">
+                                <div class="flex justify-between items-start gap-4">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                            <span class="text-xs font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full">
+                                                <%= review.userType === 'former_student' ? 'Alumni' : (review.userType || 'Other') %>
+                                            </span>
+                                            <span class="text-xs text-slate-400"><%= new Date(review.createdAt).toLocaleDateString('en-GB') %></span>
+                                        </div>
+                                        <% if (review.reviewTitle) { %>
+                                            <h3 class="font-bold text-slate-800 text-sm"><%= review.reviewTitle %></h3>
+                                        <% } %>
+                                        <p class="text-sm text-slate-600 mt-1 line-clamp-3"><%= review.reviewText %></p>
+                                        <div class="flex items-center gap-4 mt-2 text-xs text-slate-500">
+                                            <span>Rating: <%= review.rating %>/5</span>
+                                            <span>Recommend: <%= review.recommend %></span>
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <button class="unsave-btn text-red-500 hover:text-red-700 transition" data-review-id="<%= review.id %>" title="Remove saved review">
+                                            <svg class="w-5 h-5 fill-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                    <div class="bg-slate-50 px-4 py-2 border-t border-slate-200 text-right">
+                        <a href="/school/<%= encodeURIComponent(schoolName) %>" class="text-xs font-medium text-indigo-600 hover:underline">View all reviews for this school →</a>
+                    </div>
+                </div>
+            <% }) %>
+        <% } %>
+    </main>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.unsave-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const reviewId = this.getAttribute('data-review-id');
+        if (confirm('Remove this review from your saved list?')) {
+            const response = await fetch(`/unsave-review/${reviewId}`, { method: 'POST' });
+            if (response.ok) {
+                window.location.reload();
+            }
+        }
+    });
+});
+</script>
+
+<%- include('partials/footer') %>

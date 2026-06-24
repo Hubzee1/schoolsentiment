@@ -1,0 +1,416 @@
+<%- include('partials/header') %>
+
+<main class="max-w-3xl mx-auto px-4 py-8">
+    <nav class="text-xs text-slate-500 mb-4 flex space-x-2">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <a href="/dashboard" class="hover:underline">Dashboard</a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium">Post an Ad</span>
+    </nav>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+        <h1 class="text-2xl font-bold text-slate-900 mb-6">Post an Item on School Noticeboard</h1>
+        
+        <form id="adForm" action="/submit-ad" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <% if (currentUser && currentUser.banned === 1) { %>
+            <div class="bg-red-100 border border-red-300 rounded-xl p-4 shadow-sm mb-6">
+                <div class="flex items-start gap-3">
+                    <span class="text-xl">⚠️</span>
+                    <div class="text-sm text-red-800">
+                        <p class="font-bold mb-1">Account Suspended</p>
+                        <p class="mb-2">Your account has been suspended due to a previous review being flagged.</p>
+                        <p class="font-bold mb-1">You can still:</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                            <div class="flex items-center gap-2">✅ <span>Access our Review Site</span></div>
+                            <div class="flex items-center gap-2">📦 <span>Browse the School Noticeboard</span></div>
+                            <div class="flex items-center gap-2">❤️ <span>Save reviews from other users</span></div>
+                            <div class="flex items-center gap-2">💬 <span>Reply to messages from sellers</span></div>
+                        </div>
+                        <p class="mt-2 text-xs">You cannot write new reviews or post new ads.</p>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+            <!-- School Selection -->
+            <div>
+                <label class="block text-sm font-bold text-slate-900 mb-2">Select School *</label>
+                <% if (schoolName && schoolName !== '') { %>
+                    <input type="hidden" name="schoolName" value="<%= schoolName %>">
+                    <div class="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-full text-sm text-slate-700">
+                        <%= schoolName %>
+                    </div>
+                <% } else { %>
+                    <div class="relative">
+                        <input type="text" id="schoolSearch" name="schoolName" placeholder="Search for a UK school..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition" required autocomplete="off">
+                        <div id="autocompleteResults" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; max-height: 300px; overflow-y: auto; margin-top: 4px;"></div>
+                    </div>
+                <% } %>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-bold text-slate-900 mb-2">Title *</label>
+                <input type="text" name="title" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g., Year 7 Rugby Kit - Good Condition">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-bold text-slate-900 mb-2">Category *</label>
+                <select name="category" required class="w-full px-4 py-2 border border-slate-300 rounded-lg">
+                    <option value="">Select a category</option>
+                    <option value="uniform">Uniforms</option>
+                    <option value="books">Books</option>
+                    <option value="sports">Sports Equipment</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="flex items-center gap-2 cursor-pointer mb-3">
+                    <input type="hidden" name="isWanted" value="false">
+                    <input type="checkbox" id="isWanted" name="isWanted" value="true" class="w-4 h-4 text-amber-600 border-slate-300 rounded focus:ring-amber-500">
+                    <span class="text-sm text-slate-700">This is a wanted ad (looking to buy)</span>
+                </label>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-bold text-slate-900 mb-2">Condition *</label>
+                <select name="condition" required class="w-full px-4 py-2 border border-slate-300 rounded-lg">
+                    <option value="">Select condition</option>
+                    <option value="new">New with tags</option>
+                    <option value="like-new">Like new</option>
+                    <option value="good">Good used condition</option>
+                    <option value="fair">Fair - signs of wear</option>
+                    <option value="poor">Poor - but usable</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-bold text-slate-900 mb-2">Price *</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">£</span>
+                    <input type="text" name="price" required class="w-full pl-7 pr-4 py-2 border border-slate-300 rounded-lg" placeholder="e.g., 25 or FREE">
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Enter "0" or "FREE" for free items</p>
+            </div>
+            
+            <!-- IMAGE MANAGER -->
+            <div>
+                <label class="block text-sm font-bold text-slate-900 mb-2">Photos (up to 5)</label>
+                
+                <!-- Add Image Button -->
+                <button type="button" id="addImageBtn" class="mb-3 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-200 transition flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Add Photo
+                </button>
+                
+                <!-- Hidden file input that gets triggered -->
+                <input type="file" id="imageFileInput" accept="image/jpeg,image/png,image/jpg" style="display: none;">
+                
+                <!-- Image Preview Grid -->
+                <div id="imagePreviewGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-3"></div>
+                
+                <p class="text-xs text-slate-400 mt-2"><img src="/images/Elated.png" class="w-4 h-4 inline object-contain align-middle mr-1"> Click the Elated face to set as primary (thumbnail) photo. ✕ to delete. Max 5 photos.</p>
+                
+                <!-- Hidden field to store image URLs order -->
+                <input type="hidden" id="imageUrlsInput" name="imageUrlsJson" value="[]">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-bold text-slate-900 mb-2">Description *</label>
+                <textarea name="description" rows="8" required class="w-full px-4 py-2 border border-slate-300 rounded-lg" placeholder="Describe the item (max 500 words)"></textarea>
+                <div class="text-right text-xs text-slate-400 mt-1"><span id="descCounter">500</span> words remaining</div>
+            </div>
+            
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <p class="text-sm text-amber-700 font-medium mb-2">⚠️ Safety &amp; Simplicity</p>
+                <p class="text-xs text-amber-600">We handle the community connections while you handle the exchange safely in person.</p>
+            </div>
+            
+            <div class="flex gap-3">
+                <button type="submit" id="submitBtn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2">
+    <span id="btnText">Post Item</span>
+    <span id="btnSpinner" style="display:none;"><svg class="animate-spin inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="#f59e0b" stroke-width="4"></circle><path class="opacity-75" fill="#000000" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></span>
+</button>
+                <a href="javascript:history.back()" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300">Cancel</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+// IMAGE MANAGER
+let selectedImages = []; // Array of { file: File, previewUrl: string, isPrimary: boolean }
+
+const addImageBtn = document.getElementById('addImageBtn');
+const fileInput = document.getElementById('imageFileInput');
+const previewGrid = document.getElementById('imagePreviewGrid');
+const imageUrlsInput = document.getElementById('imageUrlsInput');
+
+// Trigger file selection
+addImageBtn.addEventListener('click', () => {
+    if (selectedImages.length >= 5) {
+        alert('Maximum 5 photos allowed');
+        return;
+    }
+    fileInput.click();
+});
+
+// Handle file selection
+fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (selectedImages.length >= 5) {
+        alert('Maximum 5 photos allowed');
+        fileInput.value = '';
+        return;
+    }
+    
+    // Validate file type
+    if (!file.type.match('image/jpeg') && !file.type.match('image/png') && !file.type.match('image/jpg')) {
+        alert('Only JPEG and PNG images are allowed');
+        fileInput.value = '';
+        return;
+    }
+    
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Image must be less than 5MB');
+        fileInput.value = '';
+        return;
+    }
+    
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file);
+    
+    // Add to array (new images are NOT primary by default unless it's the first image)
+    const isPrimary = selectedImages.length === 0;
+    selectedImages.push({ file, previewUrl, isPrimary });
+    
+    // Render the grid
+    renderImageGrid();
+    
+    // Clear file input so same file can be selected again if needed
+    fileInput.value = '';
+});
+
+// Render image grid with controls
+function renderImageGrid() {
+    if (selectedImages.length === 0) {
+        previewGrid.innerHTML = '<div class="col-span-full text-center text-slate-400 text-sm py-8 border-2 border-dashed border-slate-200 rounded-lg">No photos selected. Click "Add Photo" to add images.</div>';
+        imageUrlsInput.value = '';
+        return;
+    }
+    
+    let html = '';
+    selectedImages.forEach((img, index) => {
+        html += `
+            <div class="relative group border rounded-lg p-2 bg-slate-50">
+                <img src="${img.previewUrl}" class="w-full h-24 object-cover rounded-lg">
+                <div class="absolute top-1 right-1 flex gap-1">
+                    <button type="button" class="set-primary-btn bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-yellow-50 transition ${img.isPrimary ? 'bg-yellow-100 ring-2 ring-yellow-400' : ''}" data-index="${index}">
+                        <img src="/images/Elated.png" class="w-8 h-8 object-cover ${img.isPrimary ? 'opacity-100' : 'opacity-60'}">
+                    </button>
+                    <button type="button" class="delete-image-btn bg-white rounded-full w-7 h-7 flex items-center justify-center shadow-md hover:bg-red-50 transition" data-index="${index}">
+                        ✕
+                    </button>
+                </div>
+                ${img.isPrimary ? '<div class="absolute bottom-1 left-1 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1"><img src="/images/Elated.png" class="w-3 h-3 object-contain"> Primary</div>' : ''}
+                <div class="text-center text-xs text-slate-500 mt-1">${index + 1}</div>
+            </div>
+        `;
+    });
+    previewGrid.innerHTML = html;
+    
+    // Add event listeners to new buttons
+    document.querySelectorAll('.set-primary-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const idx = parseInt(btn.dataset.index);
+            setPrimaryImage(idx);
+        });
+    });
+    
+    document.querySelectorAll('.delete-image-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const idx = parseInt(btn.dataset.index);
+            deleteImage(idx);
+        });
+    });
+    
+    // Update hidden input with the ORDER of image URLs (primary first)
+    updateHiddenInput();
+}
+
+function setPrimaryImage(index) {
+    // Remove primary flag from all
+    selectedImages.forEach(img => img.isPrimary = false);
+    // Set primary flag on selected
+    selectedImages[index].isPrimary = true;
+    // Reorder array so primary is first
+    const primaryImage = selectedImages[index];
+    const remainingImages = selectedImages.filter((_, i) => i !== index);
+    selectedImages = [primaryImage, ...remainingImages];
+    renderImageGrid();
+}
+
+function deleteImage(index) {
+    // Revoke object URL to avoid memory leaks
+    URL.revokeObjectURL(selectedImages[index].previewUrl);
+    selectedImages.splice(index, 1);
+    // If no images left and we deleted the primary, nothing special
+    // If we deleted the primary and there are remaining images, make the first one primary
+    if (selectedImages.length > 0 && !selectedImages.some(img => img.isPrimary)) {
+        selectedImages[0].isPrimary = true;
+    }
+    renderImageGrid();
+}
+
+function updateHiddenInput() {
+    // This creates an array of image URLs (just placeholders)
+    // The actual file upload will happen via FormData
+    // We store the order info in a hidden field for server reference
+    const orderData = selectedImages.map((img, idx) => ({
+        position: idx,
+        isPrimary: img.isPrimary
+    }));
+    imageUrlsInput.value = JSON.stringify(orderData);
+}
+
+// Before form submission, we need to upload files via AJAX or modify FormData
+// Since the server expects multipart/form-data with files, we need to reconstruct the file list
+// in the correct order (primary first)
+
+const adForm = document.getElementById('adForm');
+adForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Show spinner
+    const submitBtn = adForm.querySelector('button[type="submit"]');
+    const textSpan = document.getElementById('btnText');
+    const spinner = document.getElementById('btnSpinner');
+    if (textSpan) textSpan.textContent = 'Posting...';
+    if (spinner) spinner.style.display = 'inline-block';
+    if (submitBtn) submitBtn.disabled = true;
+    
+    if (selectedImages.length === 0) {
+        // No photos - allowed, just submit
+        adForm.submit();
+        return;
+    }
+    
+    // Create FormData and append files in correct order (primary first)
+    const formData = new FormData();
+    
+    // Append all other form fields
+    const formFields = adForm.querySelectorAll('input:not([type="file"]), select, textarea');
+    formFields.forEach(field => {
+        if (field.name && field.name !== 'imageUrlsJson') {
+            formData.append(field.name, field.value);
+        }
+    });
+    
+    // Append files in the current order (primary first already from reordering)
+    for (let i = 0; i < selectedImages.length; i++) {
+        formData.append('photos', selectedImages[i].file);
+    }
+    
+    const originalText = submitBtn ? submitBtn.innerText : 'Post Item';
+    
+    try {
+        const response = await fetch("/submit-ad", {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const data = await response.json(); if (data.success) { window.location.href = data.redirect; } else { alert("Error posting ad: " + data.message); }
+        } else {
+            const text = await response.text();
+            document.body.innerHTML = text;
+        }
+    } catch (err) {
+        alert('Error posting ad. Please try again.');
+        if (textSpan) textSpan.textContent = 'Post Item';
+        if (spinner) spinner.style.display = 'none';
+        if (submitBtn) submitBtn.disabled = false;
+    }
+});
+
+// Clean up object URLs on page unload to prevent memory leaks
+window.addEventListener('beforeunload', () => {
+    selectedImages.forEach(img => {
+        if (img.previewUrl) URL.revokeObjectURL(img.previewUrl);
+    });
+});
+
+// School autocomplete
+const schoolInput = document.getElementById('schoolSearch');
+const autocompleteResults = document.getElementById('autocompleteResults');
+let allSchools = [];
+
+fetch('/api/schools')
+    .then(response => response.json())
+    .then(schools => {
+        allSchools = schools;
+    });
+
+if (schoolInput) {
+    schoolInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        if (query.length < 2) {
+            autocompleteResults.style.display = 'none';
+            return;
+        }
+        const matches = allSchools.filter(s => s.name.toLowerCase().includes(query.toLowerCase()) || s.town.toLowerCase().includes(query.toLowerCase())).slice(0,7);
+        if (!matches.length) {
+            autocompleteResults.style.display = 'none';
+            return;
+        }
+        let html = '';
+        matches.forEach(s => {
+            html += `<div class="autocomplete-item" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f1f5f9;" data-school-name="${s.name.replace(/'/g, "\\'")}">
+                        <div style="font-weight: 600; color: #0f172a; margin-bottom: 4px;">${s.name}</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">${s.town} • ${s.postcode}</div>
+                    </div>`;
+        });
+        autocompleteResults.innerHTML = html;
+        autocompleteResults.style.display = 'block';
+    });
+
+    autocompleteResults.addEventListener('click', function(e) {
+        const item = e.target.closest('.autocomplete-item');
+        if (item) {
+            schoolInput.value = item.getAttribute('data-school-name');
+            autocompleteResults.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!schoolInput.contains(e.target) && !autocompleteResults.contains(e.target)) {
+            autocompleteResults.style.display = 'none';
+        }
+    });
+}
+
+// Word counter
+const descTextarea = document.querySelector('textarea[name="description"]');
+const counterSpan = document.getElementById('descCounter');
+if (descTextarea && counterSpan) {
+    const remaining = 500 - descTextarea.value.length;
+    counterSpan.textContent = remaining;
+    descTextarea.addEventListener('input', function() {
+        const remaining = 500 - this.value.length;
+        if (remaining < 0) {
+            alert('Description cannot exceed 500 words');
+            this.value = this.value.substring(0, 500);
+            counterSpan.textContent = 0;
+        } else {
+            counterSpan.textContent = remaining;
+        }
+    });
+}
+</script>
+
+<%- include('partials/footer') %>

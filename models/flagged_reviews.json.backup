@@ -1,0 +1,22 @@
+[
+  {
+    "reviewId": "1780414015964",
+    "reviewTitle": "Class Act",
+    "schoolName": "Kingsbury High School",
+    "reason": "hate",
+    "details": "test",
+    "flaggedBy": "ba95e491-caf8-4602-badd-8abf949864c5",
+    "flaggedAt": "2026-06-08T18:02:19.103Z",
+    "status": "resolved"
+  },
+  {
+    "reviewId": "1780942188374",
+    "reviewTitle": "Blackies",
+    "schoolName": "Kingsbury High School",
+    "reason": "hate",
+    "details": "",
+    "flaggedBy": "ba95e491-caf8-4602-badd-8abf949864c5",
+    "flaggedAt": "2026-06-08T18:10:11.331Z",
+    "status": "resolved"
+  }
+]

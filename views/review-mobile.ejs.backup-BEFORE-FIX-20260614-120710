@@ -1,0 +1,445 @@
+<%- include('partials/header') %>
+
+<div class="bg-[#fefbf0] text-slate-900 antialiased min-h-screen relative overflow-x-hidden">
+  
+  <div class="absolute inset-0 opacity-[0.008] pointer-events-none select-none z-0">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full min-h-screen" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid slice">
+      <g stroke="#000" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <g transform="translate(650, 180)"><circle cx="90" cy="90" r="80"/><path d="M60 75 Q75 60 90 75 M100 75 Q115 60 130 75" stroke-width="14"/><path d="M50 105 Q90 150 130 105 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(180, 80)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(920, 90)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 130 102 112"/></g>
+        <g transform="translate(100, 380)"><circle cx="60" cy="60" r="54"/><circle cx="43" cy="52" r="5" fill="#000"/><circle cx="77" cy="52" r="5" fill="#000"/><path d="M42 82 Q60 98 78 82"/></g>
+        <g transform="translate(480, 420)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 132 102 112"/></g>
+        <g transform="translate(880, 440)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="relative z-10">
+
+<main class="max-w-5xl mx-auto px-3 py-3">
+    
+    <nav class="text-xs text-slate-500 mb-3 flex flex-wrap gap-1">
+        <a href="/" class="hover:underline">Home</a>
+        <span>&gt;</span>
+        <span class="text-slate-800 font-medium">Write Your Review</span>
+    </nav>
+
+    <% if (currentUser && currentUser.banned === 1) { %>
+    <div class="bg-red-100 border border-red-300 rounded-xl p-4 shadow-sm mb-4">
+        <div class="flex items-start gap-3">
+            <span class="text-xl">⚠️</span>
+            <div class="text-sm text-red-800">
+                <p class="font-bold mb-1">Account Suspended</p>
+                <p class="mb-2">Your account has been suspended. You cannot write reviews.</p>
+            </div>
+        </div>
+    </div>
+<% } else if (!currentUser) { %>
+    <div class="bg-[#def0ff] border border-[#bce0ff] rounded-xl p-4 shadow-sm mb-4">
+        <div class="flex items-start gap-3">
+            <span class="text-xl">🔒</span>
+            <div class="text-sm text-[#004085]">
+                <p class="font-bold mb-1">Reviews are always anonymous</p>
+                <p class="mb-2">You do not need an account to write a review.</p>
+            </div>
+        </div>
+    </div>
+<% } else { %>
+    <div class="bg-[#def0ff] border border-[#bce0ff] rounded-xl p-4 shadow-sm mb-4">
+        <div class="flex items-start gap-3">
+            <span class="text-xl">🔒</span>
+            <div class="text-sm text-[#004085]">
+                <p class="font-bold mb-1">You are signed in</p>
+                <p class="mb-2">Your review will be anonymous.</p>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+    <form action="/submit-review" method="POST" id="reviewForm" class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-5">
+        
+        <div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-4 tracking-tight">Your Review</h2>
+            
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col space-y-1.5">
+                    <label class="text-sm font-bold text-slate-900">Select School <span class="text-rose-500">*</span></label>
+                    <div class="relative">
+                        <input type="text" id="schoolName" name="schoolName" placeholder="Search for a UK school..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition" required autocomplete="off">
+                        <div id="autocompleteResults" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; max-height: 300px; overflow-y: auto; margin-top: 4px;"></div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-1.5">
+                    <label class="text-sm font-bold text-slate-900">Would you recommend this school? <span class="text-rose-500">*</span></label>
+                    <input type="hidden" id="recommend" name="recommend" required value="">
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" class="recommend-option py-2.5 bg-white border border-slate-300 rounded-full text-sm font-medium hover:bg-slate-50 transition" data-value="yes">Yes</button>
+                        <button type="button" class="recommend-option py-2.5 bg-white border border-slate-300 rounded-full text-sm font-medium hover:bg-slate-50 transition" data-value="no">No</button>
+                        <button type="button" class="recommend-option py-2.5 bg-white border border-slate-300 rounded-full text-sm font-medium hover:bg-slate-50 transition" data-value="unsure">Unsure</button>
+                    </div>
+                    <div id="recommendError" class="text-rose-500 text-xs hidden">Please select whether you would recommend this school</div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="flex flex-col space-y-1.5">
+                        <label class="text-sm font-bold text-slate-900">I am a <span class="text-rose-500">*</span></label>
+                        <select id="userType" name="userType" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                            <option value="">Select...</option>
+                            <option value="student">Student</option>
+                            <option value="parent">Parent</option>
+                            <option value="staff">Staff</option>
+                            <option value="former_student">Alumni</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col space-y-1.5">
+                        <label class="text-sm font-bold text-slate-900">Child's Year Group <span class="text-rose-500">*</span></label>
+                        <select id="yearGroup" name="yearGroup" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                            <option value="" disabled selected>Required</option>
+                            <option value="primary">Reception / Year 1-6</option>
+                            <option value="secondary">Year 7-11 (Secondary)</option>
+                            <option value="sixth_form">Sixth Form (Year 12-13)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-1.5">
+                    <label class="text-sm font-bold text-slate-900">Year(s) of attendance <span class="text-rose-500">*</span></label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="yearFrom" name="yearFrom" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                            <option value="" disabled selected>From</option>
+                            <option value="2019">2019</option><option value="2020">2020</option><option value="2021">2021</option>
+                            <option value="2022">2022</option><option value="2023">2023</option><option value="2024">2024</option>
+                            <option value="2025">2025</option><option value="2026">2026</option>
+                        </select>
+                        <select id="yearTo" name="yearTo" required class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                            <option value="" disabled selected>To</option>
+                            <option value="2019">2019</option><option value="2020">2020</option><option value="2021">2021</option>
+                            <option value="2022">2022</option><option value="2023">2023</option><option value="2024">2024</option>
+                            <option value="2025">2025</option><option value="2026">2026</option>
+                        </select>
+                    </div>
+                    <div id="yearError" class="text-rose-500 text-xs hidden">To year cannot be before From year</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MOBILE RATING BREAKDOWN - 5 FACES IN ONE ROW with labels below -->
+        <div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Rating Breakdown</h3>
+            <p class="text-xs text-slate-400 mb-4">Tap any face to rate</p>
+            
+            <!-- Teaching -->
+            <div class="mb-6 pb-4 border-b border-slate-100">
+                <label class="block text-sm font-bold text-slate-900 mb-3">Teacher Quality <span class="text-rose-500">*</span></label>
+                <div class="flex flex-row justify-between gap-1">
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="teaching" data-value="1">
+                        <img src="/images/Angry.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Angry">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Annoyed</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="teaching" data-value="2">
+                        <img src="/images/Sad.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Sad">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Disappointed</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="teaching" data-value="3">
+                        <img src="/images/Average.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Average">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Satisfied</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="teaching" data-value="4">
+                        <img src="/images/happy.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Happy">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Happy</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="teaching" data-value="5">
+                        <img src="/images/Elated.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Elated">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Elated</span>
+                    </button>
+                </div>
+                <input type="hidden" name="teachingRating" id="teachingRating" required>
+            </div>
+
+            <!-- Facilities -->
+            <div class="mb-6 pb-4 border-b border-slate-100">
+                <label class="block text-sm font-bold text-slate-900 mb-3">Facilities <span class="text-rose-500">*</span></label>
+                <div class="flex flex-row justify-between gap-1">
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="facilities" data-value="1">
+                        <img src="/images/Angry.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Angry">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Annoyed</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="facilities" data-value="2">
+                        <img src="/images/Sad.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Sad">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Disappointed</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="facilities" data-value="3">
+                        <img src="/images/Average.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Average">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Satisfied</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="facilities" data-value="4">
+                        <img src="/images/happy.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Happy">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Happy</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="facilities" data-value="5">
+                        <img src="/images/Elated.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Elated">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Elated</span>
+                    </button>
+                </div>
+                <input type="hidden" name="facilitiesRating" id="facilitiesRating" required>
+            </div>
+
+            <!-- Pastoral Care -->
+            <div class="mb-6 pb-4 border-b border-slate-100">
+                <label class="block text-sm font-bold text-slate-900 mb-3">Pastoral Care <span class="text-rose-500">*</span></label>
+                <div class="flex flex-row justify-between gap-1">
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="pastoral" data-value="1">
+                        <img src="/images/Angry.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Angry">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Annoyed</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="pastoral" data-value="2">
+                        <img src="/images/Sad.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Sad">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Disappointed</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="pastoral" data-value="3">
+                        <img src="/images/Average.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Average">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Satisfied</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="pastoral" data-value="4">
+                        <img src="/images/happy.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Happy">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Happy</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="pastoral" data-value="5">
+                        <img src="/images/Elated.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Elated">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Elated</span>
+                    </button>
+                </div>
+                <input type="hidden" name="pastoralRating" id="pastoralRating" required>
+            </div>
+
+            <!-- Extra-curriculars -->
+            <div class="mb-6 pb-4 border-b border-slate-100">
+                <label class="block text-sm font-bold text-slate-900 mb-3">Extra-curriculars <span class="text-rose-500">*</span></label>
+                <div class="flex flex-row justify-between gap-1">
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="extra" data-value="1">
+                        <img src="/images/Angry.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Angry">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Annoyed</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="extra" data-value="2">
+                        <img src="/images/Sad.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Sad">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Disappointed</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="extra" data-value="3">
+                        <img src="/images/Average.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Average">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Satisfied</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="extra" data-value="4">
+                        <img src="/images/happy.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Happy">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Happy</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="extra" data-value="5">
+                        <img src="/images/Elated.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Elated">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Elated</span>
+                    </button>
+                </div>
+                <input type="hidden" name="extraRating" id="extraRating" required>
+            </div>
+
+            <!-- SEN Support -->
+            <div class="mb-6 pb-4 border-b border-slate-100">
+                <label class="block text-sm font-bold text-slate-900 mb-3">SEN Support <span class="text-rose-500">*</span></label>
+                <div class="flex flex-row justify-between gap-1">
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="sen" data-value="1">
+                        <img src="/images/Angry.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Angry">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Annoyed</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="sen" data-value="2">
+                        <img src="/images/Sad.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Sad">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Disappointed</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="sen" data-value="3">
+                        <img src="/images/Average.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Average">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Satisfied</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="sen" data-value="4">
+                        <img src="/images/happy.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Happy">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Happy</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="sen" data-value="5">
+                        <img src="/images/Elated.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Elated">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Elated</span>
+                    </button>
+                </div>
+                <input type="hidden" name="senRating" id="senRating" required>
+            </div>
+
+            <!-- School Meals -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-slate-900 mb-3">School Meals <span class="text-rose-500">*</span></label>
+                <div class="flex flex-row justify-between gap-1">
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="meals" data-value="1">
+                        <img src="/images/Angry.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Angry">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Annoyed</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="meals" data-value="2">
+                        <img src="/images/Sad.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Sad">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Disappointed</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="meals" data-value="3">
+                        <img src="/images/Average.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Average">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Satisfied</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="meals" data-value="4">
+                        <img src="/images/happy.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Happy">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Happy</span>
+                    </button>
+                    <button type="button" class="rating-face flex-1 flex flex-col items-center p-1 rounded-lg transition-all" data-category="meals" data-value="5">
+                        <img src="/images/Elated.png" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" alt="Elated">
+                        <span class="text-[8px] sm:text-[10px] text-slate-500 mt-0.5">Elated</span>
+                    </button>
+                </div>
+                <input type="hidden" name="mealsRating" id="mealsRating" required>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">Review Title <span class="text-sm font-normal text-slate-400">(Optional)</span></h3>
+            <input type="text" name="reviewTitle" placeholder="Give your review a descriptive title..." class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+        </div>
+
+        <div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">Your Review <span class="text-rose-500">*</span></h3>
+            <textarea name="reviewText" rows="6" required placeholder="Share your honest experience with this school..." class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-3">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-full text-sm transition">Submit Review</button>
+            <a href="/" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-6 py-3 rounded-full text-sm text-center transition">Cancel</a>
+        </div>
+    </form>
+</main>
+
+</div>
+</div>
+
+<script>
+// School autocomplete
+const schoolInput = document.getElementById('schoolName');
+const autocompleteResults = document.getElementById('autocompleteResults');
+let allSchools = [];
+
+fetch('/api/schools')
+    .then(response => response.json())
+    .then(schools => {
+        allSchools = schools;
+    });
+
+if (schoolInput) {
+    schoolInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        if (query.length < 2) {
+            autocompleteResults.style.display = 'none';
+            return;
+        }
+        const matches = allSchools.filter(s => s.name.toLowerCase().includes(query.toLowerCase()) || s.town.toLowerCase().includes(query.toLowerCase())).slice(0,7);
+        if (!matches.length) {
+            autocompleteResults.style.display = 'none';
+            return;
+        }
+        let html = '';
+        matches.forEach(s => {
+            html += `<div class="autocomplete-item" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f1f5f9;" data-school-name="${s.name.replace(/'/g, "\\'")}">
+                        <div style="font-weight: 600; color: #0f172a; margin-bottom: 4px;">${s.name}</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">${s.town} • ${s.postcode}</div>
+                    </div>`;
+        });
+        autocompleteResults.innerHTML = html;
+        autocompleteResults.style.display = 'block';
+    });
+
+    autocompleteResults.addEventListener('click', function(e) {
+        const item = e.target.closest('.autocomplete-item');
+        if (item) {
+            schoolInput.value = item.getAttribute('data-school-name');
+            autocompleteResults.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!schoolInput.contains(e.target) && !autocompleteResults.contains(e.target)) {
+            autocompleteResults.style.display = 'none';
+        }
+    });
+}
+
+// Rating faces
+document.querySelectorAll('.rating-face').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const category = this.dataset.category;
+        const value = this.dataset.value;
+        
+        document.querySelectorAll(`.rating-face[data-category="${category}"]`).forEach(b => {
+            b.classList.remove('bg-indigo-100', 'ring-2', 'ring-indigo-500', 'ring-offset-2');
+        });
+        
+        this.classList.add('bg-indigo-100', 'ring-2', 'ring-indigo-500', 'ring-offset-2');
+        
+        let inputId = '';
+        if (category === 'teaching') inputId = 'teachingRating';
+        else if (category === 'facilities') inputId = 'facilitiesRating';
+        else if (category === 'pastoral') inputId = 'pastoralRating';
+        else if (category === 'extra') inputId = 'extraRating';
+        else if (category === 'sen') inputId = 'senRating';
+        else if (category === 'meals') inputId = 'mealsRating';
+        
+        document.getElementById(inputId).value = value;
+    });
+});
+
+// Recommend options
+document.querySelectorAll('.recommend-option').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const value = this.dataset.value;
+        document.getElementById('recommend').value = value;
+        
+        document.querySelectorAll('.recommend-option').forEach(b => {
+            b.classList.remove('bg-indigo-600', 'text-white');
+            b.classList.add('bg-white', 'text-slate-700');
+        });
+        this.classList.remove('bg-white', 'text-slate-700');
+        this.classList.add('bg-indigo-600', 'text-white');
+        
+        document.getElementById('recommendError').classList.add('hidden');
+    });
+});
+
+// Year validation
+const yearFrom = document.getElementById('yearFrom');
+const yearTo = document.getElementById('yearTo');
+const yearError = document.getElementById('yearError');
+
+function validateYears() {
+    if (yearFrom.value && yearTo.value && parseInt(yearTo.value) < parseInt(yearFrom.value)) {
+        yearError.classList.remove('hidden');
+        return false;
+    }
+    yearError.classList.add('hidden');
+    return true;
+}
+
+yearFrom.addEventListener('change', validateYears);
+yearTo.addEventListener('change', validateYears);
+
+// Form validation
+document.getElementById('reviewForm').addEventListener('submit', function(e) {
+    if (!document.getElementById('recommend').value) {
+        e.preventDefault();
+        document.getElementById('recommendError').classList.remove('hidden');
+        return;
+    }
+    if (!validateYears()) {
+        e.preventDefault();
+        return;
+    }
+});
+</script>
+
+<%- include('partials/footer') %>

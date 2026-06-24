@@ -1,0 +1,239 @@
+<%- include('partials/header') %>
+
+<div class="bg-[#fefbf0] text-slate-900 antialiased min-h-screen relative overflow-x-hidden">
+  
+  <div class="absolute inset-0 opacity-[0.008] pointer-events-none select-none z-0">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full min-h-screen" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid slice">
+      <g stroke="#000" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <g transform="translate(650, 180)"><circle cx="90" cy="90" r="80"/><path d="M60 75 Q75 60 90 75 M100 75 Q115 60 130 75" stroke-width="14"/><path d="M50 105 Q90 150 130 105 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(180, 80)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(920, 90)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 130 102 112"/></g>
+        <g transform="translate(100, 380)"><circle cx="60" cy="60" r="54"/><circle cx="43" cy="52" r="5" fill="#000"/><circle cx="77" cy="52" r="5" fill="#000"/><path d="M42 82 Q60 98 78 82"/></g>
+        <g transform="translate(480, 420)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 132 102 112"/></g>
+        <g transform="translate(880, 440)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="relative z-10">
+
+<main class="max-w-3xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-xl shadow-sm border p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">Create a school account</h1>
+            <p class="text-slate-500">Only for school staff</p>
+        </div>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+            <h2 class="font-bold text-blue-800 mb-2">✨ Gain access to:</h2>
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-blue-700">
+                <li>✓ Write Replies to School Reviews</li>
+                <li>✓ Get School Verification Badge</li>
+                <li>✓ Post School Items for Sale</li>
+                <li>✓ Notifications for reviews on your school</li>
+            </ul>
+        </div>
+        
+        <form action="/submit-school-signup" method="POST" class="space-y-6">
+            <input type="hidden" name="csrf" value="<%= Date.now() %>">
+            
+            <div class="border-b pb-4">
+                <h2 class="text-xl font-bold text-slate-800 mb-4">1. Contact Details</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Full name *</label>
+                        <input type="text" name="fullName" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Work email *</label>
+                        <input type="email" name="workEmail" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <p class="text-xs text-slate-400 mt-1">Must be a valid school email (we'll send a verification link)</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Work phone</label>
+                        <input type="tel" name="workPhone" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Primary website</label>
+                        <input type="text" name="primaryWebsite" id="primaryWebsite" placeholder="www.schoolwebsite.com" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <p class="text-xs text-slate-400 mt-1">Start with www. – we'll add https:// automatically</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-b pb-4">
+                <h2 class="text-xl font-bold text-slate-800 mb-4">2. School Details</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">School name *</label>
+                        <input type="text" name="schoolName" id="schoolName" required placeholder="Start typing school name..." class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <div id="schoolSuggestions" class="absolute z-10 bg-white border rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto hidden w-full"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Your role at the school *</label>
+                        <select name="roleAtSchool" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">Select your role</option>
+                            <option value="Headteacher">Headteacher / Principal</option>
+                            <option value="Deputy Head">Deputy Headteacher</option>
+                            <option value="Administrator">School Administrator</option>
+                            <option value="Governor">Governor / Trustee</option>
+                            <option value="Teacher">Teacher</option>
+                            <option value="Other Staff">Other Staff</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-b pb-4">
+                <h2 class="text-xl font-bold text-slate-800 mb-4">3. Organisation Details</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Number of schools you need access to *</label>
+                        <select name="numberOfSchools" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">Select</option>
+                            <option value="1">1 school</option>
+                            <option value="2-5">2-5 schools</option>
+                            <option value="6-10">6-10 schools</option>
+                            <option value="11-20">11-20 schools</option>
+                            <option value="21+">21+ schools</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Number of coworkers who need access *</label>
+                        <select name="numberOfCoworkers" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">Select</option>
+                            <option value="1">Just me</option>
+                            <option value="2-5">2-5 people</option>
+                            <option value="6-10">6-10 people</option>
+                            <option value="11-20">11-20 people</option>
+                            <option value="21+">21+ people</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-b pb-4">
+                <h2 class="text-xl font-bold text-slate-800 mb-4">4. How did you hear about us?</h2>
+                
+                <div>
+                    <select name="howDidYouHear" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Select an option</option>
+                        <option value="Google search">Google search</option>
+                        <option value="Social media">Social media (Facebook, Twitter, LinkedIn)</option>
+                        <option value="Word of mouth">Word of mouth / Colleague recommendation</option>
+                        <option value="Email">Email newsletter</option>
+                        <option value="Article or blog">Article or blog post</option>
+                        <option value="Event or conference">Event or conference</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="bg-slate-50 rounded-lg p-4">
+                <h2 class="text-xl font-bold text-slate-800 mb-2">5. Agreement</h2>
+                
+                <div class="space-y-3">
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" name="authorised" required class="mt-1">
+                        <span class="text-sm text-slate-700">I confirm I am authorised to represent this school *</span>
+                    </label>
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" name="termsAgreed" required class="mt-1">
+                        <span class="text-sm text-slate-700">I agree to the <a href="/terms" target="_blank" class="text-indigo-600 hover:underline">Terms of Service</a> and <a href="/privacy" target="_blank" class="text-indigo-600 hover:underline">Privacy Policy</a> *</span>
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition">
+                Submit & Send Verification Email
+            </button>
+        </form>
+        
+        <p class="text-center text-xs text-slate-400 mt-6">
+            Already have a school account? <a href="/signin" class="text-indigo-600 hover:underline">Sign in here</a>
+        </p>
+    </div>
+</main>
+
+<script>
+// School name autocomplete
+const schoolInput = document.getElementById('schoolName');
+const suggestionsDiv = document.getElementById('schoolSuggestions');
+let schoolsData = [];
+
+fetch('/api/schools')
+    .then(res => res.json())
+    .then(data => {
+        schoolsData = data;
+    });
+
+schoolInput.addEventListener('input', function() {
+    const query = this.value.toLowerCase();
+    if (query.length < 2) {
+        suggestionsDiv.classList.add('hidden');
+        return;
+    }
+    
+    const matches = schoolsData.filter(school => 
+        school.name.toLowerCase().includes(query)
+    ).slice(0, 8);
+    
+    if (matches.length === 0) {
+        suggestionsDiv.classList.add('hidden');
+        return;
+    }
+    
+    suggestionsDiv.innerHTML = matches.map(school => `
+        <div class="px-4 py-2 hover:bg-indigo-50 cursor-pointer" onclick="selectSchool('${school.name.replace(/'/g, "\\'")}')">
+            ${school.name}
+            <span class="text-xs text-slate-400 block">${school.town || ''}</span>
+        </div>
+    `).join('');
+    
+    suggestionsDiv.classList.remove('hidden');
+});
+
+function selectSchool(name) {
+    schoolInput.value = name;
+    suggestionsDiv.classList.add('hidden');
+}
+
+document.addEventListener('click', function(e) {
+    if (!schoolInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+        suggestionsDiv.classList.add('hidden');
+    }
+});
+
+// Format website input to add https://
+const websiteInput = document.getElementById('primaryWebsite');
+websiteInput.addEventListener('blur', function() {
+    let value = this.value.trim();
+    if (value && !value.startsWith('http://') && !value.startsWith('https://')) {
+        if (value.startsWith('www.')) {
+            this.value = 'https://' + value;
+        } else if (!value.includes('.')) {
+            // Not a valid domain, leave as is
+        } else {
+            this.value = 'https://www.' + value;
+        }
+    }
+});
+</script>
+
+<style>
+#schoolSuggestions {
+    position: absolute;
+    width: calc(100% - 2px);
+    max-width: calc(100% - 2px);
+    background: white;
+    z-index: 50;
+}
+</style>
+
+  </div>
+</div>
+
+<%- include('partials/footer') %>

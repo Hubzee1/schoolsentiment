@@ -1,0 +1,126 @@
+<%- include('partials/header') %>
+
+<main class="max-w-6xl mx-auto px-4 py-8">
+    <div class="text-sm text-slate-500 mb-4">
+        <a href="/" class="hover:underline">Home</a> › 
+        <span class="text-slate-800 font-medium">Schools Near Me</span>
+    </div>
+
+    <div class="bg-white border rounded-2xl p-6 shadow-sm">
+        <h1 class="text-2xl font-bold mb-4">Schools Near Your Location</h1>
+        
+        <div id="locationStatus" class="mb-4 p-3 bg-blue-50 rounded-lg text-blue-700">
+            📍 Finding your location...
+        </div>
+        
+        <div id="schoolsList" class="space-y-3">
+            <div class="text-center text-slate-500 py-8">Loading schools near you...</div>
+        </div>
+        
+        <div class="mt-6 text-center">
+            <a href="/review" class="bg-black text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-slate-800 transition">Browse All Schools</a>
+        </div>
+    </div>
+</main>
+
+<script>
+// School data
+const allSchools = <%- JSON.stringify(schools) %>;
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+function getSchoolCoordinates(school) {
+    // Approximate coordinates for London schools (you can expand this)
+    const coords = {
+        'Kingsbury High School': { lat: 51.584, lon: -0.278 },
+        'St Mary's Church of England Primary School': { lat: 51.584, lon: -0.278 },
+        'The Crest Academy': { lat: 51.582, lon: -0.276 },
+        'Oliver Goldsmith Primary School': { lat: 51.583, lon: -0.277 },
+        'St Margaret Clitherow Catholic Primary School': { lat: 51.583, lon: -0.279 },
+        'St Joseph's Catholic Junior School': { lat: 51.584, lon: -0.277 },
+        'Fryent Primary School': { lat: 51.585, lon: -0.278 },
+        'St Gregory's Catholic Science College': { lat: 51.593, lon: -0.313 },
+        'Park High School': { lat: 51.617, lon: -0.308 },
+        'Nower Hill High School': { lat: 51.595, lon: -0.376 }
+    };
+    return coords[school.name] || { lat: 51.5, lon: -0.12 };
+}
+
+function getDirectionsUrl(lat, lon, schoolName, schoolAddress) {
+    return `https://www.google.com/maps/dir/${lat},${lon}/${encodeURIComponent(schoolName + ' ' + schoolAddress)}`;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const statusDiv = document.getElementById('locationStatus');
+    const schoolsList = document.getElementById('schoolsList');
+    
+    if (!navigator.geolocation) {
+        statusDiv.innerHTML = '⚠️ Geolocation is not supported by your browser. Please search for schools by name.';
+        schoolsList.innerHTML = '<div class="text-center text-slate-500 py-8">Unable to find schools near you without location access.</div>';
+        return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+            
+            statusDiv.innerHTML = `📍 Your location found! Showing schools near you.`;
+            
+            // Calculate distances for all schools
+            let schoolsWithDistance = allSchools.map(school => {
+                const coords = getSchoolCoordinates(school);
+                const distance = calculateDistance(userLat, userLon, coords.lat, coords.lon);
+                return { ...school, distance: distance, coords: coords };
+            });
+            
+            // Sort by distance
+            schoolsWithDistance.sort((a, b) => a.distance - b.distance);
+            
+            // Display schools
+            let html = '';
+            schoolsWithDistance.forEach(school => {
+                const distanceKm = school.distance.toFixed(1);
+                const miles = (school.distance * 0.621371).toFixed(1);
+                const directionsUrl = getDirectionsUrl(userLat, userLon, school.name, school.address || school.town);
+                
+                html += `
+                    <div class="bg-slate-50 border rounded-xl p-4 hover:shadow-md transition">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg">
+                                    <a href="/school/${encodeURIComponent(school.name)}" class="hover:text-indigo-600">${school.name}</a>
+                                </h3>
+                                <p class="text-sm text-slate-500">${school.address || ''} ${school.town}, ${school.postcode}</p>
+                                <p class="text-xs text-slate-400 mt-1">${school.type || school.phase || 'School'}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-indigo-600">${distanceKm} km</div>
+                                <div class="text-xs text-slate-400">${miles} miles</div>
+                                <a href="${directionsUrl}" target="_blank" class="text-xs text-blue-600 hover:underline mt-1 inline-block">Get Directions →</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            schoolsList.innerHTML = html;
+        },
+        function(error) {
+            statusDiv.innerHTML = '⚠️ Unable to get your location. Please allow location access to see schools near you.';
+            schoolsList.innerHTML = '<div class="text-center text-slate-500 py-8">You can still <a href="/review" class="text-indigo-600">browse all schools</a> or search by name.</div>';
+        }
+    );
+});
+</script>
+
+<%- include('partials/footer') %>

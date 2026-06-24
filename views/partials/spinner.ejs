@@ -1,0 +1,36 @@
+<!-- Loading Spinner - Brand Colors (Black/Amber) -->
+<div id="loadingSpinner" class="hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl p-8 shadow-xl flex flex-col items-center gap-4 border border-slate-200">
+        <div class="animate-spin rounded-full h-12 w-12 border-4 border-amber-400 border-t-black"></div>
+        <p class="text-sm font-medium text-slate-700">Loading...</p>
+    </div>
+</div>
+
+<script>
+// Hide spinner immediately when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) spinner.classList.add('hidden');
+});
+
+function showSpinner() {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) spinner.classList.remove('hidden');
+}
+
+function hideSpinner() {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) spinner.classList.add('hidden');
+}
+
+// Show spinner on form submissions
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (this.checkValidity() !== false) {
+                showSpinner();
+            }
+        });
+    });
+});
+</script>

@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title><%= title %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; min-height: 100vh; }
+        body { 
+            font-family: 'Inter', Arial, sans-serif; 
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .grey-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f8f9fa;
+            z-index: 0;
+        }
+        .cream-banner {
+            border-bottom: 1px solid #e9e9ef;
+            position: absolute;
+            top: 65px;
+            left: 0;
+            width: 100%;
+            height: 15cm;
+            background: #fefbf0;
+            z-index: 1;
+            overflow: hidden;
+        }
+        @media (max-width: 640px) {
+            .cream-banner {
+                height: 12.8cm !important;
+            }
+        }
+        .background-container {
+            position: absolute;
+            top: 65px;
+            left: 0;
+            width: 100%;
+            height: 15cm;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .background-image {
+            position: absolute;
+            background-repeat: no-repeat;
+            background-position: center center;
+            opacity: 0.35;
+            width: 300px;
+            height: 300px;
+            background-size: contain;
+        }
+        .image-elated {
+            background-image: url('/images/Elated.png');
+            left: -5%;
+            top: 20px;
+            animation: moveElated 35s ease-in-out infinite;
+        }
+        .image-angry {
+            background-image: url('/images/Angry.png');
+            left: 90%;
+            top: -80px;
+            animation: moveAngry 30s ease-in-out infinite;
+        }
+        .image-average {
+            background-image: url('/images/Average.png');
+            left: 50%;
+            top: -200px;
+            animation: moveAverage 40s ease-in-out infinite;
+        }
+        .image-happy {
+            background-image: url('/images/happy.png');
+            left: 75%;
+            top: 300px;
+            animation: moveHappy 32s ease-in-out infinite;
+        }
+        .image-sad {
+            background-image: url('/images/Sad.png');
+            left: 276px;
+            top: 230px;
+            animation: moveSad 38s ease-in-out infinite;
+        }
+        @keyframes moveElated {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.2); }
+            25% { transform: translate(75px, 60px) rotate(45deg) scale(1.2); }
+            50% { transform: translate(40px, 125px) rotate(0deg) scale(1.2); }
+            75% { transform: translate(-60px, 90px) rotate(-45deg) scale(1.2); }
+        }
+        @keyframes moveAngry {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.2) scaleX(-1); }
+            25% { transform: translate(-90px, -30px) rotate(-30deg) scale(1.2) scaleX(-1); }
+            50% { transform: translate(-50px, 90px) rotate(0deg) scale(1.2) scaleX(-1); }
+            75% { transform: translate(75px, -40px) rotate(30deg) scale(1.2) scaleX(-1); }
+        }
+        @keyframes moveAverage {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.2); }
+            33% { transform: translate(60px, 100px) rotate(60deg) scale(1.2); }
+            66% { transform: translate(-70px, 75px) rotate(-60deg) scale(1.2); }
+        }
+        @keyframes moveHappy {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.2) scaleX(-1); }
+            20% { transform: translate(-80px, 40px) rotate(-36deg) scale(1.2) scaleX(-1); }
+            40% { transform: translate(50px, 110px) rotate(0deg) scale(1.2) scaleX(-1); }
+            60% { transform: translate(-40px, 80px) rotate(36deg) scale(1.2) scaleX(-1); }
+            80% { transform: translate(70px, -20px) rotate(0deg) scale(1.2) scaleX(-1); }
+        }
+        @keyframes moveSad {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.2); }
+            25% { transform: translate(30px, 80px) rotate(45deg) scale(1.2); }
+            50% { transform: translate(-40px, 120px) rotate(0deg) scale(1.2); }
+            75% { transform: translate(20px, 150px) rotate(-45deg) scale(1.2); }
+        }
+        .main-content {
+            flex: 1;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Mobile Navigation Styles */
+        .top-nav {
+            background: #000000;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #333333;
+            position: relative;
+            z-index: 20;
+        }
+        .top-nav .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo img {
+            height: 50px;
+            width: auto;
+        }
+        
+        /* Desktop navigation links */
+        .nav-links {
+            display: none;
+            gap: 1.5rem;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        /* Mobile menu button */
+        .mobile-menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Mobile slide-out menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100%;
+            background: #000000;
+            z-index: 1001;
+            transition: right 0.3s ease;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.3);
+        }
+        .mobile-menu.open {
+            right: 0;
+        }
+        .mobile-menu-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 30px;
+        }
+        .mobile-menu-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0 8px;
+        }
+        .mobile-menu-links {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .mobile-menu-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+        }
+        .mobile-menu-links a:hover {
+            opacity: 0.7;
+        }
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+        }
+        .mobile-menu-overlay.active {
+            display: block;
+        }
+        
+        /* Desktop styles */
+        @media (min-width: 768px) {
+            .mobile-menu-btn {
+                display: none;
+            }
+            .nav-links {
+                display: flex;
+            }
+            .logo img {
+                height: 65px;
+            }
+        }
+        
+        .top-nav a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.9;
+        }
+        .top-nav a:hover {
+            opacity: 1;
+        }
+        .nav-divider {
+            color: rgba(255,255,255,0.5);
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 20px; 
+        }
+        
+        /* Notification Bell */
+        .bell-container {
+            position: relative;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+        }
+        .bell-icon {
+            width: 20px;
+            height: 20px;
+            stroke: white;
+            stroke-width: 1.5;
+            fill: none;
+            transition: opacity 0.2s;
+        }
+        .bell-icon:hover {
+            opacity: 0.7;
+        }
+        .unread-badge {
+            position: absolute;
+            top: -8px;
+            right: -10px;
+            background-color: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+        
+        /* Notification Panel */
+        .notification-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1002;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .notification-panel.open {
+            right: 0;
+        }
+        .notification-panel-header {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.88);
+        }
+        .notification-panel-header h3 {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1e293b;
+        }
+        .close-panel {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+        .close-panel:hover {
+            color: #475569;
+        }
+        .mark-all-read {
+            background: none;
+            border: none;
+            font-size: 12px;
+            color: #3b82f6;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .notification-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+        .notification-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .notification-item:hover {
+            background: #f8fafc;
+        }
+        .notification-item.unread {
+            background: #eff6ff;
+        }
+        .notification-item.unread:hover {
+            background: #dbeafe;
+        }
+        .notification-message {
+            font-size: 14px;
+            color: #334155;
+            margin-bottom: 5px;
+        }
+        .notification-time {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+        .no-notifications {
+            padding: 40px 20px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        /* Overlay */
+        .panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            z-index: 1001;
+            display: none;
+        }
+        .panel-overlay.active {
+            display: block;
+        }
+        
+        @media (max-width: 640px) {
+            .notification-panel {
+                width: 100%;
+                right: -100%;
+            }
+        }
+
+        /* ====== MOBILE FACE ADJUSTMENTS ====== */
+        @media (max-width: 640px) {
+            .background-image {
+                width: 130px !important;
+                height: 130px !important;
+                opacity: 0.2 !important;
+            }
+            .image-elated {
+                left: -5% !important;
+                top: 10px !important;
+            }
+            .image-angry {
+                left: 88% !important;
+                top: 60px !important;
+            }
+            .image-average {
+                left: 45% !important;
+                top: -140px !important;
+            }
+            .image-happy {
+                left: 72% !important;
+                top: 350px !important;
+            }
+            .image-sad {
+                left: 5% !important;
+                top: 300px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grey-overlay"></div>
+    
+    <% if (currentPage === 'home') { %>
+    <div class="cream-banner">
+        <div class="background-image image-elated"></div>
+        <div class="background-image image-angry"></div>
+        <div class="background-image image-average"></div>
+        <div class="background-image image-happy"></div>
+        <div class="background-image image-sad"></div>
+    </div>
+    <% } %>
+    
+    <nav class="top-nav">
+        <div class="container">
+            <div class="logo">
+                <a href="/">
+                    <img src='/logo/SchoolSentiment_white_transparency.png' alt="SchoolSentiment Logo">
+                </a>
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <div class="nav-links">
+                <a href="/review">Write Review</a>
+                <span class="nav-divider">|</span>
+                <a href="/noticeboard">Noticeboard</a>
+                <span class="nav-divider">|</span>
+                <% if (locals.currentUser) { %>
+                    <a href="/dashboard">Dashboard</a>
+                    <span class="nav-divider">|</span>
+                    <a href="/messages">Messages</a>
+                    <span class="nav-divider">|</span>
+                    <a href="/blog">Blog</a>
+                    <span class="nav-divider">|</span>
+                    <div class="bell-container" id="notificationBell">
+                        <svg class="bell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        </svg>
+                        <span id="unreadCount" class="unread-badge" style="display: none;">0</span>
+                    </div>
+                    <span class="nav-divider">|</span>
+                    <% if (locals.currentUser && locals.currentUser.email === 'hubzy@hotmail.com') { %>
+                        <a href="/admin">Admin</a>
+                        <span class="nav-divider">|</span>
+                    <% } %>
+                    <a href="/signout">Sign Out</a>
+                <% } else { %>
+                    <a href="/blog">Blog</a>
+                    <span class="nav-divider">|</span>
+                    <a href="/signin">Sign In</a>
+                    <span class="nav-divider">|</span>
+                    <a href="/for-schools">For Schools</a>
+                <% } %>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Mobile Slide-out Menu -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <button class="mobile-menu-close" id="mobileMenuClose">&times;</button>
+        </div>
+        <div class="mobile-menu-links">
+            <a href="/review">Write Review</a>
+            <a href="/noticeboard">Noticeboard</a>
+            <% if (locals.currentUser) { %>
+                <a href="/dashboard">Dashboard</a>
+                <a href="/messages">Messages</a>
+                <a href="/blog">Blog</a>
+                <% if (locals.currentUser && locals.currentUser.email === 'hubzy@hotmail.com') { %>
+                    <a href="/admin">Admin</a>
+                <% } %>
+                <a href="/signout">Sign Out</a>
+            <% } else { %>
+                <a href="/blog">Blog</a>
+                <a href="/signin">Sign In</a>
+                <a href="/for-schools">For Schools</a>
+            <% } %>
+        </div>
+    </div>
+    
+    <!-- Notification Panel -->
+    <div id="panelOverlay" class="panel-overlay"></div>
+    <div id="notificationPanel" class="notification-panel">
+        <div class="notification-panel-header">
+            <h3>Notifications</h3>
+            <div>
+                <button id="markAllRead" class="mark-all-read">Mark all as read</button>
+                <button id="closePanel" class="close-panel">&times;</button>
+            </div>
+        </div>
+        <div id="notificationList" class="notification-list">
+            <div class="no-notifications">Loading...</div>
+        </div>
+    </div>
+    
+    <div class="main-content">
+
+<script>
+// Mobile Menu
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+function openMobileMenu() {
+    mobileMenu.classList.add('open');
+    mobileMenuOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMobileMenu() {
+    mobileMenu.classList.remove('open');
+    mobileMenuOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openMobileMenu);
+if (mobileMenuClose) mobileMenuClose.addEventListener('click', closeMobileMenu);
+if (mobileMenuOverlay) mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+// Close mobile menu on escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileMenu.classList.contains('open')) {
+        closeMobileMenu();
+    }
+});
+
+// Notification Panel functionality
+let isPanelOpen = false;
+let notificationsData = [];
+
+function formatTimeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+}
+
+async function fetchUnreadCount() {
+    try {
+        const response = await fetch('/api/notifications/unread-count');
+        const data = await response.json();
+        const count = data.count || 0;
+        const badge = document.getElementById('unreadCount');
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching unread count:', error);
+    }
+}
+
+async function fetchNotifications() {
+    try {
+        const response = await fetch('/api/notifications?limit=50');
+        const data = await response.json();
+        notificationsData = data.notifications || [];
+        renderNotifications();
+        return notificationsData;
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        return [];
+    }
+}
+
+function renderNotifications() {
+    const container = document.getElementById('notificationList');
+    if (!container) return;
+    
+    if (notificationsData.length === 0) {
+        container.innerHTML = '<div class="no-notifications">No notifications yet</div>';
+        return;
+    }
+    
+    container.innerHTML = notificationsData.map(notif => `
+        <div class="notification-item ${notif.isRead ? '' : 'unread'}" data-id="${notif.id}" data-type="${notif.type}" data-review-id="${notif.reviewId || ''}" data-ad-id="${notif.adId || ''}" data-school-name="${notif.schoolName || ''}">
+            <div class="notification-message">${escapeHtml(notif.message)}</div>
+            <div class="notification-time">${formatTimeAgo(notif.createdAt)}</div>
+        </div>
+    `).join('');
+    
+    document.querySelectorAll('.notification-item').forEach(item => {
+        item.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const id = item.dataset.id;
+            const type = item.dataset.type;
+            const reviewId = item.dataset.reviewId;
+            const adId = item.dataset.adId;
+            const schoolName = item.dataset.schoolName;
+            
+            await markNotificationAsRead(id);
+            closePanel();
+            
+            if (type === 'review' && schoolName) {
+                window.location.href = `/school/${encodeURIComponent(schoolName)}?show=saved`;
+            } else if (type === 'ad' && schoolName) {
+                window.location.href = `/school/${encodeURIComponent(schoolName)}/noticeboard`;
+            } else if (type === 'claim') {
+                window.location.href = `/admin/claims`;
+            } else if (reviewId) {
+                window.location.href = `/school/${encodeURIComponent(schoolName)}?show=saved`;
+            }
+        });
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+async function markNotificationAsRead(notificationId) {
+    try {
+        await fetch('/api/notifications/mark-read', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notificationId })
+        });
+        const notif = notificationsData.find(n => n.id == notificationId);
+        if (notif) notif.isRead = 1;
+        renderNotifications();
+        fetchUnreadCount();
+    } catch (error) {
+        console.error('Error marking as read:', error);
+    }
+}
+
+async function markAllNotificationsAsRead() {
+    try {
+        await fetch('/api/notifications/mark-all-read', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        notificationsData.forEach(n => n.isRead = 1);
+        renderNotifications();
+        fetchUnreadCount();
+    } catch (error) {
+        console.error('Error marking all as read:', error);
+    }
+}
+
+function openPanel() {
+    const panel = document.getElementById('notificationPanel');
+    const overlay = document.getElementById('panelOverlay');
+    if (panel && overlay) {
+        panel.classList.add('open');
+        overlay.classList.add('active');
+        isPanelOpen = true;
+        fetchNotifications();
+    }
+}
+
+function closePanel() {
+    const panel = document.getElementById('notificationPanel');
+    const overlay = document.getElementById('panelOverlay');
+    if (panel && overlay) {
+        panel.classList.remove('open');
+        overlay.classList.remove('active');
+        isPanelOpen = false;
+    }
+}
+
+function togglePanel() {
+    if (isPanelOpen) {
+        closePanel();
+    } else {
+        openPanel();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const bell = document.getElementById('notificationBell');
+    const closeBtn = document.getElementById('closePanel');
+    const overlay = document.getElementById('panelOverlay');
+    const markAllBtn = document.getElementById('markAllRead');
+    
+    if (bell) {
+        bell.addEventListener('click', togglePanel);
+    }
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closePanel);
+    }
+    if (overlay) {
+        overlay.addEventListener('click', closePanel);
+    }
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', markAllNotificationsAsRead);
+    }
+    
+    if (bell) {
+        fetchUnreadCount();
+        setInterval(fetchUnreadCount, 30000);
+    }
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isPanelOpen) {
+            closePanel();
+        }
+    });
+});
+</script>
+
+<style>
+  /* Hide breadcrumbs on mobile devices */
+  @media (max-width: 640px) {
+    .breadcrumb-nav {
+      display: none !important;
+    }
+  }
+</style>
