@@ -2730,3 +2730,13 @@ app.listen(PORT, () => {
     console.log(`📚 Loaded ${schoolsData.length} UK schools`);
     console.log("🔐 Authentication system ready - magic link login enabled");
 });
+
+// ADD THIS NEAR THE TOP OF THE FILE (after the imports)
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ UNHANDLED REJECTION:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('❌ UNCAUGHT EXCEPTION:', err.message);
+    console.error(err.stack);
+});
