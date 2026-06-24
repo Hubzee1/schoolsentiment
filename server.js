@@ -2740,3 +2740,11 @@ process.on('uncaughtException', (err) => {
     console.error('❌ UNCAUGHT EXCEPTION:', err.message);
     console.error(err.stack);
 });
+
+// 🔍 DB Config Debug - Add this near the top after the database connection
+console.log('🔍 DB Config:', {
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD ? '***SET***' : '***MISSING***'
+});
