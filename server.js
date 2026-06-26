@@ -104,11 +104,11 @@ async function findOrCreateUserByEmail(email, termsAgreedAt = null) {
     let user = await queryOne("SELECT * FROM users WHERE email = ?", [email]);
     if (!user) {
         const id = crypto.randomUUID();
-        const agreedAt = termsAgreedAt || new Date().toISOString();
+        const agreedAt = termsAgreedAt || new Date().toISOString().replace("T", " ").replace(/\..*/, "");
         await run(
             `INSERT INTO users (id, email, createdAt, reviewIds, savedSchools, followedSchools, savedReviewIds, termsAgreedAt)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [id, email, new Date().toISOString(), '[]', '[]', '[]', '[]', agreedAt]
+            [id, email, new Date().toISOString().replace("T", " ").replace(/\..*/, ""), '[]', '[]', '[]', '[]', agreedAt]
         );
         user = await queryOne("SELECT * FROM users WHERE id = ?", [id]);
     }
@@ -271,7 +271,7 @@ async function saveReview(review) {
             review.mealsRating || null,
             review.isAnonymous ? 1 : 0,
             review.userId || null,
-            new Date().toISOString(),
+            new Date().toISOString().replace("T", " ").replace(/\..*/, ""),
             '[]',
             null
         ]
@@ -287,7 +287,7 @@ async function updateReview(reviewId, updatedData) {
     editHistory.push({
         text: review.reviewText,
         rating: review.rating,
-        editedAt: new Date().toISOString()
+        editedAt: new Date().toISOString().replace("T", " ").replace(/\..*/, "")
     });
     await run(
         `UPDATE reviews SET
@@ -313,7 +313,7 @@ async function updateReview(reviewId, updatedData) {
             updatedData.yearGroup || review.yearGroup,
             updatedData.userType || review.userType,
             JSON.stringify(editHistory),
-            new Date().toISOString(),
+            new Date().toISOString().replace("T", " ").replace(/\..*/, ""),
             reviewId
         ]
     );
@@ -366,8 +366,8 @@ async function createAd(adData) {
             adData.userId,
             adData.userEmail || null,
             'active',
-            new Date().toISOString(),
-            new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            new Date().toISOString().replace("T", " ").replace(/\..*/, ""),
+            new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().replace("T", " ").replace(/\..*/, ""),
             null
         ]
     );
@@ -401,7 +401,7 @@ async function updateAd(adId, adData) {
             adData.isFree ? 1 : 0,
             adData.isWanted ? 1 : 0,
             adData.condition,
-            new Date().toISOString(),
+            new Date().toISOString().replace("T", " ").replace(/\..*/, ""),
             adId
         ]
     );
@@ -448,13 +448,13 @@ async function createSession(userId) {
     await run(
         `INSERT INTO sessions (token, userId, createdAt, expiresAt)
         VALUES (?, ?, ?, ?)`,
-        [token, userId, new Date().toISOString(), new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()]
+        [token, userId, new Date().toISOString().replace("T", " ").replace(/\..*/, ""), new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().replace("T", " ").replace(/\..*/, "")]
     );
     return token;
 }
 
 async function getSession(token) {
-    return await queryOne("SELECT * FROM sessions WHERE token = ? AND expiresAt > ?", [token, new Date().toISOString()]);
+    return await queryOne("SELECT * FROM sessions WHERE token = ? AND expiresAt > ?", [token, new Date().toISOString().replace("T", " ").replace(/\..*/, "")]);
 }
 
 async function deleteSession(token) {
@@ -477,7 +477,7 @@ async function createMessage(messageData) {
             messageData.fromUserId,
             messageData.toUserId,
             messageData.message || null,
-            new Date().toISOString(),
+            new Date().toISOString().replace("T", " ").replace(/\..*/, ""),
             messageData.isRead ? 1 : 0
         ]
     );
@@ -1176,7 +1176,7 @@ app.post("/flag-review", async (req, res) => {
     
     await run(
         `INSERT INTO flagged_reviews (reviewId, reviewTitle, schoolName, reason, details, flaggedBy, flaggedAt, status, type) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', 'review')`,
-        [reviewId, reviewTitle || null, schoolName || null, reason, details || null, req.user ? req.user.id : 'anonymous', new Date().toISOString()]
+        [reviewId, reviewTitle || null, schoolName || null, reason, details || null, req.user ? req.user.id : 'anonymous', new Date().toISOString().replace("T", " ").replace(/\..*/, "")]
     );
     
     console.log(`🚩 Review flagged: ${reviewId} - Reason: ${reason}`);
@@ -1193,7 +1193,7 @@ app.post("/flag-reply", async (req, res) => {
     const reply = await queryOne("SELECT responseText FROM school_responses WHERE id = ?", [replyId]);
     await run(
         `INSERT INTO flagged_reviews (replyId, reviewId, reviewTitle, schoolName, reason, details, flaggedBy, flaggedAt, status, type) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), 'pending', 'reply')`,
-        [replyId, reviewId, reply ? reply.responseText.substring(0, 200) : 'School reply', schoolName, reason, details || null, req.user ? req.user.id : 'anonymous', new Date().toISOString()]
+        [replyId, reviewId, reply ? reply.responseText.substring(0, 200) : 'School reply', schoolName, reason, details || null, req.user ? req.user.id : 'anonymous', new Date().toISOString().replace("T", " ").replace(/\..*/, "")]
     );
     
     console.log(`🚩 School reply flagged: ${replyId} - Reason: ${reason}`);
@@ -1276,7 +1276,7 @@ app.post("/admin/ban-user-by-review", async (req, res) => {
         if (flag.details && flag.reason !== 'other') banReason += " - Details: " + flag.details;
     }
     if (review && review.userId) {
-        await run("UPDATE users SET banned = 1, bannedAt = ?, bannedReason = ?, bannedForReviewId = ? WHERE id = ?", [new Date().toISOString(), banReason, reviewId, review.userId]);
+        await run("UPDATE users SET banned = 1, bannedAt = ?, bannedReason = ?, bannedForReviewId = ? WHERE id = ?", [new Date().toISOString().replace("T", " ").replace(/\..*/, ""), banReason, reviewId, review.userId]);
     }
     res.json({ success: true });
 });
@@ -1343,7 +1343,7 @@ app.post("/admin/toggle-ban", async (req, res) => {
             const reasonMap = { 'defamatory': 'Defamatory / False information', 'personal': 'Contains personal information', 'hate': 'Hate speech or harassment', 'offensive': 'Offensive language', 'spam': 'Spam or advertising', 'other': 'Other - ' + (flag.details || 'No details') };
             banReason = reasonMap[flag.reason] || flag.reason;
         }
-        await run("UPDATE users SET banned = 1, bannedAt = ?, bannedReason = ?, bannedForReviewId = ? WHERE id = ?", [new Date().toISOString(), banReason, reviewId, review.userId]);
+        await run("UPDATE users SET banned = 1, bannedAt = ?, bannedReason = ?, bannedForReviewId = ? WHERE id = ?", [new Date().toISOString().replace("T", " ").replace(/\..*/, ""), banReason, reviewId, review.userId]);
         res.json({ banned: true, userId: review.userId });
     }
 });
@@ -1375,7 +1375,7 @@ app.get("/api/export-my-data", async (req, res) => {
     }
     const ads = await query("SELECT * FROM ads WHERE userId = ? AND status = 'active' ORDER BY createdAt DESC", [userId]);
     const messages = await query("SELECT * FROM messages WHERE fromUserId = ? OR toUserId = ? ORDER BY createdAt DESC", [userId, userId]);
-    res.json({ exportedAt: new Date().toISOString(), account: { email: user.email, accountCreated: user.createdAt, termsAgreedAt: user.termsAgreedAt || null }, reviews: reviews, savedReviews: savedReviews, ads: ads, messages: messages });
+    res.json({ exportedAt: new Date().toISOString().replace("T", " ").replace(/\..*/, ""), account: { email: user.email, accountCreated: user.createdAt, termsAgreedAt: user.termsAgreedAt || null }, reviews: reviews, savedReviews: savedReviews, ads: ads, messages: messages });
 });
 
 app.post("/api/delete-my-account", async (req, res) => {
@@ -1408,12 +1408,12 @@ app.post("/send-magic-link", magicLinkLimiter, async (req, res) => {
     if (!termsAgreed) return res.redirect("/signin?message=You must agree to the Terms of Service and Privacy Policy to create an account");
     
     
-    const user = await findOrCreateUserByEmail(email, new Date().toISOString());
+    const user = await findOrCreateUserByEmail(email, new Date().toISOString().replace("T", " ").replace(/\..*/, ""));
     const magicToken = crypto.randomBytes(32).toString("hex");
     await run("DELETE FROM magic_links WHERE userId = ?", [user.id]);
     await run(
         `INSERT INTO magic_links (token, userId, claimReviewId, expiresAt) VALUES (?, ?, ?, ?)`,
-        [magicToken, user.id, claimReviewId || null, new Date(Date.now() + 15 * 60 * 1000).toISOString()]
+        [magicToken, user.id, claimReviewId || null, new Date(Date.now() + 15 * 60 * 1000).toISOString().replace("T", " ").replace(/\..*/, "")]
     );
     const magicLink = `${process.env.BASE_URL || "http://localhost:3000"}/verify-magic-link?token=${magicToken}`;
     try {
@@ -1454,7 +1454,7 @@ app.post("/send-magic-link", magicLinkLimiter, async (req, res) => {
 app.get("/verify-magic-link", async (req, res) => {
     const token = req.query.token;
     console.log("🔍 Verifying token:", token);
-    const now = new Date().toISOString();
+    const now = new Date().toISOString().replace("T", " ").replace(/\..*/, "");
     const link = await queryOne("SELECT * FROM magic_links WHERE token = ? AND expiresAt > ?", [token, now]);
     if (!link) {
         console.log("❌ Token not found or expired");
@@ -1749,7 +1749,7 @@ app.post("/send-reply/:adId/:userId", async (req, res) => {
     if (!req.body.message || req.body.message.trim() === '') return res.status(400).json({ error: "Message cannot be empty" });
     const ad = await getAdById(req.params.adId);
     if (!ad) return res.status(404).json({ error: "Ad not found" });
-    await createMessage({ adId: req.params.adId, fromUserId: req.user.id, toUserId: req.params.userId, message: sanitizeInput(req.body.message), createdAt: new Date().toISOString(), isRead: false });
+    await createMessage({ adId: req.params.adId, fromUserId: req.user.id, toUserId: req.params.userId, message: sanitizeInput(req.body.message), createdAt: new Date().toISOString().replace("T", " ").replace(/\..*/, ""), isRead: false });
     
     await run(
         `INSERT INTO notifications (userId, type, adId, schoolName, message, createdAt, isRead) VALUES (?, 'message', ?, ?, 'You have a new message about your ad', NOW(), 0)`,
@@ -1763,7 +1763,7 @@ app.post("/message-about-ad/:adId", async (req, res) => {
     if (!req.user) return res.status(401).json({ error: "Please sign in to send messages" });
     const ad = await getAdById(req.params.adId);
     if (!ad) return res.status(404).json({ error: "Ad not found" });
-    await createMessage({ adId: ad.id, fromUserId: req.user.id, toUserId: ad.userId, message: sanitizeInput(req.body.message), createdAt: new Date().toISOString(), isRead: false });
+    await createMessage({ adId: ad.id, fromUserId: req.user.id, toUserId: ad.userId, message: sanitizeInput(req.body.message), createdAt: new Date().toISOString().replace("T", " ").replace(/\..*/, ""), isRead: false });
     
     await run(
         `INSERT INTO notifications (userId, type, adId, schoolName, message, createdAt, isRead) VALUES (?, 'message', ?, ?, 'Someone is interested in your ad', NOW(), 0)`,
@@ -2080,7 +2080,7 @@ app.post("/submit-claim", async (req, res) => {
     if (!req.user) return res.status(401).send("Please sign in");
     const { schoolName, role } = req.body;
     const claimId = crypto.randomBytes(16).toString("hex");
-    const submittedAt = new Date().toISOString();
+    const submittedAt = new Date().toISOString().replace("T", " ").replace(/\..*/, "");
     const autoVerifyResult = shouldAutoVerify(req.user.email, role);
     const finalStatus = autoVerifyResult.autoVerify ? "approved" : "pending";
     
@@ -2164,7 +2164,7 @@ app.post("/submit-reply", async (req, res) => {
     const replyId = crypto.randomBytes(16).toString("hex");
     await run(
         `INSERT INTO school_responses (id, reviewId, schoolName, responseText, respondedBy, respondedByUserId, createdAt, hidden) VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
-        [replyId, reviewId, schoolName, sanitizeInput(responseText), req.user.email, req.user.id, new Date().toISOString()]
+        [replyId, reviewId, schoolName, sanitizeInput(responseText), req.user.email, req.user.id, new Date().toISOString().replace("T", " ").replace(/\..*/, "")]
     );
     
     const review = await queryOne("SELECT userId FROM reviews WHERE id = ?", [reviewId]);
@@ -2198,8 +2198,8 @@ app.post("/admin/approve-claim", async (req, res) => {
     if (existingVerified) { return res.status(400).json({ error: "School already has an approved claim" }); }
     const existingApprovedClaim = await queryOne("SELECT * FROM school_claims WHERE schoolName = ? AND status = 'approved'", [schoolName]);
     if (existingApprovedClaim) { return res.status(400).json({ error: "Another claim for this school is already approved" }); }
-    await run("UPDATE school_claims SET status = 'approved', reviewedAt = ?, reviewedBy = ? WHERE id = ?", [new Date().toISOString(), req.user.id, claimId]);
-    await run("INSERT INTO verified_schools (schoolName, verifiedAt, verifiedBy, claimId) VALUES (?, ?, ?, ?)", [schoolName, new Date().toISOString(), req.user.id, claimId]);
+    await run("UPDATE school_claims SET status = 'approved', reviewedAt = ?, reviewedBy = ? WHERE id = ?", [new Date().toISOString().replace("T", " ").replace(/\..*/, ""), req.user.id, claimId]);
+    await run("INSERT INTO verified_schools (schoolName, verifiedAt, verifiedBy, claimId) VALUES (?, ?, ?, ?)", [schoolName, new Date().toISOString().replace("T", " ").replace(/\..*/, ""), req.user.id, claimId]);
     const claim = await queryOne("SELECT claimantEmail, claimantUserId FROM school_claims WHERE id = ?", [claimId]);
     
     if (claim && claim.claimantUserId) {
@@ -2239,7 +2239,7 @@ app.post("/admin/approve-claim", async (req, res) => {
 app.post("/admin/reject-claim", async (req, res) => {
     if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: "Unauthorized" });
     const { claimId, schoolName, rejectionReason } = req.body;
-    await run("UPDATE school_claims SET status = 'rejected', reviewedAt = ?, reviewedBy = ?, adminNotes = ? WHERE id = ?", [new Date().toISOString(), req.user.id, rejectionReason || null, claimId]);
+    await run("UPDATE school_claims SET status = 'rejected', reviewedAt = ?, reviewedBy = ?, adminNotes = ? WHERE id = ?", [new Date().toISOString().replace("T", " ").replace(/\..*/, ""), req.user.id, rejectionReason || null, claimId]);
     const claim = await queryOne("SELECT claimantEmail, claimantUserId FROM school_claims WHERE id = ?", [claimId]);
     
     if (claim && claim.claimantUserId) {
@@ -2281,7 +2281,7 @@ app.post("/admin/revoke-verification", async (req, res) => {
     const { schoolName } = req.body;
     await run("DELETE FROM verified_schools WHERE schoolName = ?", [schoolName]);
     const claim = await queryOne("SELECT id FROM school_claims WHERE schoolName = ? AND status = 'approved' ORDER BY reviewedAt DESC LIMIT 1", [schoolName]);
-    if (claim) { await run("UPDATE school_claims SET status = 'rejected', reviewedAt = ?, reviewedBy = ?, adminNotes = 'Verification revoked by admin' WHERE id = ?", [new Date().toISOString(), req.user.id, claim.id]); }
+    if (claim) { await run("UPDATE school_claims SET status = 'rejected', reviewedAt = ?, reviewedBy = ?, adminNotes = 'Verification revoked by admin' WHERE id = ?", [new Date().toISOString().replace("T", " ").replace(/\..*/, ""), req.user.id, claim.id]); }
     res.json({ success: true });
 });
 
@@ -2320,10 +2320,10 @@ app.post("/submit-school-signup", schoolSignupLimiter, async (req, res) => {
         );
     } else {
         const userId = crypto.randomUUID();
-        const createdAt = new Date().toISOString();
+        const createdAt = new Date().toISOString().replace("T", " ").replace(/\..*/, "");
         await run(
             `INSERT INTO users (id, email, createdAt, reviewIds, savedSchools, followedSchools, savedReviewIds, savedAdIds, banned, termsAgreedAt, isSchoolStaff, schoolRepresentative, workPhone, primaryWebsite, numberOfSchools, numberOfCoworkers, howDidYouHear, signupComplete, fullName, roleAtSchool) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [userId, workEmail, createdAt, '[]', '[]', '[]', '[]', '[]', 0, new Date().toISOString(), 1, schoolName, workPhone || null, primaryWebsite || null, numberOfSchools, numberOfCoworkers, howDidYouHear, 1, fullName, roleAtSchool]
+            [userId, workEmail, createdAt, '[]', '[]', '[]', '[]', '[]', 0, new Date().toISOString().replace("T", " ").replace(/\..*/, ""), 1, schoolName, workPhone || null, primaryWebsite || null, numberOfSchools, numberOfCoworkers, howDidYouHear, 1, fullName, roleAtSchool]
         );
         user = await queryOne("SELECT * FROM users WHERE id = ?", [userId]);
     }
@@ -2332,7 +2332,7 @@ app.post("/submit-school-signup", schoolSignupLimiter, async (req, res) => {
     await run("DELETE FROM magic_links WHERE userId = ?", [user.id]);
     await run(
         `INSERT INTO magic_links (token, userId, claimReviewId, expiresAt) VALUES (?, ?, ?, ?)`,
-        [magicToken, user.id, null, new Date(Date.now() + 15 * 60 * 1000).toISOString()]
+        [magicToken, user.id, null, new Date(Date.now() + 15 * 60 * 1000).toISOString().replace("T", " ").replace(/\..*/, "")]
     );
     const magicLink = `${process.env.BASE_URL || "http://localhost:3000"}/verify-school-signup?token=${magicToken}`;
     try {
@@ -2347,7 +2347,7 @@ app.post("/submit-school-signup", schoolSignupLimiter, async (req, res) => {
 
 app.get("/verify-school-signup", async (req, res) => {
     const token = req.query.token;
-    const link = await queryOne("SELECT * FROM magic_links WHERE token = ? AND expiresAt > ?", [token, new Date().toISOString()]);
+    const link = await queryOne("SELECT * FROM magic_links WHERE token = ? AND expiresAt > ?", [token, new Date().toISOString().replace("T", " ").replace(/\..*/, "")]);
     if (!link) { return res.redirect("/for-schools?error=Invalid or expired link"); }
     await run("DELETE FROM magic_links WHERE token = ?", [token]);
     const sessionToken = await createSession(link.userId);
@@ -2590,7 +2590,7 @@ app.post("/api/flag-ad/:adId", async (req, res) => {
     const ad = await getAdById(adId);
     await run(
         `INSERT INTO flagged_ads (adId, reason, details, flaggedBy, flaggedAt, status) VALUES (?, ?, ?, ?, ?, 'pending')`,
-        [adId, reason, details || null, req.user.id, new Date().toISOString()]
+        [adId, reason, details || null, req.user.id, new Date().toISOString().replace("T", " ").replace(/\..*/, "")]
     );
     
     const adminEmail = process.env.ADMIN_EMAIL || "hubzy@hotmail.com";
