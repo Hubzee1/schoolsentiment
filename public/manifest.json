@@ -1,6 +1,6 @@
 {
   "name": "School Sentiment",
-  "short_name": "SchoolSentiment",
+  "short_name": "School Sentiment",
   "description": "Honest school reviews from parents, students, and staff",
   "start_url": "/",
   "display": "standalone",
