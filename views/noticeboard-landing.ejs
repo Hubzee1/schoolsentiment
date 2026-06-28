@@ -21,7 +21,7 @@
 
   <div class="relative z-10 flex-grow">
     
-    <!-- SCHOOL SEARCH BAR -->
+    <!-- SCHOOL SEARCH BAR WITH POSTCODE FILTER -->
     <div class="max-w-6xl mx-auto px-4 pt-6 w-full">
       <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 text-center">School <span class="bg-amber-100 px-4 py-1.5 rounded-md text-amber-900 font-bold text-4xl sm:text-5xl align-middle inline-block ml-2">Noticeboard</span></h1>
 <p class="text-sm text-slate-500 mt-2 text-center max-w-2xl mx-auto">Pre-loved blazers, post-exam calculators. Keep school essentials<br>moving within your local school family.</p>
@@ -133,86 +133,201 @@
 </div>
 
 <script>
-// School search autocomplete
-const searchInput = document.getElementById('schoolSearch');
-const resultsDiv = document.getElementById('schoolSearchResults');
-let schools = [];
+// School search autocomplete with postcode filter
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('schoolSearch');
+    const resultsDiv = document.getElementById('schoolSearchResults');
+    let allSchools = [];
+    let currentNameMatches = [];
+    let currentPostcodeFilter = '';
 
-fetch('/api/schools')
-    .then(res => res.json())
-    .then(data => { schools = data; });
+    fetch('/api/schools')
+        .then(res => res.json())
+        .then(data => { 
+            allSchools = data; 
+            console.log('Schools loaded:', allSchools.length);
+        })
+        .catch(e => console.error('Error loading schools:', e));
 
-if (searchInput) {
-    searchInput.addEventListener('input', function() {
-        const query = this.value.trim().toLowerCase();
-        if (query.length < 2) {
+    // Function to render the school list with postcode filtering
+    function renderFilteredSchools(nameMatches, postcodeFilter, keepFocus) {
+        console.log('renderFilteredSchools called with:', nameMatches.length, 'matches');
+        if (!nameMatches || nameMatches.length === 0) {
             resultsDiv.classList.add('hidden');
             return;
         }
-        const matches = schools.filter(s => s.name.toLowerCase().includes(query) || s.town.toLowerCase().includes(query)).slice(0, 8);
-        if (matches.length === 0) {
-            resultsDiv.classList.add('hidden');
-            return;
+
+        // Filter by postcode if provided
+        let filteredMatches = nameMatches;
+        if (postcodeFilter && postcodeFilter.length >= 1) {
+            const filterUpper = postcodeFilter.toUpperCase().trim();
+            filteredMatches = nameMatches.filter(s => {
+                if (!s.postcode) return false;
+                const postcodeUpper = s.postcode.toUpperCase();
+                const filterNoSpace = filterUpper.replace(/\s/g, '');
+                const postcodeNoSpace = postcodeUpper.replace(/\s/g, '');
+                return postcodeNoSpace.startsWith(filterNoSpace) || postcodeUpper.startsWith(filterUpper);
+            });
         }
+
+        const totalMatches = filteredMatches.length;
+        const displayMatches = filteredMatches.slice(0, 10);
+
         let html = '';
-        matches.forEach(school => {
-            html += `<div class="p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0" data-school="${encodeURIComponent(school.name)}">
-                        <div class="font-semibold text-slate-800 text-sm">${school.name}</div>
-                        <div class="text-xs text-slate-500">${school.town} • ${school.postcode}</div>
-                    </div>`;
+
+        // Show the message with postcode search prompt - LEFT ALIGNED
+        html += '<div class="autocomplete-header" style="padding: 12px 16px; background: #fef3c7; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; color: #92400e; text-align: left;">';
+        html += '<div style="font-weight: 600; margin-bottom: 4px;">' + totalMatches + ' schools found with this name.</div>';
+        html += '<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">';
+        html += '<span>Find by school postcode:</span>';
+        html += '<input type="text" id="postcodeSearchInput" placeholder="e.g., B29" style="padding: 6px 14px; border: 1px solid #d1d5db; border-radius: 9999px; font-size: 0.8rem; width: 100px;" value="' + postcodeFilter + '" />';
+        html += '</div></div>';
+
+        // Show the school matches with school ID for navigation
+        displayMatches.forEach(school => {
+            const schoolName = school.name || 'Unknown';
+            const townName = school.town || '';
+            const postcodeName = school.postcode || '';
+            const schoolId = school.id || '';
+            html += '<div class="autocomplete-item" data-school-id="' + schoolId + '" data-school-name="' + schoolName.replace(/"/g, '&quot;') + '" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">';
+            html += '<div style="font-weight: bold; text-align: left;">' + schoolName + '</div>';
+            if (townName || postcodeName) {
+                html += '<div style="font-size: 0.85rem; color: #666; text-align: left;">' + townName + (postcodeName ? ' • ' + postcodeName : '') + '</div>';
+            }
+            html += '</div>';
         });
+
         resultsDiv.innerHTML = html;
         resultsDiv.classList.remove('hidden');
-        
-        document.querySelectorAll('[data-school]').forEach(el => {
-            el.addEventListener('click', function() {
-                window.location.href = '/school/' + this.dataset.school + '/noticeboard';
-            });
-        });
-    });
-    
-    document.addEventListener('click', function(e) {
-        if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
-            resultsDiv.classList.add('hidden');
-        }
-    });
-}
 
-// Search button handler
-const searchButton = document.getElementById('searchButton');
-if (searchButton) {
-    searchButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        const query = document.getElementById('schoolSearch').value.trim();
-        if (query) {
-            const matchedSchool = schools.find(s => s.name.toLowerCase() === query.toLowerCase());
-            if (matchedSchool) {
-                window.location.href = '/school/' + encodeURIComponent(matchedSchool.name) + '/noticeboard';
-            } else {
-                const partialMatch = schools.find(s => s.name.toLowerCase().includes(query.toLowerCase()));
-                if (partialMatch) {
-                    window.location.href = '/school/' + encodeURIComponent(partialMatch.name) + '/noticeboard';
-                } else {
-                    window.location.href = '/search-noticeboard?school=' + encodeURIComponent(query);
-                }
+        // Attach event listener to the postcode input for real-time filtering
+        const postcodeInput = document.getElementById('postcodeSearchInput');
+        if (postcodeInput) {
+            if (keepFocus) {
+                postcodeInput.focus();
+                postcodeInput.setSelectionRange(postcodeInput.value.length, postcodeInput.value.length);
             }
+
+            postcodeInput.addEventListener('input', function() {
+                const val = this.value.trim();
+                currentPostcodeFilter = val;
+                renderFilteredSchools(currentNameMatches, val, true);
+            });
+
+            postcodeInput.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
         }
-    });
-}
+    }
 
-// Sort dropdown
-const sortSelect = document.getElementById('sortSelect');
-if (sortSelect) {
-    sortSelect.addEventListener('change', function() {
-        const url = new URL(window.location.href);
-        url.searchParams.set('sort', this.value);
-        url.searchParams.set('page', '1');
-        window.location.href = url.toString();
-    });
-}
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim().toLowerCase();
+            console.log('Search input:', query);
+            
+            if (query.length < 2) {
+                resultsDiv.classList.add('hidden');
+                currentNameMatches = [];
+                currentPostcodeFilter = '';
+                return;
+            }
 
-// ========== SYNC SAVED ADS HEARTS ==========
-document.addEventListener('DOMContentLoaded', function() {
+            if (!allSchools || allSchools.length === 0) {
+                console.log('No schools loaded yet');
+                resultsDiv.classList.add('hidden');
+                return;
+            }
+
+            // Find matches by NAME
+            const matches = allSchools.filter(s => 
+                s.name && s.name.toLowerCase().includes(query)
+            );
+
+            console.log('Found matches:', matches.length);
+
+            if (matches.length === 0) {
+                // If no name matches, search by town (fallback)
+                const townMatches = allSchools.filter(s => 
+                    s.town && s.town.toLowerCase().includes(query)
+                );
+                if (townMatches.length > 0) {
+                    console.log('Found town matches:', townMatches.length);
+                    currentNameMatches = townMatches;
+                    currentPostcodeFilter = '';
+                    renderFilteredSchools(townMatches, '', false);
+                    return;
+                }
+                resultsDiv.classList.add('hidden');
+                currentNameMatches = [];
+                currentPostcodeFilter = '';
+                return;
+            }
+
+            currentNameMatches = matches;
+            currentPostcodeFilter = '';
+            renderFilteredSchools(matches, '', false);
+        });
+        
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+                resultsDiv.classList.add('hidden');
+                currentNameMatches = [];
+                currentPostcodeFilter = '';
+            }
+        });
+    }
+
+    // Click handler for autocomplete items
+    if (resultsDiv) {
+        resultsDiv.addEventListener('click', function(e) {
+            const item = e.target.closest('.autocomplete-item');
+            if (!item) return;
+            
+            const schoolId = item.getAttribute('data-school-id');
+            if (schoolId) {
+                console.log('Navigating to school ID:', schoolId);
+                window.location.href = '/school/id/' + schoolId + '/noticeboard';
+            }
+        });
+    }
+
+    // Search button handler
+    const searchButton = document.getElementById('searchButton');
+    if (searchButton) {
+        searchButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            const query = document.getElementById('schoolSearch').value.trim();
+            if (query) {
+                // Try to find exact match first
+                const matchedSchool = allSchools.find(s => s.name.toLowerCase() === query.toLowerCase());
+                if (matchedSchool) {
+                    window.location.href = '/school/id/' + matchedSchool.id + '/noticeboard';
+                    return;
+                }
+                // Try partial match
+                const partialMatch = allSchools.find(s => s.name.toLowerCase().includes(query.toLowerCase()));
+                if (partialMatch) {
+                    window.location.href = '/school/id/' + partialMatch.id + '/noticeboard';
+                    return;
+                }
+                // Fallback to search
+                window.location.href = '/search-noticeboard?school=' + encodeURIComponent(query);
+            }
+        });
+    }
+
+    // Sort dropdown
+    const sortSelect = document.getElementById('sortSelect');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            const url = new URL(window.location.href);
+            url.searchParams.set('sort', this.value);
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        });
+    }
+
+    // ========== SYNC SAVED ADS HEARTS ==========
     // Fetch saved ads and update heart icons
     fetch('/api/saved-ads')
         .then(res => res.json())
@@ -260,5 +375,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<style>
+.autocomplete-item { cursor: pointer; }
+.autocomplete-item:hover { background: #f8f9fa !important; }
+#postcodeSearchInput {
+    border-radius: 9999px !important;
+    padding: 6px 14px !important;
+}
+</style>
 
 <%- include('partials/footer') %>

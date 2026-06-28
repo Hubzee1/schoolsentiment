@@ -825,7 +825,18 @@ app.get("/school", (req, res) => {
     }
 });
 
-// NEW ROUTE: Find school by ID
+// NEW ROUTE: Find school by ID and redirect to noticeboard
+app.get("/school/id/:id/noticeboard", (req, res) => {
+    const schoolId = parseInt(req.params.id);
+    const school = schoolsData.find(s => s.id === schoolId);
+    if (school) {
+        return res.redirect(`/school/${encodeURIComponent(school.name)}/noticeboard`);
+    } else {
+        return res.send(`<h1>School Not Found</h1><p>No school found with ID "${schoolId}".</p><a href="/">Back to Home</a>`);
+    }
+});
+
+// NEW ROUTE: Find school by ID and redirect to school profile
 app.get("/school/id/:id", (req, res) => {
     const schoolId = parseInt(req.params.id);
     const school = schoolsData.find(s => s.id === schoolId);
@@ -881,23 +892,12 @@ app.get("/school/:name", async (req, res) => {
         schoolDetails = schoolsData.find(school => school.name.toLowerCase().includes(schoolName.toLowerCase())) || { name: schoolName };
     }
     
-    // Get reviews for this specific school - using the schoolDetails.name
-    const schoolNameForReviews = schoolDetails ? schoolDetails.name : schoolName;
-    
-    // Remove any backslashes from the school name for comparison (they get added by the database)
-    const cleanSchoolName = schoolNameForReviews.replace(/\\/g, '');
-    
-    let schoolReviews = allReviews.filter(review => {
-        const reviewSchoolName = review.schoolName.replace(/\\/g, '');
-        return reviewSchoolName === cleanSchoolName;
-    });
+    // Get reviews for this specific school
+    let schoolReviews = allReviews.filter(review => review.schoolName === schoolDetails.name);
     
     // If no reviews with exact match, fall back to contains
     if (schoolReviews.length === 0) {
-        schoolReviews = allReviews.filter(review => {
-            const reviewSchoolName = review.schoolName.replace(/\\/g, '').toLowerCase();
-            return reviewSchoolName.includes(cleanSchoolName.toLowerCase());
-        });
+        schoolReviews = allReviews.filter(review => review.schoolName.toLowerCase().includes(schoolName.toLowerCase()));
     }
     
     const totalReviews = schoolReviews.length;
@@ -906,9 +906,9 @@ app.get("/school/:name", async (req, res) => {
     
     const averageRating = schoolReviews.length > 0 ? schoolReviews.reduce((sum, review) => sum + (review.rating || 0), 0) / schoolReviews.length : 0;
     
-    const verified = await queryOne("SELECT * FROM verified_schools WHERE schoolName = ?", [schoolNameForReviews]);
-    const existingClaim = req.user ? await queryOne("SELECT * FROM school_claims WHERE schoolName = ? AND claimantUserId = ? AND status = 'pending'", [schoolNameForReviews, req.user.id]) : null;
-    const replies = await query("SELECT * FROM school_responses WHERE schoolName = ? AND hidden = 0 ORDER BY createdAt DESC", [schoolNameForReviews]);
+    const verified = await queryOne("SELECT * FROM verified_schools WHERE schoolName = ?", [schoolDetails.name]);
+    const existingClaim = req.user ? await queryOne("SELECT * FROM school_claims WHERE schoolName = ? AND claimantUserId = ? AND status = 'pending'", [schoolDetails.name, req.user.id]) : null;
+    const replies = await query("SELECT * FROM school_responses WHERE schoolName = ? AND hidden = 0 ORDER BY createdAt DESC", [schoolDetails.name]);
     const repliesByReviewId = {};
     replies.forEach(reply => {
         if (!repliesByReviewId[reply.reviewId]) {
@@ -918,13 +918,13 @@ app.get("/school/:name", async (req, res) => {
     });
     
     // Use the school name from schoolDetails for the title
-    const displayName = schoolDetails ? schoolDetails.name : schoolName;
+    const displayName = schoolDetails.name || schoolName;
     
     res.render("school-profile", {
         user: req.user || null,
         title: displayName + " - SchoolSentiment",
         schoolName: displayName,
-        schoolDetails: schoolDetails || { name: displayName },
+        schoolDetails: schoolDetails,
         reviews: paginatedReviews,
         allReviewsForStats: schoolReviews,
         averageRating: averageRating,
