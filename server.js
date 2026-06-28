@@ -145,10 +145,29 @@ async function removeReviewFromUser(userId, reviewId) {
     const user = await getUserById(userId);
     if (user) {
         let reviewIds = [];
-        try { 
-            reviewIds = JSON.parse(user.reviewIds || '[]'); 
-        } catch(e) { 
-            reviewIds = []; 
+        try {
+            // Handle different data types
+            if (typeof user.reviewIds === 'string') {
+                // If it's a JSON string, parse it
+                if (user.reviewIds.startsWith('[')) {
+                    reviewIds = JSON.parse(user.reviewIds || '[]');
+                } else if (user.reviewIds.includes(',')) {
+                    // If it's a comma-separated string
+                    reviewIds = user.reviewIds.split(',').map(id => id.trim()).filter(id => id);
+                } else if (user.reviewIds) {
+                    // Single value
+                    reviewIds = [user.reviewIds];
+                } else {
+                    reviewIds = [];
+                }
+            } else if (Array.isArray(user.reviewIds)) {
+                reviewIds = user.reviewIds;
+            } else {
+                reviewIds = [];
+            }
+        } catch(e) {
+            console.error('Error parsing reviewIds:', e.message);
+            reviewIds = [];
         }
         reviewIds = reviewIds.filter(id => id !== reviewId);
         await run("UPDATE users SET reviewIds = ? WHERE id = ?", [JSON.stringify(reviewIds), userId]);
