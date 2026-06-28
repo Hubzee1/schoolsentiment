@@ -2361,8 +2361,20 @@ app.get("/for-schools", (req, res) => {
 
 app.post("/submit-school-signup", schoolSignupLimiter, async (req, res) => {
     const { fullName, workEmail, workPhone, primaryWebsite, schoolName, roleAtSchool, numberOfSchools, numberOfCoworkers, howDidYouHear, authorised, termsAgreed } = req.body;
+    // Also get the schoolId from the form
+    const schoolId = req.body.schoolId || null;
+    
     if (!fullName || !workEmail || !schoolName || !roleAtSchool || !numberOfSchools || !numberOfCoworkers || !howDidYouHear) return res.redirect("/for-schools?error=Please fill in all required fields");
     if (!authorised || !termsAgreed) return res.redirect("/for-schools?error=You must agree to the terms");
+    
+    // If schoolId is provided, verify it exists in the school data
+    let verifiedSchoolName = schoolName;
+    if (schoolId) {
+        const school = schoolsData.find(s => s.id == schoolId);
+        if (school) {
+            verifiedSchoolName = school.name;
+        }
+    }
     
     const existingClaim = await queryOne("SELECT * FROM school_claims WHERE claimantEmail = ? AND status IN ('pending', 'approved', 'rejected')", [workEmail]);
     if (existingClaim) {
@@ -2378,14 +2390,14 @@ app.post("/submit-school-signup", schoolSignupLimiter, async (req, res) => {
         if (user.isSchoolStaff === 1) { return res.redirect("/for-schools?error=This email is already registered as school staff. Please sign in."); }
         await run(
             `UPDATE users SET isSchoolStaff = 1, schoolRepresentative = ?, workPhone = ?, primaryWebsite = ?, numberOfSchools = ?, numberOfCoworkers = ?, howDidYouHear = ?, signupComplete = 1, fullName = ?, roleAtSchool = ? WHERE id = ?`,
-            [schoolName, workPhone || null, primaryWebsite || null, numberOfSchools, numberOfCoworkers, howDidYouHear, fullName, roleAtSchool, user.id]
+            [verifiedSchoolName, workPhone || null, primaryWebsite || null, numberOfSchools, numberOfCoworkers, howDidYouHear, fullName, roleAtSchool, user.id]
         );
     } else {
         const userId = crypto.randomUUID();
         const createdAt = new Date().toISOString().replace("T", " ").replace(/\..*/, "");
         await run(
             `INSERT INTO users (id, email, createdAt, reviewIds, savedSchools, followedSchools, savedReviewIds, savedAdIds, banned, termsAgreedAt, isSchoolStaff, schoolRepresentative, workPhone, primaryWebsite, numberOfSchools, numberOfCoworkers, howDidYouHear, signupComplete, fullName, roleAtSchool) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [userId, workEmail, createdAt, '[]', '[]', '[]', '[]', '[]', 0, new Date().toISOString().replace("T", " ").replace(/\..*/, ""), 1, schoolName, workPhone || null, primaryWebsite || null, numberOfSchools, numberOfCoworkers, howDidYouHear, 1, fullName, roleAtSchool]
+            [userId, workEmail, createdAt, '[]', '[]', '[]', '[]', '[]', 0, new Date().toISOString().replace("T", " ").replace(/\..*/, ""), 1, verifiedSchoolName, workPhone || null, primaryWebsite || null, numberOfSchools, numberOfCoworkers, howDidYouHear, 1, fullName, roleAtSchool]
         );
         user = await queryOne("SELECT * FROM users WHERE id = ?", [userId]);
     }
@@ -2399,7 +2411,7 @@ app.post("/submit-school-signup", schoolSignupLimiter, async (req, res) => {
     const magicLink = `${process.env.BASE_URL || "http://localhost:3000"}/verify-school-signup?token=${magicToken}`;
     try {
         await sendEmail(workEmail, 'Verify your School Staff Account', `<div><h2>🏫 Verify Your School Staff Account</h2><p>Hello ${fullName},</p><p>Click the button below to verify your work email:</p><a href="${magicLink}" style="background:#4f46e5;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;">Verify Email →</a><p>This link expires in 15 minutes.</p></div>`);
-        await sendEmail(process.env.ADMIN_EMAIL || "hubzy@hotmail.com", `🏫 New School Staff Sign-Up: ${schoolName}`, `<div><h2>New School Staff Sign-Up</h2><p><strong>School:</strong> ${schoolName}</p><p><strong>Name:</strong> ${fullName}</p><p><strong>Email:</strong> ${workEmail}</p><p><strong>Role:</strong> ${roleAtSchool}</p><p><strong>Number of schools:</strong> ${numberOfSchools}</p><p><strong>Coworkers:</strong> ${numberOfCoworkers}</p><p><strong>How heard:</strong> ${howDidYouHear}</p></div>`).catch(e => console.log("Admin email error:", e.message));
+        await sendEmail(process.env.ADMIN_EMAIL || "hubzy@hotmail.com", `🏫 New School Staff Sign-Up: ${verifiedSchoolName}`, `<div><h2>New School Staff Sign-Up</h2><p><strong>School:</strong> ${verifiedSchoolName}</p><p><strong>Name:</strong> ${fullName}</p><p><strong>Email:</strong> ${workEmail}</p><p><strong>Role:</strong> ${roleAtSchool}</p><p><strong>Number of schools:</strong> ${numberOfSchools}</p><p><strong>Coworkers:</strong> ${numberOfCoworkers}</p><p><strong>How heard:</strong> ${howDidYouHear}</p></div>`).catch(e => console.log("Admin email error:", e.message));
         res.render("school-signup-success", { title: "Verification Email Sent - School Sentiment", email: workEmail, currentPage: "for-schools" });
     } catch (error) {
         console.error('Email error:', error);
