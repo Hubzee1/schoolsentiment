@@ -825,17 +825,15 @@ app.get("/school", (req, res) => {
     }
 });
 
-// NEW ROUTE: Find school by ID and render directly
-app.get("/school/id/:id", async (req, res) => {
+// NEW ROUTE: Find school by ID
+app.get("/school/id/:id", (req, res) => {
     const schoolId = parseInt(req.params.id);
     const school = schoolsData.find(s => s.id === schoolId);
-    if (!school) {
+    if (school) {
+        return res.redirect(`/school/${encodeURIComponent(school.name)}?id=${schoolId}`);
+    } else {
         return res.send(`<h1>School Not Found</h1><p>No school found with ID "${schoolId}".</p><a href="/">Back to Home</a>`);
     }
-    
-    // Redirect to the name-based route with the school name
-    // But we need to use a special query param to indicate we want the exact school
-    return res.redirect(`/school/${encodeURIComponent(school.name)}?id=${schoolId}`);
 });
 
 app.get("/review", (req, res) => {
@@ -883,12 +881,23 @@ app.get("/school/:name", async (req, res) => {
         schoolDetails = schoolsData.find(school => school.name.toLowerCase().includes(schoolName.toLowerCase())) || { name: schoolName };
     }
     
-    // Get reviews for this specific school
-    let schoolReviews = allReviews.filter(review => review.schoolName === schoolDetails.name);
+    // Get reviews for this specific school - using the schoolDetails.name
+    const schoolNameForReviews = schoolDetails ? schoolDetails.name : schoolName;
+    
+    // Remove any backslashes from the school name for comparison (they get added by the database)
+    const cleanSchoolName = schoolNameForReviews.replace(/\\/g, '');
+    
+    let schoolReviews = allReviews.filter(review => {
+        const reviewSchoolName = review.schoolName.replace(/\\/g, '');
+        return reviewSchoolName === cleanSchoolName;
+    });
     
     // If no reviews with exact match, fall back to contains
     if (schoolReviews.length === 0) {
-        schoolReviews = allReviews.filter(review => review.schoolName.toLowerCase().includes(schoolName.toLowerCase()));
+        schoolReviews = allReviews.filter(review => {
+            const reviewSchoolName = review.schoolName.replace(/\\/g, '').toLowerCase();
+            return reviewSchoolName.includes(cleanSchoolName.toLowerCase());
+        });
     }
     
     const totalReviews = schoolReviews.length;
@@ -897,9 +906,9 @@ app.get("/school/:name", async (req, res) => {
     
     const averageRating = schoolReviews.length > 0 ? schoolReviews.reduce((sum, review) => sum + (review.rating || 0), 0) / schoolReviews.length : 0;
     
-    const verified = await queryOne("SELECT * FROM verified_schools WHERE schoolName = ?", [schoolDetails.name]);
-    const existingClaim = req.user ? await queryOne("SELECT * FROM school_claims WHERE schoolName = ? AND claimantUserId = ? AND status = 'pending'", [schoolDetails.name, req.user.id]) : null;
-    const replies = await query("SELECT * FROM school_responses WHERE schoolName = ? AND hidden = 0 ORDER BY createdAt DESC", [schoolDetails.name]);
+    const verified = await queryOne("SELECT * FROM verified_schools WHERE schoolName = ?", [schoolNameForReviews]);
+    const existingClaim = req.user ? await queryOne("SELECT * FROM school_claims WHERE schoolName = ? AND claimantUserId = ? AND status = 'pending'", [schoolNameForReviews, req.user.id]) : null;
+    const replies = await query("SELECT * FROM school_responses WHERE schoolName = ? AND hidden = 0 ORDER BY createdAt DESC", [schoolNameForReviews]);
     const repliesByReviewId = {};
     replies.forEach(reply => {
         if (!repliesByReviewId[reply.reviewId]) {
@@ -909,13 +918,13 @@ app.get("/school/:name", async (req, res) => {
     });
     
     // Use the school name from schoolDetails for the title
-    const displayName = schoolDetails.name || schoolName;
+    const displayName = schoolDetails ? schoolDetails.name : schoolName;
     
     res.render("school-profile", {
         user: req.user || null,
         title: displayName + " - SchoolSentiment",
         schoolName: displayName,
-        schoolDetails: schoolDetails,
+        schoolDetails: schoolDetails || { name: displayName },
         reviews: paginatedReviews,
         allReviewsForStats: schoolReviews,
         averageRating: averageRating,
@@ -1024,6 +1033,18 @@ app.post("/submit-review", async (req, res) => {
             await addReviewToUser(req.user.id, savedReview.id.toString());
         }
         
+        // Redirect using school ID if provided, otherwise use name
+        const schoolId = req.body.schoolId;
+        if (schoolId) {
+            // Find the school in the data to verify it exists
+            const school = schoolsData.find(s => s.id == schoolId);
+            if (school) {
+                // Use the school ID to redirect
+                return res.redirect(`/school/id/${schoolId}`);
+            }
+        }
+        
+        // Fallback: redirect using the school name (will use the ID-based search with ?id= parameter)
         res.render("thank-you", { title: "Review Submitted - SchoolSentiment", schoolName: req.body.schoolName, currentPage: "review" });
     } catch (error) {
         console.error("Error saving review:", error);
