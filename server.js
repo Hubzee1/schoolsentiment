@@ -825,6 +825,19 @@ app.get("/school", (req, res) => {
     }
 });
 
+// NEW ROUTE: Find school by ID and render directly
+app.get("/school/id/:id", async (req, res) => {
+    const schoolId = parseInt(req.params.id);
+    const school = schoolsData.find(s => s.id === schoolId);
+    if (!school) {
+        return res.send(`<h1>School Not Found</h1><p>No school found with ID "${schoolId}".</p><a href="/">Back to Home</a>`);
+    }
+    
+    // Redirect to the name-based route with the school name
+    // But we need to use a special query param to indicate we want the exact school
+    return res.redirect(`/school/${encodeURIComponent(school.name)}?id=${schoolId}`);
+});
+
 app.get("/review", (req, res) => {
     const userAgent = req.headers["user-agent"] || "";
     const isMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
@@ -846,22 +859,47 @@ app.get("/nearby-map", (req, res) => {
 
 app.get("/school/:name", async (req, res) => {
     const schoolName = decodeURIComponent(req.params.name);
+    const specificId = req.query.id ? parseInt(req.query.id) : null;
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
     const offset = (page - 1) * limit;
     
     const allReviews = await getReviews();
-    let schoolReviews = allReviews.filter(review => review.schoolName.toLowerCase().includes(schoolName.toLowerCase()));
+    
+    // Find the specific school by ID first if provided
+    let schoolDetails = null;
+    if (specificId) {
+        schoolDetails = schoolsData.find(s => s.id === specificId);
+    }
+    
+    // If no specific ID or not found, find by name
+    if (!schoolDetails) {
+        schoolDetails = schoolsData.find(school => school.name === schoolName);
+    }
+    if (!schoolDetails) {
+        schoolDetails = schoolsData.find(school => school.name.toLowerCase() === schoolName.toLowerCase());
+    }
+    if (!schoolDetails) {
+        schoolDetails = schoolsData.find(school => school.name.toLowerCase().includes(schoolName.toLowerCase())) || { name: schoolName };
+    }
+    
+    // Get reviews for this specific school
+    let schoolReviews = allReviews.filter(review => review.schoolName === schoolDetails.name);
+    
+    // If no reviews with exact match, fall back to contains
+    if (schoolReviews.length === 0) {
+        schoolReviews = allReviews.filter(review => review.schoolName.toLowerCase().includes(schoolName.toLowerCase()));
+    }
+    
     const totalReviews = schoolReviews.length;
     const totalPages = Math.ceil(totalReviews / limit);
     const paginatedReviews = schoolReviews.slice(offset, offset + limit);
     
-    const schoolDetails = schoolsData.find(school => school.name.toLowerCase() === schoolName.toLowerCase()) || { name: schoolName };
     const averageRating = schoolReviews.length > 0 ? schoolReviews.reduce((sum, review) => sum + (review.rating || 0), 0) / schoolReviews.length : 0;
     
-    const verified = await queryOne("SELECT * FROM verified_schools WHERE schoolName = ?", [schoolName]);
-    const existingClaim = req.user ? await queryOne("SELECT * FROM school_claims WHERE schoolName = ? AND claimantUserId = ? AND status = 'pending'", [schoolName, req.user.id]) : null;
-    const replies = await query("SELECT * FROM school_responses WHERE schoolName = ? AND hidden = 0 ORDER BY createdAt DESC", [schoolName]);
+    const verified = await queryOne("SELECT * FROM verified_schools WHERE schoolName = ?", [schoolDetails.name]);
+    const existingClaim = req.user ? await queryOne("SELECT * FROM school_claims WHERE schoolName = ? AND claimantUserId = ? AND status = 'pending'", [schoolDetails.name, req.user.id]) : null;
+    const replies = await query("SELECT * FROM school_responses WHERE schoolName = ? AND hidden = 0 ORDER BY createdAt DESC", [schoolDetails.name]);
     const repliesByReviewId = {};
     replies.forEach(reply => {
         if (!repliesByReviewId[reply.reviewId]) {
@@ -870,10 +908,13 @@ app.get("/school/:name", async (req, res) => {
         repliesByReviewId[reply.reviewId].push(reply);
     });
     
+    // Use the school name from schoolDetails for the title
+    const displayName = schoolDetails.name || schoolName;
+    
     res.render("school-profile", {
         user: req.user || null,
-        title: schoolName + " - SchoolSentiment",
-        schoolName: schoolName,
+        title: displayName + " - SchoolSentiment",
+        schoolName: displayName,
         schoolDetails: schoolDetails,
         reviews: paginatedReviews,
         allReviewsForStats: schoolReviews,
@@ -2740,4 +2781,3 @@ process.on('uncaughtException', (err) => {
     console.error('❌ UNCAUGHT EXCEPTION:', err.message);
     console.error(err.stack);
 });
-
