@@ -114,13 +114,16 @@
 
         <!-- Overall School Impression -->
         <div class="flex flex-col space-y-2">
-            <label class="text-sm font-bold text-slate-900">Overall School Impression <span class="text-rose-500">*</span></label>
-            <div class="border border-slate-200 bg-slate-50 rounded-t-xl p-2 flex space-x-2">
-                <button type="button" id="boldBtn" class="px-3 py-1 rounded hover:bg-slate-200 text-sm font-bold">B</button>
-                <button type="button" id="italicBtn" class="px-3 py-1 rounded hover:bg-slate-200 text-sm italic">I</button>
+            <div class="flex items-center space-x-2">
+                <label class="text-sm font-bold text-slate-900">Overall School Impression <span class="text-rose-500">*</span></label>
             </div>
-            <div id="reviewContent" contenteditable="true" class="w-full px-4 py-3 border border-t-0 border-slate-200 rounded-b-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 min-h-[160px] bg-white" style="line-height: 1.6;"><%= review.reviewText %></div>
+            <div class="border border-slate-200 bg-slate-50 rounded-t-xl p-2 flex items-center space-x-2">
+                <button type="button" id="boldBtn" class="px-3 py-1 rounded hover:bg-slate-200 text-sm font-bold transition">B</button>
+                <button type="button" id="italicBtn" class="px-3 py-1 rounded hover:bg-slate-200 text-xs italic transition">I</button>
+            </div>
+            <div id="reviewContent" contenteditable="true" class="w-full px-4 py-3 border border-t-0 border-slate-200 rounded-b-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition leading-relaxed min-h-[160px] bg-white overflow-y-auto" style="line-height: 1.6;" placeholder="Share your honest insights about your time at this school. Please protect the privacy of others by omitting names, and help us maintain a supportive space by using respectful language."></div>
             <input type="hidden" id="reviewText" name="reviewText" required>
+            <div id="reviewError" class="text-rose-500 text-xs hidden">Please share your overall impression</div>
         </div>
 
         <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700">
@@ -128,14 +131,124 @@
         </div>
 
         <div class="flex space-x-3">
-            <button type="submit" class="bg-[#34535c] text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-[#284047] transition">Save Changes</button>
-            <a href="/dashboard" class="bg-[#717b85] text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-[#5a626a] transition">Cancel</a>
+            <button type="submit" id="submitReviewBtn" class="bg-[#34535c] text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-[#284047] transition shadow-sm flex items-center gap-2">
+                <span id="submitReviewText">Save Changes</span>
+                <span id="submitReviewSpinner" class="hidden"><svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></span>
+            </button>
+            <a href="/dashboard" class="bg-[#717b85] text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-[#5a626a] transition shadow-sm inline-block">Cancel</a>
         </div>
     </form>
 </main>
 
+<style>
+.rating-category { transition: all 0.2s ease; cursor: pointer; }
+.rating-category[data-rating="1"] { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
+.rating-category[data-rating="1"]:hover { background: #fecaca; }
+.rating-category[data-rating="2"] { background: #ffedd5; border-color: #fed7aa; color: #9a3412; }
+.rating-category[data-rating="2"]:hover { background: #fed7aa; }
+.rating-category[data-rating="3"] { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+.rating-category[data-rating="3"]:hover { background: #fde68a; }
+.rating-category[data-rating="4"] { background: #d1fae5; border-color: #a7f3d0; color: #065f46; }
+.rating-category[data-rating="4"]:hover { background: #a7f3d0; }
+.rating-category[data-rating="5"] { background: #ccfbf1; border-color: #99f6e4; color: #0f766e; }
+.rating-category[data-rating="5"]:hover { background: #99f6e4; }
+.rating-category.active { transform: scale(1.02); box-shadow: 0 0 0 2px currentColor, 0 0 0 4px #e2e8f0; }
+.recommend-option.active { background: #e8f4fd !important; border-color: #2A7CDE !important; }
+
+/* Active button styling for Bold and Italic */
+#boldBtn.active, #italicBtn.active {
+    background: #2A7CDE !important;
+    color: white !important;
+    border-color: #2A7CDE !important;
+}
+#reviewContent:empty:before {
+    content: attr(placeholder);
+    color: #94a3b8;
+    white-space: pre-wrap;
+}
+#reviewContent strong { font-weight: bold; }
+#reviewContent em { font-style: italic; }
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const reviewContent = document.getElementById('reviewContent');
+    const reviewTextHidden = document.getElementById('reviewText');
+    const reviewError = document.getElementById('reviewError');
+    const reviewForm = document.getElementById('reviewForm');
+    const boldBtn = document.getElementById('boldBtn');
+    const italicBtn = document.getElementById('italicBtn');
+    const submitBtn = document.getElementById('submitReviewBtn');
+    const submitText = document.getElementById('submitReviewText');
+    const submitSpinner = document.getElementById('submitReviewSpinner');
+
+    // Function to convert markdown to HTML for the editor
+    function markdownToHtml(text) {
+        if (!text) return '';
+        let html = text;
+        // Bold: **text** -> <strong>text</strong>
+        html = html.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
+        // Italic: *text* -> <em>text</em>
+        html = html.replace(/\*([^\*]+)\*/g, '<em>$1</em>');
+        // Handle newlines
+        html = html.replace(/\n/g, '<br>');
+        return html;
+    }
+
+    // Set the initial content with markdown rendered
+    const reviewTextRaw = '<%= review.reviewText ? review.reviewText.replace(/'/g, "\\'") : "" %>';
+    reviewContent.innerHTML = markdownToHtml(reviewTextRaw);
+
+    // Bold and Italic buttons with active highlighting
+    function updateActiveState() {
+        if (boldBtn) {
+            try {
+                const isBold = document.queryCommandState('bold');
+                if (isBold) {
+                    boldBtn.classList.add('active');
+                } else {
+                    boldBtn.classList.remove('active');
+                }
+            } catch(e) {}
+        }
+        if (italicBtn) {
+            try {
+                const isItalic = document.queryCommandState('italic');
+                if (isItalic) {
+                    italicBtn.classList.add('active');
+                } else {
+                    italicBtn.classList.remove('active');
+                }
+            } catch(e) {}
+        }
+    }
+    
+    if (boldBtn) {
+        boldBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            reviewContent.focus();
+            document.execCommand('bold', false, null);
+            setTimeout(updateActiveState, 10);
+        });
+    }
+    
+    if (italicBtn) {
+        italicBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            reviewContent.focus();
+            document.execCommand('italic', false, null);
+            setTimeout(updateActiveState, 10);
+        });
+    }
+    
+    if (reviewContent) {
+        reviewContent.addEventListener('mouseup', updateActiveState);
+        reviewContent.addEventListener('keyup', updateActiveState);
+        reviewContent.addEventListener('click', updateActiveState);
+    }
+    
+    updateActiveState();
+
     const recommendOptions = document.querySelectorAll('.recommend-option');
     const recommendInput = document.getElementById('recommend');
     recommendOptions.forEach(opt => {
@@ -170,53 +283,64 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     yearTo.addEventListener('change', validateYears);
 
-    const reviewContent = document.getElementById('reviewContent');
-    const reviewTextHidden = document.getElementById('reviewText');
-    const reviewForm = document.getElementById('reviewForm');
-    const boldBtn = document.getElementById('boldBtn');
-    const italicBtn = document.getElementById('italicBtn');
-    
-    if (boldBtn) {
-        boldBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            reviewContent.focus();
-            document.execCommand('bold', false, null);
-        });
-    }
-    if (italicBtn) {
-        italicBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            reviewContent.focus();
-            document.execCommand('italic', false, null);
-        });
-    }
-
+    // Form submission - convert HTML to markdown
     reviewForm.addEventListener('submit', function(e) {
+        let hasError = false;
+        
+        if (!recommendInput.value) {
+            hasError = true;
+        }
+        
+        categories.forEach(cat => {
+            if (!document.getElementById(cat + 'Rating').value) {
+                hasError = true;
+            }
+        });
+        
+        if (!yearFrom.value || !yearTo.value) {
+            hasError = true;
+        } else if (!validateYears()) {
+            hasError = true;
+        }
+        
         let html = reviewContent.innerHTML;
-        html = html.replace(/<strong>(.*?)<\/strong>/g, '**$1**');
-        html = html.replace(/<em>(.*?)<\/em>/g, '*$1*');
-        html = html.replace(/<b>(.*?)<\/b>/g, '**$1**');
-        html = html.replace(/<i>(.*?)<\/i>/g, '*$1*');
-        html = html.replace(/<div>/g, '\n');
-        html = html.replace(/<\/div>/g, '');
-        html = html.replace(/<br>/g, '\n');
-        html = html.replace(/<[^>]*>/g, '');
-        html = html.replace(/&nbsp;/g, ' ');
-        reviewTextHidden.value = html.trim();
+        if (!html.trim() || html === '<br>' || html === '<div><br></div>') {
+            reviewError.classList.remove('hidden');
+            hasError = true;
+        } else {
+            reviewError.classList.add('hidden');
+            // Convert HTML to markdown for storage
+            html = html.replace(/<strong>(.*?)<\/strong>/g, '**$1**');
+            html = html.replace(/<em>(.*?)<\/em>/g, '*$1*');
+            html = html.replace(/<b>(.*?)<\/b>/g, '**$1**');
+            html = html.replace(/<i>(.*?)<\/i>/g, '*$1*');
+            html = html.replace(/<div>/g, '\n');
+            html = html.replace(/<\/div>/g, '');
+            html = html.replace(/<br>/g, '\n');
+            html = html.replace(/<ul>[\s\S]*?<\/ul>/g, function(match) {
+                return match.replace(/<li>(.*?)<\/li>/g, '- $1\n');
+            });
+            html = html.replace(/<ol>[\s\S]*?<\/ol>/g, function(match) {
+                let counter = 1;
+                return match.replace(/<li>(.*?)<\/li>/g, function() {
+                    return (counter++) + '. $1\n';
+                });
+            });
+            html = html.replace(/<[^>]*>/g, '');
+            html = html.replace(/&nbsp;/g, ' ');
+            reviewTextHidden.value = html.trim();
+        }
+        
+        if (hasError) {
+            e.preventDefault();
+        } else {
+            // Show spinner
+            submitText.textContent = 'Saving...';
+            submitSpinner.classList.remove('hidden');
+            submitBtn.disabled = true;
+        }
     });
 });
 </script>
-
-<style>
-.rating-category { transition: all 0.2s ease; cursor: pointer; }
-.rating-category[data-rating="1"] { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
-.rating-category[data-rating="2"] { background: #ffedd5; border-color: #fed7aa; color: #9a3412; }
-.rating-category[data-rating="3"] { background: #fef3c7; border-color: #fde68a; color: #92400e; }
-.rating-category[data-rating="4"] { background: #d1fae5; border-color: #a7f3d0; color: #065f46; }
-.rating-category[data-rating="5"] { background: #ccfbf1; border-color: #99f6e4; color: #0f766e; }
-.rating-category.active { transform: scale(1.02); box-shadow: 0 0 0 2px currentColor; }
-.recommend-option.active { background: #e8f4fd !important; border-color: #2A7CDE !important; }
-#reviewContent:empty:before { content: "Share your honest insights..."; color: #94a3b8; }
-</style>
 
 <%- include('partials/footer') %>

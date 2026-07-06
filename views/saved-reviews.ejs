@@ -22,6 +22,17 @@
   <div class="relative z-10">
     <main class="max-w-4xl mx-auto px-4 py-4">
 
+        <%
+          // Helper function to render markdown (bold and italic)
+          function renderMarkdown(text) {
+            if (!text) return '';
+            let html = text;
+            html = html.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*([^\*]+)\*/g, '<em>$1</em>');
+            return html;
+          }
+        %>
+
         <div class="flex justify-between items-center mb-4">
             <div>
                 <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Saved Reviews</h1>
@@ -80,7 +91,7 @@
                                         <% if (review.reviewTitle) { %>
                                             <h3 class="font-bold text-slate-800 text-sm"><%= review.reviewTitle %></h3>
                                         <% } %>
-                                        <p class="text-sm text-slate-600 mt-1 line-clamp-3"><%= review.reviewText %></p>
+                                        <div class="text-sm text-slate-600 mt-1 line-clamp-3"><%- renderMarkdown(review.reviewText) %></div>
                                         <div class="flex items-center gap-4 mt-2 text-xs text-slate-500">
                                             <span>Rating: <%= review.rating %>/5</span>
                                             <span>Recommend: <%= review.recommend %></span>

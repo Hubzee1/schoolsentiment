@@ -6,6 +6,15 @@
     if (!encodedName) return '';
     return encodedName.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
   }
+  
+  // Helper function to render markdown (bold and italic)
+  function renderMarkdown(text) {
+    if (!text) return '';
+    let html = text;
+    html = html.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*([^\*]+)\*/g, '<em>$1</em>');
+    return html;
+  }
 %>
 
 
@@ -80,7 +89,7 @@
                       </form>
                     </div>
                   </div>
-                  <p class="text-xs text-slate-600 mt-2 line-clamp-2"><%= review.reviewText ? review.reviewText.substring(0, 100) : '' %>...</p>
+                  <div class="text-xs text-slate-600 mt-2 line-clamp-2"><%- renderMarkdown(review.reviewText ? review.reviewText.substring(0, 100) : '') %></div>
                 </div>
               <% }) %>
             </div>
