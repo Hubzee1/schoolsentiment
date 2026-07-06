@@ -1662,46 +1662,38 @@ app.post("/submit-ad", upload.array("photos", 5), async (req, res) => {
     if (req.files && req.files.length > 0) {
         for (const file of req.files) {
             try {
-                const ExifImage = require('exif').ExifImage;
                 const tempPath = file.path + '.tmp';
                 
-                // Read and remove EXIF using exif library
-                try {
-                    new ExifImage({ image: file.path }, function(error, exifData) {
-                        if (error) {
-                            console.log('No EXIF data found, continuing...');
-                        } else {
-                            console.log('EXIF data found and will be stripped');
-                        }
-                    });
-                } catch (e) {
-                    // No EXIF, continue
-                }
-                
-                // Re-encode with sharp to strip all metadata
+                // Get image metadata including orientation
                 const metadata = await sharp(file.path).metadata();
+                
+                // Build sharp pipeline with orientation handling
                 let pipeline = sharp(file.path);
                 
+                // Auto-rotate based on EXIF orientation
+                pipeline = pipeline.rotate();
+                
+                // Resize if needed
                 if (metadata.width > 1200 || metadata.height > 1200) {
                     pipeline = pipeline.resize(1200, 1200, { fit: 'inside', withoutEnlargement: true });
                 }
                 
-                // Save with no metadata
+                // Save with orientation applied
                 await pipeline
-                    .withMetadata(false)
                     .toFile(tempPath);
                 
-                // Replace the original file with the clean one
+                // Replace the original file with the processed one
                 fs.renameSync(tempPath, file.path);
                 imageUrls.push("/uploads/ads/" + file.filename);
-                // Strip ALL EXIF using exifr
+                
+                // Strip EXIF data (after orientation is applied)
                 try {
                     await stripExifFromFile(file.path);
                 } catch (exifErr) {
                     console.error("EXIF strip error:", exifErr);
                 }
-                console.log("✅ EXIF stripped from:", file.filename);
-                } catch (err) { 
+                console.log("✅ Image processed and orientation corrected:", file.filename);
+            } catch (err) { 
                 console.error("Image processing error:", err);
                 // If error, still try to use the original
                 imageUrls.push("/uploads/ads/" + file.filename);
@@ -1903,39 +1895,30 @@ app.post("/update-ad/:id", upload.array("photos", 5), async (req, res) => {
     if (req.files && req.files.length > 0) {
         for (const file of req.files) {
             try {
-                const ExifImage = require('exif').ExifImage;
                 const tempPath = file.path + '.tmp';
                 
-                // Read and remove EXIF using exif library
-                try {
-                    new ExifImage({ image: file.path }, function(error, exifData) {
-                        if (error) {
-                            console.log('No EXIF data found, continuing...');
-                        } else {
-                            console.log('EXIF data found and will be stripped');
-                        }
-                    });
-                } catch (e) {
-                    // No EXIF, continue
-                }
-                
-                // Re-encode with sharp to strip all metadata
+                // Get image metadata including orientation
                 const metadata = await sharp(file.path).metadata();
+                
+                // Build sharp pipeline with orientation handling
                 let pipeline = sharp(file.path);
                 
+                // Auto-rotate based on EXIF orientation
+                pipeline = pipeline.rotate();
+                
+                // Resize if needed
                 if (metadata.width > 1200 || metadata.height > 1200) {
                     pipeline = pipeline.resize(1200, 1200, { fit: 'inside', withoutEnlargement: true });
                 }
                 
-                // Save with no metadata
+                // Save with orientation applied
                 await pipeline
-                    .withMetadata(false)
                     .toFile(tempPath);
                 
-                // Replace the original file with the clean one
+                // Replace the original file with the processed one
                 fs.renameSync(tempPath, file.path);
                 imageUrls.push("/uploads/ads/" + file.filename);
-                console.log("✅ EXIF stripped from:", file.filename);
+                console.log("✅ Image processed and orientation corrected:", file.filename);
             } catch (err) { 
                 console.error("Image processing error:", err);
                 // If error, still try to use the original
