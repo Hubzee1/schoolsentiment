@@ -133,6 +133,12 @@
 </div>
 
 <script>
+// Helper function to normalize apostrophes for mobile search
+function normalizeApostrophe(text) {
+    if (!text) return '';
+    return text.replace(/[’'`]/g, "'");
+}
+
 // School search autocomplete with postcode filter
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('schoolSearch');
@@ -222,8 +228,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (searchInput) {
         searchInput.addEventListener('input', function() {
-            const query = this.value.trim().toLowerCase();
-            console.log('Search input:', query);
+            const rawQuery = this.value.trim().toLowerCase();
+            const query = normalizeApostrophe(rawQuery).toLowerCase();
+            console.log('Search input (normalized):', query);
             
             if (query.length < 2) {
                 resultsDiv.classList.add('hidden');
@@ -238,18 +245,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Find matches by NAME
-            const matches = allSchools.filter(s => 
-                s.name && s.name.toLowerCase().includes(query)
-            );
+            // Find matches by NAME - normalize both sides
+            const matches = allSchools.filter(s => {
+                if (!s.name) return false;
+                const normalizedName = normalizeApostrophe(s.name).toLowerCase();
+                return normalizedName.includes(query);
+            });
 
             console.log('Found matches:', matches.length);
 
             if (matches.length === 0) {
                 // If no name matches, search by town (fallback)
-                const townMatches = allSchools.filter(s => 
-                    s.town && s.town.toLowerCase().includes(query)
-                );
+                const townMatches = allSchools.filter(s => {
+                    if (!s.town) return false;
+                    const normalizedTown = normalizeApostrophe(s.town).toLowerCase();
+                    return normalizedTown.includes(query);
+                });
                 if (townMatches.length > 0) {
                     console.log('Found town matches:', townMatches.length);
                     currentNameMatches = townMatches;
@@ -298,14 +309,15 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const query = document.getElementById('schoolSearch').value.trim();
             if (query) {
+                const normalizedQuery = normalizeApostrophe(query).toLowerCase();
                 // Try to find exact match first
-                const matchedSchool = allSchools.find(s => s.name.toLowerCase() === query.toLowerCase());
+                const matchedSchool = allSchools.find(s => normalizeApostrophe(s.name).toLowerCase() === normalizedQuery);
                 if (matchedSchool) {
                     window.location.href = '/school/id/' + matchedSchool.id + '/noticeboard';
                     return;
                 }
                 // Try partial match
-                const partialMatch = allSchools.find(s => s.name.toLowerCase().includes(query.toLowerCase()));
+                const partialMatch = allSchools.find(s => normalizeApostrophe(s.name).toLowerCase().includes(normalizedQuery));
                 if (partialMatch) {
                     window.location.href = '/school/id/' + partialMatch.id + '/noticeboard';
                     return;

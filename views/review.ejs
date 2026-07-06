@@ -366,6 +366,12 @@
 </style>
 
 <script>
+// Helper function to normalize apostrophes for mobile search
+function normalizeApostrophe(text) {
+    if (!text) return '';
+    return text.replace(/[’'`]/g, "'");
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // School autocomplete
     const schoolInput = document.getElementById('schoolName');
@@ -449,7 +455,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     schoolInput.addEventListener('input', function() {
-        const query = this.value.trim();
+        const rawQuery = this.value.trim();
+        const query = normalizeApostrophe(rawQuery).toLowerCase();
         
         if (query.length < 2) { 
             autocompleteResults.style.display = 'none';
@@ -458,10 +465,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return; 
         }
         
-        // Find matches by NAME
-        const nameMatches = allSchools.filter(s => 
-            s.name && s.name.toLowerCase().includes(query.toLowerCase())
-        );
+        // Find matches by NAME - normalize both sides
+        const nameMatches = allSchools.filter(s => {
+            if (!s.name) return false;
+            const normalizedName = normalizeApostrophe(s.name).toLowerCase();
+            return normalizedName.includes(query);
+        });
         
         if (nameMatches.length > 0) {
             currentNameMatches = nameMatches;
@@ -471,9 +480,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // If no name matches, search by town (fallback)
-        const townMatches = allSchools.filter(s => 
-            s.town && s.town.toLowerCase().includes(query.toLowerCase())
-        );
+        const townMatches = allSchools.filter(s => {
+            if (!s.town) return false;
+            const normalizedTown = normalizeApostrophe(s.town).toLowerCase();
+            return normalizedTown.includes(query);
+        });
         
         if (townMatches.length > 0) {
             currentNameMatches = townMatches;

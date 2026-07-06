@@ -160,6 +160,12 @@
 </main>
 
 <script>
+// Helper function to normalize apostrophes for mobile search
+function normalizeApostrophe(text) {
+    if (!text) return '';
+    return text.replace(/[’'`]/g, "'");
+}
+
 // School name autocomplete with postcode filter
 const schoolInput = document.getElementById('schoolName');
 const schoolIdInput = document.getElementById('schoolId');
@@ -245,7 +251,8 @@ function renderFilteredSchools(nameMatches, postcodeFilter, keepFocus) {
 }
 
 schoolInput.addEventListener('input', function() {
-    const query = this.value.toLowerCase();
+    const rawQuery = this.value.toLowerCase();
+    const query = normalizeApostrophe(rawQuery);
     
     if (query.length < 2) {
         suggestionsDiv.classList.add('hidden');
@@ -254,9 +261,11 @@ schoolInput.addEventListener('input', function() {
         return;
     }
     
-    const matches = allSchools.filter(school => 
-        school.name.toLowerCase().includes(query)
-    );
+    const matches = allSchools.filter(school => {
+        if (!school.name) return false;
+        const normalizedName = normalizeApostrophe(school.name).toLowerCase();
+        return normalizedName.includes(query);
+    });
     
     if (matches.length === 0) {
         suggestionsDiv.classList.add('hidden');
