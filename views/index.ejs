@@ -105,6 +105,13 @@
 </div>
 
 <script>
+// Helper function to normalize apostrophes for mobile search
+// Converts curly apostrophes (’) and other variants to straight apostrophes (')
+function normalizeApostrophe(text) {
+    if (!text) return '';
+    return text.replace(/[’'`]/g, "'");
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('schoolSearch');
     const autocompleteResults = document.getElementById('autocompleteResults');
@@ -195,7 +202,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     searchInput.addEventListener('input', function() {
-        const query = this.value.trim().toLowerCase();
+        // Normalize the query - convert curly apostrophes to straight apostrophes
+        const rawQuery = this.value.trim();
+        const query = normalizeApostrophe(rawQuery).toLowerCase();
 
         if (query.length < 2) {
             autocompleteResults.style.display = 'none';
@@ -215,14 +224,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         allSchools.forEach(school => {
             if (!school) return;
-            const name = (school.name || "").toLowerCase();
-            const town = (school.town || "").toLowerCase();
+            // Normalize school names before matching
+            const normalizedName = normalizeApostrophe(school.name || "").toLowerCase();
+            const normalizedTown = normalizeApostrophe(school.town || "").toLowerCase();
 
-            if (name.startsWith(query)) {
+            if (normalizedName.startsWith(query)) {
                 nameStartsWith.push(school);
-            } else if (town.includes(query)) {
+            } else if (normalizedTown.includes(query)) {
                 townMatches.push(school);
-            } else if (name.includes(query)) {
+            } else if (normalizedName.includes(query)) {
                 nameContains.push(school);
             }
         });
