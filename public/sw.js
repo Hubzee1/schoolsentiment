@@ -1,5 +1,5 @@
 // Service Worker for School Sentiment
-const CACHE_NAME = 'schoolsentiment-v1';
+const CACHE_NAME = 'schoolsentiment-v2';
 const urlsToCache = [
   '/',
   '/review',
