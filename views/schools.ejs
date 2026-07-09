@@ -1,0 +1,109 @@
+<%- include('partials/header') %>
+
+<div class="bg-[#fefbf0] text-slate-900 antialiased min-h-screen relative overflow-x-hidden">
+  
+  <div class="absolute inset-0 opacity-[0.008] pointer-events-none select-none z-0">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full min-h-screen" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid slice">
+      <g stroke="#000" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <g transform="translate(650, 180)"><circle cx="90" cy="90" r="80"/><path d="M60 75 Q75 60 90 75 M100 75 Q115 60 130 75" stroke-width="14"/><path d="M50 105 Q90 150 130 105 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(180, 80)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+        <g transform="translate(920, 90)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 130 102 112"/></g>
+        <g transform="translate(100, 380)"><circle cx="60" cy="60" r="54"/><circle cx="43" cy="52" r="5" fill="#000"/><circle cx="77" cy="52" r="5" fill="#000"/><path d="M42 82 Q60 98 78 82"/></g>
+        <g transform="translate(480, 420)"><circle cx="78" cy="78" r="70"/><circle cx="56" cy="68" r="6" fill="#000"/><circle cx="100" cy="68" r="6" fill="#000"/><path d="M54 112 Q78 132 102 112"/></g>
+        <g transform="translate(880, 440)"><circle cx="70" cy="70" r="62"/><path d="M45 55 Q57 43 70 55 M75 55 Q87 43 100 55" stroke-width="10"/><path d="M40 80 Q70 115 100 80 Z" fill="#000" opacity="0.15"/></g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="relative z-10">
+
+<main class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2 tracking-tight">All UK Schools</h1>
+    <p class="text-slate-500 mb-6"><%= totalSchools %> schools listed alphabetically</p>
+
+    <!-- Search -->
+    <div class="mb-6">
+        <input type="text" id="schoolSearch" placeholder="Search for a school..." class="w-full max-w-md px-4 py-2.5 bg-white border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+    </div>
+
+    <!-- Alphabetical filter (no "All" option) -->
+    <div class="flex flex-wrap gap-2 mb-6">
+        <%
+          const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+          for (var i = 0; i < letters.length; i++) {
+            var letter = letters[i];
+        %>
+            <a href="?letter=<%= letter %>" class="px-3 py-1 bg-slate-100 rounded-full text-sm hover:bg-slate-200<%= (currentLetter === letter || (!currentLetter && letter === 'A')) ? ' bg-slate-900 text-white hover:bg-slate-800' : '' %>">
+                <%= letter %>
+            </a>
+        <% } %>
+    </div>
+
+    <!-- School list -->
+    <% if (schools.length === 0) { %>
+        <p class="text-slate-500">No schools found matching your selection.</p>
+    <% } else { %>
+        <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            <% for (var i = 0; i < schools.length; i++) { 
+                 var school = schools[i]; 
+            %>
+                <li>
+                    <a href="/school/<%= encodeURIComponent(school.name) %>" class="block p-3 hover:bg-slate-50 rounded-lg transition border border-transparent hover:border-slate-200">
+                        <div class="font-medium text-slate-900"><%= school.name %></div>
+                        <div class="text-xs text-slate-400"><%= school.town || '' %> <%= school.postcode || '' %></div>
+                    </a>
+                </li>
+            <% } %>
+        </ul>
+    <% } %>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+        <div class="flex flex-wrap justify-center gap-2 mt-8">
+            <% for (var i = 1; i <= totalPages; i++) { 
+                 var pageLink = '?page=' + i;
+                 if (currentLetter && currentLetter !== 'all') {
+                   pageLink = pageLink + '&letter=' + currentLetter;
+                 }
+            %>
+                <a href="<%= pageLink %>" class="px-3 py-1 rounded-full text-sm<%= (i === pageNumber) ? ' bg-slate-900 text-white' : ' bg-slate-100 hover:bg-slate-200' %>">
+                    <%= i %>
+                </a>
+            <% } %>
+        </div>
+    <% } %>
+
+    <!-- Missing school message -->
+    <div class="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-lg text-center">
+        <p class="text-sm text-amber-700">
+            Can't find your school? 
+            <a href="/contact" class="font-semibold text-amber-800 hover:underline">Contact us</a> and we'll add it.
+        </p>
+    </div>
+</main>
+
+<script>
+// Simple search filter on the schools page
+document.addEventListener('DOMContentLoaded', function() {
+    var searchInput = document.getElementById('schoolSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            var query = this.value.trim().toLowerCase();
+            var items = document.querySelectorAll('li');
+            for (var i = 0; i < items.length; i++) {
+                var text = items[i].textContent.toLowerCase();
+                if (text.indexOf(query) !== -1) {
+                    items[i].style.display = 'block';
+                } else {
+                    items[i].style.display = 'none';
+                }
+            }
+        });
+    }
+});
+</script>
+
+  </div>
+</div>
+
+<%- include('partials/footer') %>

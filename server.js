@@ -2816,3 +2816,41 @@ process.on('uncaughtException', (err) => {
     console.error('❌ UNCAUGHT EXCEPTION:', err.message);
     console.error(err.stack);
 });
+
+
+
+// ========== SCHOOLS PAGE ==========
+app.get("/schools", (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const letter = req.query.letter || 'A';
+    const limit = 100;
+    const offset = (page - 1) * limit;
+    
+    let filteredSchools = schoolsData;
+    
+    // Filter by letter (default to 'A')
+    filteredSchools = schoolsData.filter(school => 
+        school.name && school.name.charAt(0).toUpperCase() === letter.toUpperCase()
+    );
+    
+    // Sort alphabetically by school name
+    filteredSchools.sort((a, b) => {
+        const nameA = a.name || '';
+        const nameB = b.name || '';
+        return nameA.localeCompare(nameB);
+    });
+    
+    const totalSchools = filteredSchools.length;
+    const totalPages = Math.ceil(totalSchools / limit);
+    const paginatedSchools = filteredSchools.slice(offset, offset + limit);
+    
+    res.render("schools", {
+        title: "All UK Schools - SchoolSentiment",
+        currentPage: "schools",
+        schools: paginatedSchools,
+        totalSchools: totalSchools,
+        pageNumber: page,
+        totalPages: totalPages,
+        currentLetter: letter
+    });
+});
