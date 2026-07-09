@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://schoolsentiment.co.uk/sitemap.xml
+Sitemap: https://schoolsentiment.co.uk/sitemap-index.xml
+
+# Explicitly allow Googlebot to access sitemaps
+User-agent: Googlebot
+Allow: /sitemap-*.xml
+Allow: /sitemap.xml
