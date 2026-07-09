@@ -8,8 +8,8 @@ const schoolsData = JSON.parse(fs.readFileSync(schoolsDataPath, 'utf8'));
 const baseUrl = 'https://schoolsentiment.co.uk';
 const now = new Date().toISOString().split('T')[0];
 
-// Split schools into chunks of 50,000
-const chunkSize = 50000;
+// Split schools into chunks of 25,000 (50,000 URLs max per sitemap)
+const chunkSize = 25000;
 const schoolChunks = [];
 for (let i = 0; i < schoolsData.length; i += chunkSize) {
     schoolChunks.push(schoolsData.slice(i, i + chunkSize));
@@ -49,25 +49,21 @@ function generatePagesSitemap() {
     console.log('✅ Generated: sitemap-pages.xml');
 }
 
-// Generate school sitemaps (chunked)
+// Generate school sitemaps (chunked at 25,000 schools = 50,000 URLs max)
 function generateSchoolSitemaps() {
     schoolChunks.forEach((chunk, index) => {
         const chunkNum = index + 1;
         let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
-        // Add each school in this chunk
         chunk.forEach(school => {
             const encodedName = encodeURIComponent(school.name);
-            // School profile
             xml += `
   <url>
     <loc>${baseUrl}/school/${encodedName}</loc>
     <lastmod>${now}</lastmod>
     <priority>0.7</priority>
-  </url>`;
-            // School noticeboard
-            xml += `
+  </url>
   <url>
     <loc>${baseUrl}/school/${encodedName}/noticeboard</loc>
     <lastmod>${now}</lastmod>
