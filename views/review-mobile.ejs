@@ -38,6 +38,30 @@
             <div class="text-sm text-[#004085]">
                 <p class="font-bold mb-1">Reviews are always anonymous</p>
                 <p class="mb-2">You do not need an account to write a review.</p>
+                
+                <!-- Top Toggle Button (visible when collapsed, hidden when expanded) -->
+                <button id="benefitsToggleTop" class="text-[#004085] font-semibold underline text-sm mt-1 focus:outline-none">
+                    Show benefits of signing in ▼
+                </button>
+                
+                <!-- Benefits List (hidden by default on mobile) -->
+                <div id="benefitsList" class="hidden mt-3 pt-3 border-t border-[#bce0ff]">
+                    <p class="font-bold mb-2">However, if you want to:</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        <div class="flex items-center gap-2">✏️ <span>Edit or delete your review later</span></div>
+                        <div class="flex items-center gap-2">📦 <span>Post ads on the School Noticeboard</span></div>
+                        <div class="flex items-center gap-2">🔔 <span>Follow your selected schools</span></div>
+                        <div class="flex items-center gap-2">❤️ <span>Save reviews from other users</span></div>
+                        <div class="flex items-center gap-2">💬 <span>Message sellers about items</span></div>
+                        <div class="flex items-center gap-2">📧 <span>Receive notifications for reviews and ads</span></div>
+                    </div>
+                    <p class="mt-3 text-sm font-medium">You will need to <a href="/signin" class="font-bold underline text-[#004085]">sign in or create an account</a> (email only — no password needed) — and stay 100% anonymous.</p>
+                    
+                    <!-- Bottom Toggle Button (only visible when expanded) -->
+                    <button id="benefitsToggleBottom" class="text-[#004085] font-semibold underline text-sm mt-4 focus:outline-none hidden">
+                        Hide benefits of signing in ▲
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -320,10 +344,34 @@
     </form>
 </main>
 
-</div>
-</div>
-
 <script>
+// Toggle functionality for mobile benefits dropdown with dual buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleTop = document.getElementById('benefitsToggleTop');
+    const toggleBottom = document.getElementById('benefitsToggleBottom');
+    const benefitsList = document.getElementById('benefitsList');
+    
+    function toggleBenefits() {
+        if (benefitsList.classList.contains('hidden')) {
+            benefitsList.classList.remove('hidden');
+            toggleTop.classList.add('hidden');
+            toggleBottom.classList.remove('hidden');
+        } else {
+            benefitsList.classList.add('hidden');
+            toggleTop.classList.remove('hidden');
+            toggleBottom.classList.add('hidden');
+        }
+    }
+    
+    if (toggleTop) {
+        toggleTop.addEventListener('click', toggleBenefits);
+    }
+    
+    if (toggleBottom) {
+        toggleBottom.addEventListener('click', toggleBenefits);
+    }
+});
+
 // Helper function to normalize apostrophes for mobile search
 function normalizeApostrophe(text) {
     if (!text) return '';
@@ -547,5 +595,8 @@ document.getElementById('reviewForm').addEventListener('submit', function(e) {
     }
 });
 </script>
+
+  </div>
+</div>
 
 <%- include('partials/footer') %>
