@@ -1228,9 +1228,6 @@ app.get("/api/schools", (req, res) => {
     res.json(schoolsData);
 });
 
-app.get("/blog", (req, res) => {
-    res.render("blog", { title: "Blog - SchoolSentiment", posts: [], currentPage: 'blog' });
-});
 
 app.get("/terms", (req, res) => {
     res.render("terms", { title: "Terms of Service - SchoolSentiment", currentPage: "terms" });
@@ -2852,5 +2849,31 @@ app.get("/schools", (req, res) => {
         pageNumber: page,
         totalPages: totalPages,
         currentLetter: letter
+    });
+});
+
+// ========== BLOG ROUTES ==========
+const blogPosts = require("./models/blog-posts.json");
+
+// Blog listing page (newest first)
+app.get("/blog", (req, res) => {
+    const sortedPosts = [...blogPosts].sort((a, b) => new Date(b.date) - new Date(a.date));
+    res.render("blog", {
+        title: "School Sentiment Blog",
+        posts: sortedPosts,
+        currentPage: "blog"
+    });
+});
+
+// Individual blog post page
+app.get("/blog/:slug", (req, res) => {
+    const post = blogPosts.find(p => p.slug === req.params.slug);
+    if (!post) {
+        return res.status(404).render("404", { title: "Post Not Found", currentPage: "blog" });
+    }
+    res.render("blog-post", {
+        title: post.title + " - School Sentiment Blog",
+        post: post,
+        currentPage: "blog"
     });
 });
