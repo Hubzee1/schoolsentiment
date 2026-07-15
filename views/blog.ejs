@@ -19,112 +19,93 @@
   </div>
 
   <div class="relative z-10 flex-grow">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
       
-      <!-- Header matching dashboard style -->
+      <!-- Header -->
       <div class="border-b border-slate-200 pb-4 mb-6">
         <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">School Sentiment Blog</h1>
         <p class="text-xs text-slate-500 mt-1 font-medium">Insights, stories, and perspectives on education and school communities</p>
       </div>
 
-      <!-- Featured Post -->
+      <!-- Featured Post (most recent) -->
       <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all mb-8">
         <div class="h-56 sm:h-64 overflow-hidden">
-          <img src="/photos/school.jpg" alt="School building" class="w-full h-full object-cover">
+          <img src="<%= posts[0].featuredImage %>" alt="<%= posts[0].title %>" class="w-full h-full object-cover">
         </div>
         <div class="p-6 sm:p-8">
           <div class="flex items-center gap-3 mb-3">
-            <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded-full">Featured</span>
-            <span class="text-xs text-slate-500">Mental Health</span>
+            <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded-full">Latest Post</span>
+            <span class="text-xs text-slate-500"><%= posts[0].tags ? posts[0].tags[0] : 'Education' %></span>
           </div>
-          <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-3">How Good Mental Health is Built as Children</h2>
-          <p class="text-slate-600 mb-4">Schools play an important role in nurturing and protecting mental health of students.</p>
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold text-sm">SS</div>
-            <div>
-              <div class="font-semibold text-slate-900 text-sm">SchoolSentiment Team</div>
-              <div class="text-xs text-slate-400">October 17, 2024 • 4 min read</div>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-3"><%= posts[0].title %></h2>
+          <p class="text-slate-600 mb-4"><%= posts[0].excerpt %></p>
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold text-sm">SS</div>
+              <div>
+                <div class="font-semibold text-slate-900 text-sm">School Sentiment Team</div>
+                <div class="text-xs text-slate-400"><%= new Date(posts[0].date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %> • <%= posts[0].readTime %></div>
+              </div>
+            </div>
+            <a href="/blog/<%= posts[0].slug %>" class="text-indigo-600 hover:text-indigo-800 font-semibold text-sm hover:underline">Read Full Article →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- All Posts -->
+      <h2 class="text-xl font-bold text-slate-900 mb-4">All Posts</h2>
+      <div class="space-y-4">
+        <% for (var i = 1; i < posts.length; i++) { 
+          var post = posts[i];
+        %>
+          <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+            <div class="flex flex-col sm:flex-row">
+              <div class="sm:w-48 h-48 sm:h-auto overflow-hidden flex-shrink-0">
+                <img src="<%= post.featuredImage %>" alt="<%= post.title %>" class="w-full h-full object-cover">
+              </div>
+              <div class="p-5 flex-1">
+                <div class="flex flex-col h-full justify-between">
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base hover:text-indigo-600 transition">
+                      <a href="/blog/<%= post.slug %>"><%= post.title %></a>
+                    </h3>
+                    <p class="text-slate-500 text-sm mt-1"><%= post.excerpt %></p>
+                    <div class="flex items-center gap-3 mt-2 text-xs text-slate-400">
+                      <span><%= new Date(post.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                      <span>•</span>
+                      <span><%= post.readTime %></span>
+                      <% if (post.tags) { %>
+                        <span>•</span>
+                        <span class="flex gap-1">
+                          <% for (var t = 0; t < post.tags.length; t++) { %>
+                            <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full"><%= post.tags[t] %></span>
+                          <% } %>
+                        </span>
+                      <% } %>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between mt-3">
+                    <div class="flex items-center gap-2">
+                      <div class="w-7 h-7 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold text-[10px]">SS</div>
+                      <span class="text-xs text-slate-600">School Sentiment Team</span>
+                    </div>
+                    <a href="/blog/<%= post.slug %>" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm whitespace-nowrap hover:underline">Read More →</a>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        <% } %>
       </div>
 
-      <!-- Blog Content -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm mb-8">
-        <p class="text-slate-700 leading-relaxed mb-5">
-          In today's fast-paced world, the importance of mental health has never been more apparent. While much attention is given to adult mental wellness, the foundation for lifelong mental health is built during childhood - and schools play a crucial role in this development.
-        </p>
-
-        <h3 class="text-lg font-bold text-slate-900 mb-3 mt-6">The Critical Role of Schools in Mental Health</h3>
-        <p class="text-slate-700 leading-relaxed mb-5">
-          Schools are more than just institutions for academic learning; they are environments where children spend the majority of their waking hours. This makes them uniquely positioned to influence mental health outcomes. From the classroom to the playground, every interaction and experience contributes to a child's emotional development.
-        </p>
-
-        <div class="my-6 text-center">
-          <img src="/photos/child.jpg" alt="Happy child at school" class="rounded-xl shadow-md max-w-full h-auto mx-auto">
-          <p class="text-xs text-slate-400 mt-2 italic">A positive school environment helps build resilient and happy children</p>
-        </div>
-
-        <h3 class="text-lg font-bold text-slate-900 mb-3 mt-6">Creating Supportive Environments</h3>
-        <p class="text-slate-700 leading-relaxed mb-4">
-          Schools that prioritize mental health create environments where students feel safe, valued, and supported. This includes:
-        </p>
-        <ul class="list-disc pl-5 mb-5 space-y-1 text-slate-700">
-          <li><span class="font-semibold text-indigo-600">Positive teacher-student relationships:</span> Caring educators who recognize and respond to emotional needs</li>
-          <li><span class="font-semibold text-indigo-600">Inclusive classrooms:</span> Environments where every student feels they belong</li>
-          <li><span class="font-semibold text-indigo-600">Emotional literacy programs:</span> Teaching children to identify and express emotions healthily</li>
-          <li><span class="font-semibold text-indigo-600">Anti-bullying policies:</span> Zero tolerance for behaviors that harm mental wellbeing</li>
-        </ul>
-
-        <h3 class="text-lg font-bold text-slate-900 mb-3 mt-6">Early Intervention and Support</h3>
-        <p class="text-slate-700 leading-relaxed mb-5">
-          Schools serve as early warning systems for mental health challenges. Teachers and staff who are trained to recognize signs of distress can connect students with appropriate support services before issues escalate. This early intervention can prevent more serious problems later in life.
-        </p>
-
-        <h3 class="text-lg font-bold text-slate-900 mb-3 mt-6">Building Resilience</h3>
-        <p class="text-slate-700 leading-relaxed mb-4">Beyond preventing problems, schools can actively build mental resilience by:</p>
-        <ul class="list-disc pl-5 mb-5 space-y-1 text-slate-700">
-          <li>Teaching coping strategies for stress and anxiety</li>
-          <li>Encouraging healthy social connections</li>
-          <li>Providing opportunities for success and achievement</li>
-          <li>Fostering a growth mindset and self-confidence</li>
-        </ul>
-
-        <h3 class="text-lg font-bold text-slate-900 mb-3 mt-6">The Ripple Effect</h3>
-        <p class="text-slate-700 leading-relaxed mb-5">
-          When schools successfully support mental health, the benefits extend far beyond the individual student. Well-supported students are better learners, more engaged community members, and carry these positive habits into adulthood. They become parents, employees, and citizens who understand the value of mental wellness.
-        </p>
-
-        <p class="text-slate-700 leading-relaxed mb-5">
-          At SchoolSentiment, we believe that understanding a school's approach to mental health is crucial for parents and students making educational choices. The emotional environment of a school is just as important as its academic reputation.
-        </p>
-
-        <p class="text-slate-500 italic border-l-4 border-indigo-300 pl-4 py-2 mb-5">
-          What has been your experience with mental health support in schools? Share your thoughts and help other families make informed decisions.
-        </p>
-
-        <div class="border-t border-slate-200 pt-5 mt-5">
-          <h4 class="text-sm font-bold text-slate-800 mb-3">Share this article</h4>
-          <div class="flex flex-wrap gap-3">
-            <a href="https://twitter.com/intent/tweet?url=https://schoolsentiment.co.uk/blog&text=How%20Good%20Mental%20Health%20is%20Built%20as%20Children" target="_blank" rel="noopener noreferrer" class="bg-black hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition-all">Twitter</a>
-            <a href="https://www.facebook.com/sharer/sharer.php?u=https://schoolsentiment.co.uk/blog" target="_blank" rel="noopener noreferrer" class="bg-black hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition-all">Facebook</a>
-            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="bg-black hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition-all">Instagram</a>
-            <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-4 py-2 rounded-full transition-all">YouTube</a>
-            <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer" class="bg-black hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition-all">TikTok</a>
-            <a href="mailto:?subject=How%20Good%20Mental%20Health%20is%20Built%20as%20Children&body=Check%20out%20this%20article%3A%20https%3A%2F%2Fschoolsentiment.co.uk%2Fblog" class="bg-black hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition-all">Email</a>
-          </div>
-        </div>
+      <!-- Subscribe / CTA -->
+      <div class="mt-10 bg-black rounded-2xl p-6 sm:p-8 text-center shadow-md border border-slate-200">
+        <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">Never Miss a Post</h3>
+        <p class="text-slate-300 mb-5 max-w-md mx-auto">Get the latest education insights and school stories straight to your inbox.</p>
+        <a href="/signin" class="inline-block bg-white hover:bg-slate-100 text-black font-semibold px-6 py-2 rounded-full text-sm transition-all">Subscribe for Updates</a>
       </div>
-
-      <!-- Call to Action -->
-      <div class="bg-black rounded-2xl p-6 sm:p-8 text-center shadow-md border border-slate-200">
-        <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">Join the Conversation</h3>
-        <p class="text-slate-300 mb-5 max-w-md mx-auto">Have thoughts on mental health in schools? Share your experiences and help other families make informed decisions.</p>
-        <div class="flex flex-wrap gap-3 justify-center">
-          <a href="/review" class="bg-white hover:bg-slate-100 text-black font-semibold px-5 py-2 rounded-full text-sm transition-all">Write a Review</a>
-          <a href="/noticeboard" class="bg-amber-400 hover:bg-amber-500 text-slate-950 font-semibold px-5 py-2 rounded-full text-sm transition-all">Browse Noticeboard</a>
-        </div>
-      </div>
+    </div>
+  </div>
 </div>
 
 <%- include('partials/footer') %>
